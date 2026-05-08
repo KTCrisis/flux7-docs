@@ -72,7 +72,7 @@ The server is a single Go binary — zero dependencies, runs anywhere, deploys i
 |---|---|---|
 | **Scope** | Single agent, single user | Multi-agent, multi-role |
 | **Human decisions** | Not modeled | First-class facts (tags, agent, timestamps) |
-| **Access control** | None or coarse | Tag/agent-scoped (per-fact ACL in v0.5) |
+| **Access control** | None or coarse | Tag/agent-scoped, governed by [agent-mesh](../agent-mesh/index.md) policy on `memory.*` tools |
 | **Provenance** | None | Agent + timestamp on every fact |
 | **Vendor lock-in** | Tied to specific LLM providers | Go binary + HTTP SDK, works with anything |
 | **Storage** | Opaque | Markdown files you can read and edit |
@@ -83,7 +83,7 @@ The server is a single Go binary — zero dependencies, runs anywhere, deploys i
 - **v0.4.1** — 7 MCP tools, Python SDK, hybrid search + LLM reranking, SSE daemon mode, auto-proxy (stdio detects running daemon)
 - **71% LoCoMo benchmark** — competitive with VC-backed solutions, without gaming the eval
 - **Production use** — backing [agent-mesh](https://github.com/KTCrisis/agent-mesh) orchestrator and [agent7](https://github.com/KTCrisis/agent7) management plane
-- **Next** — per-fact ACL + provenance (v0.5), lifecycle states, temporal bi-temporal queries (v1.0)
+- **Next** — provenance enrichment (v0.5), search quality 75%+ LoCoMo (v0.6), temporal bi-temporal queries (v1.0). Access control handled by [agent-mesh](../agent-mesh/index.md) policy on `memory.*` tools — no per-fact ACL in mem7
 
 ## Get started
 
