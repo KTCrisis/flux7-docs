@@ -5,25 +5,23 @@ site_author: Marc Verchiani
 
 theme:
   name: material
+  custom_dir: overrides
   palette:
-    - scheme: slate
-      primary: indigo
-      accent: cyan
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
-    - scheme: default
-      primary: indigo
-      accent: cyan
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
+    scheme: flux7
+  font: false
+  favicon: assets/favicon.svg
+  icon:
+    logo: material/console
   features:
     - navigation.sections
     - navigation.expand
     - navigation.top
     - search.suggest
     - content.code.copy
+
+extra_css:
+  - stylesheets/flux7.css
+  - https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap
 
 markdown_extensions:
   - tables

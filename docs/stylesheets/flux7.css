@@ -1,0 +1,149 @@
+:root {
+  --f7-bg: #060a06;
+  --f7-bg2: #0c120c;
+  --f7-bg3: #111811;
+  --f7-green: #00ff88;
+  --f7-pink: #ff2d6b;
+  --f7-cyan: #00e5ff;
+  --f7-gold: #ffd166;
+  --f7-text: #b8ccb8;
+  --f7-text2: #5a7a5a;
+  --f7-border: #1a2a1a;
+  --f7-dim: #2a3a2a;
+}
+
+/* --- Slate scheme override --- */
+
+[data-md-color-scheme="flux7"] {
+  --md-default-bg-color: var(--f7-bg);
+  --md-default-fg-color: var(--f7-text);
+  --md-default-fg-color--light: var(--f7-text2);
+  --md-default-fg-color--lighter: var(--f7-text2);
+  --md-default-fg-color--lightest: var(--f7-border);
+
+  --md-primary-fg-color: var(--f7-bg2);
+  --md-primary-bg-color: var(--f7-green);
+  --md-accent-fg-color: var(--f7-green);
+
+  --md-typeset-a-color: var(--f7-green);
+
+  --md-code-bg-color: var(--f7-bg2);
+  --md-code-fg-color: var(--f7-text);
+  --md-code-hl-color: rgba(0, 255, 136, 0.1);
+
+  --md-typeset-color: var(--f7-text);
+
+  --md-footer-bg-color: var(--f7-bg);
+  --md-footer-bg-color--dark: var(--f7-bg);
+  --md-footer-fg-color: var(--f7-text2);
+  --md-footer-fg-color--light: var(--f7-text2);
+  --md-footer-fg-color--lighter: var(--f7-border);
+
+  --md-typeset-table-color: var(--f7-border);
+
+  --md-admonition-bg-color: var(--f7-bg2);
+}
+
+[data-md-color-scheme="flux7"] .md-header {
+  background: var(--f7-bg);
+  border-bottom: 1px solid var(--f7-border);
+}
+
+[data-md-color-scheme="flux7"] .md-tabs {
+  background: var(--f7-bg);
+  border-bottom: 1px solid var(--f7-border);
+}
+
+[data-md-color-scheme="flux7"] .md-nav__link--active,
+[data-md-color-scheme="flux7"] .md-nav__link:hover {
+  color: var(--f7-green);
+}
+
+[data-md-color-scheme="flux7"] .md-search__input {
+  background: var(--f7-bg2);
+  color: var(--f7-text);
+}
+
+[data-md-color-scheme="flux7"] .md-sidebar {
+  border-right: 1px solid var(--f7-border);
+}
+
+[data-md-color-scheme="flux7"] .md-typeset code {
+  background: var(--f7-bg3);
+  color: var(--f7-cyan);
+}
+
+[data-md-color-scheme="flux7"] .md-typeset pre > code {
+  color: var(--f7-text);
+}
+
+[data-md-color-scheme="flux7"] .md-typeset h1,
+[data-md-color-scheme="flux7"] .md-typeset h2 {
+  color: #fff;
+}
+
+[data-md-color-scheme="flux7"] .md-typeset h3,
+[data-md-color-scheme="flux7"] .md-typeset h4 {
+  color: var(--f7-green);
+}
+
+[data-md-color-scheme="flux7"] .md-typeset a:hover {
+  color: var(--f7-cyan);
+}
+
+[data-md-color-scheme="flux7"] .md-typeset table:not([class]) th {
+  background: var(--f7-bg3);
+  color: var(--f7-green);
+}
+
+[data-md-color-scheme="flux7"] .md-typeset table:not([class]) td {
+  border-color: var(--f7-border);
+}
+
+[data-md-color-scheme="flux7"] .md-typeset table:not([class]) tr:hover td {
+  background: var(--f7-bg2);
+}
+
+/* Nav logo styling */
+[data-md-color-scheme="flux7"] .md-header__topic:first-child .md-ellipsis {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Scrollbar */
+[data-md-color-scheme="flux7"] ::-webkit-scrollbar-track {
+  background: var(--f7-bg);
+}
+
+[data-md-color-scheme="flux7"] ::-webkit-scrollbar-thumb {
+  background: var(--f7-dim);
+}
+
+[data-md-color-scheme="flux7"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--f7-text2);
+}
+
+/* Content tabs */
+[data-md-color-scheme="flux7"] .md-typeset .tabbed-labels > label.tabbed-alternate:checked,
+[data-md-color-scheme="flux7"] .md-typeset .tabbed-set > input:checked + label {
+  color: var(--f7-green);
+  border-color: var(--f7-green);
+}
+
+/* Admonition accent */
+[data-md-color-scheme="flux7"] .md-typeset .admonition.warning,
+[data-md-color-scheme="flux7"] .md-typeset details.warning {
+  border-color: var(--f7-gold);
+}
+
+/* Font override */
+body, .md-typeset {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.2px;
+}
+
+.md-typeset code,
+.md-typeset pre {
+  font-family: 'JetBrains Mono', monospace;
+}
