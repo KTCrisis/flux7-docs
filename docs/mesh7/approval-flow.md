@@ -189,7 +189,7 @@ curl "http://localhost:9090/traces?tool=filesystem.write_file" | python3 -m json
 
 ## Decision persistence
 
-When [flux7-memory](flux7-memory-auto-approve.md) is configured, every approval resolution (approve, deny, timeout) is stored as a queryable fact. This enables:
+When [flux7-memory](mem7-auto-approve.md) is configured, every approval resolution (approve, deny, timeout) is stored as a queryable fact. This enables:
 
 - **Auto-approve** — routine patterns resolve without human intervention
 - **Audit trail** — "who approved what, when, why" is queryable
@@ -197,6 +197,6 @@ When [flux7-memory](flux7-memory-auto-approve.md) is configured, every approval 
 
 ## Next steps
 
-- [Memory Integration](flux7-memory-auto-approve.md) — auto-approve from past decisions
+- [Memory Integration](mem7-auto-approve.md) — auto-approve from past decisions
 - [CLI Tools](cli-tools.md) — governing git, docker, terraform
 - [Deployment Modes](deployment-modes.md) — solo, team, cloud

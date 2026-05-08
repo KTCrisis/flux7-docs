@@ -72,7 +72,7 @@ The server is a single Go binary — zero dependencies, runs anywhere, deploys i
 |---|---|---|
 | **Scope** | Single agent, single user | Multi-agent, multi-role |
 | **Human decisions** | Not modeled | First-class facts (tags, agent, timestamps) |
-| **Access control** | None or coarse | Tag/agent-scoped, governed by [flux7-mesh](../flux7-mesh/index.md) policy on `memory.*` tools |
+| **Access control** | None or coarse | Tag/agent-scoped, governed by [flux7-mesh](../mesh7/index.md) policy on `memory.*` tools |
 | **Provenance** | None | Agent + timestamp on every fact |
 | **Vendor lock-in** | Tied to specific LLM providers | Go binary + HTTP SDK, works with anything |
 | **Storage** | Opaque | Markdown files you can read and edit |
@@ -83,7 +83,7 @@ The server is a single Go binary — zero dependencies, runs anywhere, deploys i
 - **v0.4.1** — 7 MCP tools, Python SDK, hybrid search + LLM reranking, SSE daemon mode, auto-proxy (stdio detects running daemon)
 - **71% LoCoMo benchmark** — competitive with VC-backed solutions, without gaming the eval
 - **Production use** — backing [flux7-mesh](https://github.com/KTCrisis/flux7-mesh) orchestrator and [flux7-console](https://github.com/KTCrisis/flux7-console) management plane
-- **Next** — provenance enrichment (v0.5), search quality 75%+ LoCoMo (v0.6), temporal bi-temporal queries (v1.0). Access control handled by [flux7-mesh](../flux7-mesh/index.md) policy on `memory.*` tools — no per-fact ACL in flux7-memory
+- **Next** — provenance enrichment (v0.5), search quality 75%+ LoCoMo (v0.6), temporal bi-temporal queries (v1.0). Access control handled by [flux7-mesh](../mesh7/index.md) policy on `memory.*` tools — no per-fact ACL in flux7-memory
 
 ## Get started
 

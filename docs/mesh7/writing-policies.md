@@ -218,4 +218,4 @@ policies:
 
 - [Approval Flow](approval-flow.md) — what happens when a tool call hits `human_approval`
 - [CLI Tools](cli-tools.md) — governing git, docker, terraform as tools
-- [Memory Integration](flux7-memory-auto-approve.md) — auto-approve from past decisions
+- [Memory Integration](mem7-auto-approve.md) — auto-approve from past decisions

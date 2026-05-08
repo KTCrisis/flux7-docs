@@ -2,7 +2,7 @@
 
 ## The problem
 
-Your AI agents make hundreds of tool calls per session. [flux7-mesh](../agent-mesh/index.md) enforces policy on every call — but some actions land in a grey zone. The policy says `human_approval`, and a human stares at a terminal prompt:
+Your AI agents make hundreds of tool calls per session. [flux7-mesh](../mesh7/index.md) enforces policy on every call — but some actions land in a grey zone. The policy says `human_approval`, and a human stares at a terminal prompt:
 
 > *Allow filesystem.write_file to /home/user/project/src/main.py? [y/n]*
 

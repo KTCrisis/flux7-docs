@@ -36,15 +36,15 @@ markdown_extensions:
 nav:
   - Home: index.md
   - flux7-mesh:
-    - Overview: agent-mesh/index.md
-    - Getting Started: agent-mesh/getting-started.md
-    - Writing Policies: agent-mesh/writing-policies.md
-    - Approval Flow: agent-mesh/approval-flow.md
-    - CLI Tools: agent-mesh/cli-tools.md
-    - Memory Integration: agent-mesh/mem7-auto-approve.md
-    - Supervisor Protocol: agent-mesh/supervisor-protocol.md
-    - Deployment Modes: agent-mesh/deployment-modes.md
-    - Observability: agent-mesh/otel.md
+    - Overview: mesh7/index.md
+    - Getting Started: mesh7/getting-started.md
+    - Writing Policies: mesh7/writing-policies.md
+    - Approval Flow: mesh7/approval-flow.md
+    - CLI Tools: mesh7/cli-tools.md
+    - Memory Integration: mesh7/mem7-auto-approve.md
+    - Supervisor Protocol: mesh7/supervisor-protocol.md
+    - Deployment Modes: mesh7/deployment-modes.md
+    - Observability: mesh7/otel.md
   - flux7-memory:
     - Overview: mem7/index.md
   - flux7-supervisor:
@@ -52,8 +52,8 @@ nav:
     - Configuration: sup7/configuration.md
     - Claude Code Callback: sup7/claude-code-callback.md
   - flux7-console:
-    - Overview: agent7/index.md
-    - System Design: agent7/system-design.md
+    - Overview: console/index.md
+    - System Design: console/system-design.md
 
 extra:
   social:
