@@ -11,7 +11,7 @@ You're building agents. They work for one session, then forget everything. You a
 
 These aren't retrieval problems. They're governance problems. And they've been solved before — in databases, event platforms, schema registries. They just haven't been brought to AI memory yet.
 
-## What mem7 is
+## What flux7-memory is
 
 Persistent, searchable, governed memory for your agents. `pip install flux7-memory` and go :
 
@@ -38,7 +38,7 @@ The server is a single Go binary — zero dependencies, runs anywhere, deploys i
 - Natural language queries — agents don't need to learn FTS5 syntax
 - Neighbor expansion — automatically fetches surrounding context for sequential entries
 - Tag-based filtering, agent tracking, TTL, temporal range queries
-- Three transports : MCP stdio (Claude Code, Cursor) + HTTP JSON-RPC (SDKs) + MCP SSE (daemon mode for agent-mesh)
+- Three transports : MCP stdio (Claude Code, Cursor) + HTTP JSON-RPC (SDKs) + MCP SSE (daemon mode for flux7-mesh)
 - Provider-agnostic : works with Ollama, OpenAI, or any compatible embedding API. No vendor lock-in
 - Python SDK with structured responses (`Memory` objects, not raw text to parse)
 
@@ -55,7 +55,7 @@ The server is a single Go binary — zero dependencies, runs anywhere, deploys i
        └──────────┬────────┴──────────────────┘
                   │
             ┌─────▼─────┐
-            │   mem7    │  ← one binary, shared memory
+            │ flux7-memory │  ← one binary, shared memory
             │           │     with agent-scoped tags
             └───────────┘
 ```
@@ -68,11 +68,11 @@ The server is a single Go binary — zero dependencies, runs anywhere, deploys i
 
 ## What makes it different
 
-| | Mem0 / Zep / Letta | mem7 |
+| | Mem0 / Zep / Letta | flux7-memory |
 |---|---|---|
 | **Scope** | Single agent, single user | Multi-agent, multi-role |
 | **Human decisions** | Not modeled | First-class facts (tags, agent, timestamps) |
-| **Access control** | None or coarse | Tag/agent-scoped, governed by [agent-mesh](../agent-mesh/index.md) policy on `memory.*` tools |
+| **Access control** | None or coarse | Tag/agent-scoped, governed by [flux7-mesh](../flux7-mesh/index.md) policy on `memory.*` tools |
 | **Provenance** | None | Agent + timestamp on every fact |
 | **Vendor lock-in** | Tied to specific LLM providers | Go binary + HTTP SDK, works with anything |
 | **Storage** | Opaque | Markdown files you can read and edit |
@@ -82,8 +82,8 @@ The server is a single Go binary — zero dependencies, runs anywhere, deploys i
 
 - **v0.4.1** — 7 MCP tools, Python SDK, hybrid search + LLM reranking, SSE daemon mode, auto-proxy (stdio detects running daemon)
 - **71% LoCoMo benchmark** — competitive with VC-backed solutions, without gaming the eval
-- **Production use** — backing [agent-mesh](https://github.com/KTCrisis/flux7-mesh) orchestrator and [agent7](https://github.com/KTCrisis/flux7-console) management plane
-- **Next** — provenance enrichment (v0.5), search quality 75%+ LoCoMo (v0.6), temporal bi-temporal queries (v1.0). Access control handled by [agent-mesh](../agent-mesh/index.md) policy on `memory.*` tools — no per-fact ACL in mem7
+- **Production use** — backing [flux7-mesh](https://github.com/KTCrisis/flux7-mesh) orchestrator and [flux7-console](https://github.com/KTCrisis/flux7-console) management plane
+- **Next** — provenance enrichment (v0.5), search quality 75%+ LoCoMo (v0.6), temporal bi-temporal queries (v1.0). Access control handled by [flux7-mesh](../flux7-mesh/index.md) policy on `memory.*` tools — no per-fact ACL in flux7-memory
 
 ## Get started
 

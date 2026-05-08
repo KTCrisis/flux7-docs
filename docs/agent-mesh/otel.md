@@ -25,7 +25,7 @@ Every span includes the following attributes:
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `service.name` | resource | Always `agent-mesh` |
+| `service.name` | resource | Always `flux7-mesh` |
 | `agent.id` | string | Agent identity (e.g. `claude`, `crewai-researcher`) |
 | `tool.name` | string | Tool that was called (e.g. `filesystem.write_file`) |
 | `policy.action` | string | Policy decision: `allow`, `deny`, `human_approval` |
@@ -45,7 +45,7 @@ Span kind is `SERVER` (3). Status code is `OK` (1) for allowed calls, `ERROR` (2
 The simplest mode — each line is a complete OTLP JSON export:
 
 ```yaml
-otel_endpoint: /home/user/agent-mesh/traces-otel.jsonl
+otel_endpoint: /home/user/flux7-mesh/traces-otel.jsonl
 ```
 
 Query with `jq`:
@@ -61,7 +61,7 @@ cat traces-otel.jsonl | jq '.resourceSpans[].scopeSpans[].spans[] | select(.attr
 cat traces-otel.jsonl | jq '.resourceSpans[].scopeSpans[].spans[] | {name, duration_ns: ((.endTimeUnixNano | tonumber) - (.startTimeUnixNano | tonumber))}'
 ```
 
-The file is append-only. Use it as a feed for dashboards, analytics, or agent7.
+The file is append-only. Use it as a feed for dashboards, analytics, or flux7-console.
 
 ## OTLP HTTP mode
 

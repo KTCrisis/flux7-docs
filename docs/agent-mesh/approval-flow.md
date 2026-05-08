@@ -12,7 +12,7 @@ Agent calls filesystem.write_file
   ├── Check 1: Temporal grant active?
   │   yes → bypass approval, proceed
   │
-  ├── Check 2: mem7 auto-approve? (3+ past approvals)
+  ├── Check 2: flux7-memory auto-approve? (3+ past approvals)
   │   yes → proceed, traced as supervisor:mem7
   │
   └── Submit to approval queue
@@ -122,7 +122,7 @@ approval:
   timeout_seconds: 300    # default
 ```
 
-Timed-out approvals are recorded in traces and written to mem7 (if configured) with status `timeout`.
+Timed-out approvals are recorded in traces and written to flux7-memory (if configured) with status `timeout`.
 
 ## Webhooks
 
@@ -133,7 +133,7 @@ approval:
   notify_url: https://hooks.slack.com/services/...
 ```
 
-agent-mesh POSTs to this URL with the pending approval details. Useful for Slack/Teams alerts.
+flux7-mesh POSTs to this URL with the pending approval details. Useful for Slack/Teams alerts.
 
 ## Callback URL
 
@@ -146,7 +146,7 @@ curl -X POST http://localhost:9090/tool/gmail.send_email \
   -d '{"params":{"to":"user@example.com","subject":"Hello"}}'
 ```
 
-When the approval resolves, agent-mesh POSTs the result to `X-Callback-URL`.
+When the approval resolves, flux7-mesh POSTs the result to `X-Callback-URL`.
 
 ## Supervisor mode
 
@@ -189,7 +189,7 @@ curl "http://localhost:9090/traces?tool=filesystem.write_file" | python3 -m json
 
 ## Decision persistence
 
-When [mem7](mem7-auto-approve.md) is configured, every approval resolution (approve, deny, timeout) is stored as a queryable fact. This enables:
+When [flux7-memory](flux7-memory-auto-approve.md) is configured, every approval resolution (approve, deny, timeout) is stored as a queryable fact. This enables:
 
 - **Auto-approve** — routine patterns resolve without human intervention
 - **Audit trail** — "who approved what, when, why" is queryable
@@ -197,6 +197,6 @@ When [mem7](mem7-auto-approve.md) is configured, every approval resolution (appr
 
 ## Next steps
 
-- [Memory Integration](mem7-auto-approve.md) — auto-approve from past decisions
+- [Memory Integration](flux7-memory-auto-approve.md) — auto-approve from past decisions
 - [CLI Tools](cli-tools.md) — governing git, docker, terraform
 - [Deployment Modes](deployment-modes.md) — solo, team, cloud

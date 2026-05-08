@@ -1,25 +1,25 @@
-# agent7 — AI Agent Governance Platform
+# flux7-console — AI Agent Governance Platform
 
 ## The problem
 
-You deployed agents. agent-mesh governs them. mem7 stores their decisions. Now you need answers :
+You deployed agents. flux7-mesh governs them. flux7-memory stores their decisions. Now you need answers :
 
 - **Which agents are running ? What are they doing ?** You have JSONL traces and terminal logs across machines. No single view.
-- **Who approved what, when, and why ?** Decisions are in mem7, but querying them requires knowing the key format and tag conventions.
+- **Who approved what, when, and why ?** Decisions are in flux7-memory, but querying them requires knowing the key format and tag conventions.
 - **Is this new agent safe to promote to production ?** There's no scoring, no lifecycle, no diff showing what changed since the last review.
 - **Three agents are waiting for approval at 2am.** Nobody is watching the terminal. The requests time out.
 
-These are management plane problems. agent-mesh is the data plane (runtime enforcement), mem7 is the memory substrate. agent7 is the visibility and control layer that makes them manageable at scale.
+These are management plane problems. flux7-mesh is the data plane (runtime enforcement), flux7-memory is the memory substrate. flux7-console is the visibility and control layer that makes them manageable at scale.
 
-## What agent7 is
+## What flux7-console is
 
 A web-based governance platform for AI agents. Dashboard, approval UI, audit trail, governance engine.
 
 ```
-agent7 (management plane)
+flux7-console (management plane)
 ├── Agent Catalog     — registry, metadata, lifecycle, scoring
-├── Trace Viewer      — ingests agent-mesh JSONL, aggregates stats
-├── Memory Viewer     — reads mem7 via SDK, displays decisions + facts
+├── Trace Viewer      — ingests flux7-mesh JSONL, aggregates stats
+├── Memory Viewer     — reads flux7-memory via SDK, displays decisions + facts
 ├── Approval UI       — shows pending approvals, human clicks approve/reject
 ├── Governance Engine — rules, 3-axis scoring, severity, validation verdicts
 ├── Dependency Graph  — declared (YAML) + inferred (traces), impact analysis
@@ -31,7 +31,7 @@ agent7 (management plane)
 ## How it fits
 
 ```
-                    agent7 (visibility + control)
+                    flux7-console (visibility + control)
                     ┌────────────────────────────┐
                     │  dashboard, approval UI,   │
                     │  governance, audit trail    │
@@ -42,7 +42,7 @@ agent7 (management plane)
                            │          │
                            ▼          ▼
 ┌─────────────────┐    ┌─────────────────┐
-│   agent-mesh    │───►│     mem7        │
+│   flux7-mesh    │───►│     flux7-memory        │
 │   (runtime)     │    │   (memory)      │
 │                 │    │                 │
 │ • policy        │    │ • facts         │
@@ -51,45 +51,45 @@ agent7 (management plane)
 └─────────────────┘    └─────────────────┘
 ```
 
-agent7 is a thin client of agent-mesh and mem7. If agent7 goes down, everything keeps working — agents are still governed, decisions are still stored. agent7 adds visibility, not runtime dependency.
+flux7-console is a thin client of flux7-mesh and flux7-memory. If flux7-console goes down, everything keeps working — agents are still governed, decisions are still stored. flux7-console adds visibility, not runtime dependency.
 
-**Agent-agnostic.** agent7 doesn't know or care which SDK produced the tool call. Claude Code, Managed Agents, LangChain, cron scripts — if it goes through agent-mesh, agent7 sees it.
+**Agent-agnostic.** flux7-console doesn't know or care which SDK produced the tool call. Claude Code, Managed Agents, LangChain, cron scripts — if it goes through flux7-mesh, flux7-console sees it.
 
 ## What it enables
 
-**For the solo dev :** trace viewer shows what your agents did today. Memory viewer shows what decisions were made. You don't need agent7 on day 1 — agent-mesh + mem7 are enough. Add agent7 when you want a dashboard instead of `curl`.
+**For the solo dev :** trace viewer shows what your agents did today. Memory viewer shows what decisions were made. You don't need flux7-console on day 1 — flux7-mesh + flux7-memory are enough. Add flux7-console when you want a dashboard instead of `curl`.
 
 **For the team :** approval UI lets any team member resolve pending approvals from a browser. Governance scoring flags risky agents before they hit production. Audit trail answers "who approved that email send at 3am."
 
-**For compliance :** every decision is a fact in mem7. Every tool call is a trace. agent7 joins them : "this agent called this tool, it was auto-approved because of these 3 past decisions, here's the full chain." Query, don't grep.
+**For compliance :** every decision is a fact in flux7-memory. Every tool call is a trace. flux7-console joins them : "this agent called this tool, it was auto-approved because of these 3 past decisions, here's the full chain." Query, don't grep.
 
 ## What makes it different
 
-| | Anthropic Console | LangSmith / LangFuse | agent7 |
+| | Anthropic Console | LangSmith / LangFuse | flux7-console |
 |---|---|---|---|
-| **Scope** | Anthropic agents only | LangChain ecosystem | Any agent through agent-mesh |
+| **Scope** | Anthropic agents only | LangChain ecosystem | Any agent through flux7-mesh |
 | **Governance** | Permission policies (allow/ask) | None | Rules, scoring, lifecycle, diffs |
 | **Approvals** | Inline in SDK | None | Web UI + API, team-accessible |
-| **Memory** | None | Trace replay | mem7 integration (decisions as facts) |
-| **Policy enforcement** | Basic | None | Full (agent-mesh data plane) |
+| **Memory** | None | Trace replay | flux7-memory integration (decisions as facts) |
+| **Policy enforcement** | Basic | None | Full (flux7-mesh data plane) |
 
-Anthropic Console is great for Managed Agents visibility. agent7 complements it with governance and cross-agent visibility for heterogeneous deployments.
+Anthropic Console is great for Managed Agents visibility. flux7-console complements it with governance and cross-agent visibility for heterogeneous deployments.
 
 ## Current state (May 2026)
 
-- **Dashboard** — agent-mesh trace viewer, session browser, memory debug view
+- **Dashboard** — flux7-mesh trace viewer, session browser, memory debug view
 - **Supervisor** — Python service with rule engine + Ollama LLM evaluation
 - **Working** — trace ingestion, session aggregation, pending approval polling
-- **Next** — governance engine (scoring, lifecycle), approval UI, mem7 SDK integration, dependency graph
+- **Next** — governance engine (scoring, lifecycle), approval UI, flux7-memory SDK integration, dependency graph
 
 ## Progressive adoption
 
 ```
-Day 1:   agent-mesh only — policies + tracing (CLI, zero UI)
-Day 30:  + mem7 — persistent memory, decision history, auto-approve
-Day 60:  + agent7 — dashboard, team approval UI, governance scoring
+Day 1:   flux7-mesh only — policies + tracing (CLI, zero UI)
+Day 30:  + flux7-memory — persistent memory, decision history, auto-approve
+Day 60:  + flux7-console — dashboard, team approval UI, governance scoring
 ```
 
-Each step is independently valuable. agent7 is the last layer, not the first.
+Each step is independently valuable. flux7-console is the last layer, not the first.
 
 [github.com/KTCrisis/flux7-console](https://github.com/KTCrisis/flux7-console)

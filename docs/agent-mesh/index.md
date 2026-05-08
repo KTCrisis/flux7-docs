@@ -10,14 +10,14 @@ You're deploying agents. They call tools — file writes, emails, API calls, dat
 
 These aren't agent framework problems. They're infrastructure problems. Service meshes solved them for microservices a decade ago — policy enforcement, observability, access control at the network layer. Agents need the same thing, at the tool call layer.
 
-## What agent-mesh is
+## What flux7-mesh is
 
 A sidecar proxy that sits between agents and their tools. One Go binary, one YAML config, zero dependencies.
 
 ```
 Agent (Claude, LangChain, script)
   │
-  └──► agent-mesh (sidecar)
+  └──► flux7-mesh (sidecar)
          ├── policy: allow / deny / human_approval
          ├── rate limiting + loop detection
          ├── temporal grants (sudo for agents)
@@ -37,7 +37,7 @@ Policies start strict. Over time, the system learns.
 ```
 Day 1:  human_approval for all writes
         ↓ human approves filesystem.write 3 times
-Day 7:  agent-mesh queries mem7 → 3 approvals, 0 rejections → auto-approve
+Day 7:  flux7-mesh queries flux7-memory → 3 approvals, 0 rejections → auto-approve
         ↓ novel tool call, no history
         ↓ external supervisor (rules + LLM) evaluates → approve
 Day 30: routine patterns auto-resolve in ~100ms
@@ -49,24 +49,24 @@ Three layers :
 | Level | Who | Speed | What it handles |
 |-------|-----|-------|-----------------|
 | 0 | Policy engine | 0ms | Static rules (allow, deny, human_approval) |
-| 1 | Built-in mem7 lookup | ~100ms | Routine patterns (3+ past approvals) |
+| 1 | Built-in flux7-memory lookup | ~100ms | Routine patterns (3+ past approvals) |
 | 1+ | External supervisor | ~20s | Novel cases (rule engine + LLM) |
 | 2 | Human | minutes | Unknowns, high-stakes decisions |
 
-Every decision is stored as a fact in [mem7](https://github.com/KTCrisis/flux7-memory). Every tool call is a trace. Both are queryable.
+Every decision is stored as a fact in [flux7-memory](https://github.com/KTCrisis/flux7-memory). Every tool call is a trace. Both are queryable.
 
 ## What makes it different
 
-| | API Gateways (Kong, Apigee) | Agent Frameworks (LangChain, CrewAI) | agent-mesh |
+| | API Gateways (Kong, Apigee) | Agent Frameworks (LangChain, CrewAI) | flux7-mesh |
 |---|---|---|---|
 | **Traffic** | North-south (user → LLM) | Internal (agent runtime) | East-west (agent → tools) |
 | **Policy** | API keys, rate limits | None or coarse allow/ask | Semantic YAML rules per agent per tool |
 | **Approval** | None | Framework-specific | Async queue, non-blocking, with memory |
 | **Identity** | API consumer | Single agent | Per-agent (`agent:claude`, `agent:worker-3`) |
-| **Decision persistence** | None | None | Facts in mem7, queryable, auditable |
+| **Decision persistence** | None | None | Facts in flux7-memory, queryable, auditable |
 | **Deployment** | Heavy infrastructure | Embedded in code | Single binary sidecar, zero config to start |
 
-Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidecar — agent-mesh requires zero changes to agent code.
+Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidecar — flux7-mesh requires zero changes to agent code.
 
 ## Current state (May 2026)
 
@@ -75,28 +75,28 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 - **Export** — MCP stdio + MCP Streamable HTTP + HTTP REST
 - **Governance** — YAML policies, glob patterns, conditions, per-agent policy files, specificity sort
 - **Policy API** — `POST /decide` evaluates policy without executing (allow/deny/human_approval), enables any runtime to query governance
-- **Approval** — async queue, temporal grants, supervisor protocol, mem7 auto-approve
+- **Approval** — async queue, temporal grants, supervisor protocol, flux7-memory auto-approve
 - **Observability** — JSONL traces, OTEL export, session tracking, Prometheus metrics
 - **Durable state** — approvals and grants persisted in SQLite, survive restarts (`storage_path: state.db`)
 - **Auto-proxy** — in MCP mode, detects running daemon and becomes a thin stdio→HTTP proxy (zero config change, solves port conflicts)
-- **Daemon mode** — `agent-mesh serve` runs as persistent daemon, MCP clients auto-proxy to it
+- **Daemon mode** — `mesh7 serve` runs as persistent daemon, MCP clients auto-proxy to it
 - **Python SDK** — `pip install flux7-mesh` — GovernedToolkit decorator for Claude API tool_use, direct HTTP client for grants/approvals/traces
-- **Integrations** — [mem7](https://github.com/KTCrisis/flux7-memory) (decision persistence + auto-approve), [agent7](https://github.com/KTCrisis/flux7-console) (dashboard + governance UI)
+- **Integrations** — [flux7-memory](https://github.com/KTCrisis/flux7-memory) (decision persistence + auto-approve), [flux7-console](https://github.com/KTCrisis/flux7-console) (dashboard + governance UI)
 - **Next** — operator auth, policy hot-reload
 
 ## Claude ecosystem integration
 
-agent-mesh and mem7 cover every Claude surface with a native integration path.
+flux7-mesh and flux7-memory cover every Claude surface with a native integration path.
 
-| Surface | agent-mesh | mem7 |
+| Surface | flux7-mesh | flux7-memory |
 |---|---|---|
 | **Claude Code / Cursor** | MCP stdio (auto-proxy if daemon running) | MCP stdio (auto-proxy if daemon running) |
-| **Claude Platform / Console** | MCP Streamable HTTP (`POST /mcp`) | Via agent-mesh (tools `memory.*`) |
-| **Managed Agents** | MCP connector URL → `POST /mcp` | Via agent-mesh (tools `memory.*`) |
+| **Claude Platform / Console** | MCP Streamable HTTP (`POST /mcp`) | Via flux7-mesh (tools `memory.*`) |
+| **Managed Agents** | MCP connector URL → `POST /mcp` | Via flux7-mesh (tools `memory.*`) |
 | **Claude API (raw)** | Python SDK + `POST /decide` | Python SDK (`pip install flux7-memory`) |
 | **Agent SDK (custom)** | HTTP direct (`/tool/{name}`, `/decide`) | HTTP direct (`/rpc`) |
 
-**Key insight** : mem7 access from Platform, Console, and Managed Agents goes through agent-mesh policy — no direct exposure. This means governance is enforced at every layer, not just in local development.
+**Key insight** : flux7-memory access from Platform, Console, and Managed Agents goes through flux7-mesh policy — no direct exposure. This means governance is enforced at every layer, not just in local development.
 
 **Gaps (tracked)** : operator auth (Anthropic native token validation), MCP registry listing, `memory_context` system prompt helper for Platform.
 
@@ -104,13 +104,13 @@ agent-mesh and mem7 cover every Claude surface with a native integration path.
 
 ```bash
 # Install
-go install github.com/KTCrisis/flux7-mesh/cmd/agent-mesh@latest
+go install github.com/KTCrisis/flux7-mesh/cmd/mesh7@latest
 
 # Add to Claude Code
-claude mcp add agent-mesh -- agent-mesh --mcp --config config.yaml
+claude mcp add mesh7 -- mesh7 --mcp --config config.yaml
 
 # Or run standalone
-agent-mesh --config config.yaml
+mesh7 --config config.yaml
 ```
 
 MIT licensed. [github.com/KTCrisis/flux7-mesh](https://github.com/KTCrisis/flux7-mesh)

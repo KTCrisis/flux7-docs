@@ -23,27 +23,27 @@ Configs 1–5 work natively. Configs 6–7 are solved by auto-proxy (v0.9.2) —
 The default. 90% of users. Zero setup.
 
 ```
-Claude Code ──stdio──> agent-mesh ──> filesystem, gmail, ollama...
+Claude Code ──stdio──> flux7-mesh ──> filesystem, gmail, ollama...
                            │
                       :9090 HTTP (background, for mesh CLI / traces)
 ```
 
-Claude launches agent-mesh as an MCP subprocess. Agent-mesh launches upstream MCP servers, applies policies, records traces. When Claude quits, everything stops cleanly.
+Claude launches flux7-mesh as an MCP subprocess. Agent-mesh launches upstream MCP servers, applies policies, records traces. When Claude quits, everything stops cleanly.
 
-**Setup:** Just add agent-mesh as an MCP server in Claude Code:
+**Setup:** Just add flux7-mesh as an MCP server in Claude Code:
 
 ```bash
-claude mcp add agent-mesh -- agent-mesh --mcp --config config.yaml
+claude mcp add mesh7 -- mesh7 --mcp --config config.yaml
 ```
 
 ## Config 2: Solo dev + Claude + supervisor (passive)
 
-Claude manages agent-mesh. Two layers of auto-resolve handle routine approvals before they reach a human.
+Claude manages flux7-mesh. Two layers of auto-resolve handle routine approvals before they reach a human.
 
 ```
-Claude Code ──stdio──> agent-mesh :9090 ──> tools
+Claude Code ──stdio──> flux7-mesh :9090 ──> tools
                            │
-                    Level 1: built-in (mem7 lookup, ~100ms)
+                    Level 1: built-in (flux7-memory lookup, ~100ms)
                     ├── 3+ past approvals → auto-approve
                     └── else → escalate to Level 1+
                            │
@@ -57,15 +57,15 @@ The built-in auto-approve (Level 1) fires before the approval queue — routine 
 **Setup:**
 
 ```bash
-# Terminal 1: Claude (launches agent-mesh automatically)
+# Terminal 1: Claude (launches flux7-mesh automatically)
 claude
 
 # Terminal 2: Supervisor
-cd ~/agent7
+cd ~/flux7-console
 python -m backend.app.services.supervisor --config supervisor.local.yaml
 ```
 
-With `supervisor.enabled: true` in the agent-mesh config, `approval.resolve` and `approval.pending` tools are hidden from Claude. Tool calls block until the supervisor resolves them.
+With `supervisor.enabled: true` in the flux7-mesh config, `approval.resolve` and `approval.pending` tools are hidden from Claude. Tool calls block until the supervisor resolves them.
 
 **Supervisor config:**
 
@@ -84,7 +84,7 @@ supervisor:
       confidence: 0.95
 ```
 
-**Limitation:** When Claude quits, agent-mesh dies. The supervisor retries every `poll_interval` until Claude starts again.
+**Limitation:** When Claude quits, flux7-mesh dies. The supervisor retries every `poll_interval` until Claude starts again.
 
 ## Config 3: Supervisor standalone (no Claude)
 
@@ -93,7 +93,7 @@ For pipelines, overnight runs, CI/CD, batch jobs. No human in the loop — the s
 ```
 supervisor (always alive)
   │
-  ├── spawn/restart ──> agent-mesh :9090 ──> tools
+  ├── spawn/restart ──> flux7-mesh :9090 ──> tools
   │
   ├── poll → evaluate → resolve
   └── store decisions in memory-mcp
@@ -102,18 +102,18 @@ supervisor (always alive)
 **Setup:**
 
 ```bash
-cd ~/agent7
+cd ~/flux7-console
 python -m backend.app.services.supervisor --config supervisor.yaml
 ```
 
-With `mesh_process.enabled: true`, the supervisor spawns agent-mesh on startup, monitors health, and restarts it on crash.
+With `mesh_process.enabled: true`, the supervisor spawns flux7-mesh on startup, monitors health, and restarts it on crash.
 
 ```yaml
 supervisor:
   mesh_url: http://localhost:9090
   mesh_process:
     enabled: true
-    command: agent-mesh
+    command: flux7-mesh
     config: /path/to/config.yaml
 ```
 
@@ -130,7 +130,7 @@ curl -X POST http://localhost:9090/tool/filesystem.write_file \
 Standard HTTP proxy mode. No MCP, no supervisor.
 
 ```
-agent-mesh :9090 ──> tools
+flux7-mesh :9090 ──> tools
      │
 Agent (HTTP) ──────┘
 ```
@@ -138,22 +138,22 @@ Agent (HTTP) ──────┘
 **Setup:**
 
 ```bash
-agent-mesh --config config.yaml
+mesh7 --config config.yaml
 ```
 
 Any HTTP client can call `POST /tool/{name}`, query traces, manage approvals. Works with LangChain, CrewAI, custom scripts, cron jobs.
 
 ## Config 5: Claude + external agent (the real mesh)
 
-Claude and external agents share the same agent-mesh instance. One set of policies, one trace store, one approval queue.
+Claude and external agents share the same flux7-mesh instance. One set of policies, one trace store, one approval queue.
 
 ```
-Claude Code ──stdio──> agent-mesh :9090 ──> tools
+Claude Code ──stdio──> flux7-mesh :9090 ──> tools
                            │
 Agent B ─────────HTTP──────┘
 ```
 
-**This works today.** Claude spawns agent-mesh, the external agent connects via HTTP to `:9090`. Both are governed by the same policies.
+**This works today.** Claude spawns flux7-mesh, the external agent connects via HTTP to `:9090`. Both are governed by the same policies.
 
 Add a supervisor and you get Config 2 with extra agents — everything goes through one mesh.
 
@@ -161,7 +161,7 @@ Add a supervisor and you get Config 2 with extra agents — everything goes thro
 
 ## Config 8: Anthropic Managed Agents (cloud, MCP Streamable HTTP)
 
-Cloud-hosted agents connect to your agent-mesh over the internet via MCP Streamable HTTP.
+Cloud-hosted agents connect to your flux7-mesh over the internet via MCP Streamable HTTP.
 
 ```
 Anthropic cloud
@@ -170,9 +170,9 @@ Anthropic cloud
 │   ├── sub-agent: tester
 │   └── all use mcp_toolset "mesh"
 │
-└── MCP connector ── POST /mcp ──> agent-mesh (your server, public URL)
+└── MCP connector ── POST /mcp ──> flux7-mesh (your server, public URL)
                                        │
-                                  policies, traces, mem7
+                                  policies, traces, flux7-memory
                                        │
                                   upstream MCP servers
 ```
@@ -203,7 +203,7 @@ Auth via vault (static bearer):
 vault = client.beta.vaults.create(display_name="mesh-credentials")
 client.beta.vaults.credentials.create(
     vault_id=vault.id,
-    display_name="agent-mesh token",
+    display_name="flux7-mesh token",
     auth={
         "type": "static_bearer",
         "mcp_server_url": "https://mesh.example.com/mcp",
@@ -212,25 +212,25 @@ client.beta.vaults.credentials.create(
 )
 ```
 
-agent-mesh extracts the agent ID from `Authorization: Bearer agent:<id>` and applies per-agent policies.
+flux7-mesh extracts the agent ID from `Authorization: Bearer agent:<id>` and applies per-agent policies.
 
-**Networking:** agent-mesh must be accessible from Anthropic's cloud. Options:
+**Networking:** flux7-mesh must be accessible from Anthropic's cloud. Options:
 - Dev: Tailscale funnel or ngrok → `localhost:9090`
-- Prod: deploy agent-mesh on a VPS or cloud host
+- Prod: deploy flux7-mesh on a VPS or cloud host
 
-**Permission policies:** Set `always_allow` on the Managed Agent side — let agent-mesh handle governance. Double-layer approval (Managed Agents `always_ask` + agent-mesh `human_approval`) works but adds friction.
+**Permission policies:** Set `always_allow` on the Managed Agent side — let flux7-mesh handle governance. Double-layer approval (Managed Agents `always_ask` + flux7-mesh `human_approval`) works but adds friction.
 
 ---
 
 ## Configs solved by auto-proxy (v0.9.2)
 
-Since v0.9.2, when agent-mesh starts in `--mcp` mode, it probes `GET /health` on the configured port before doing anything else. If a daemon (or another agent-mesh instance) is already running, it skips all heavy initialization and becomes a thin stdio→HTTP proxy — forwarding JSON-RPC from stdin to `POST /mcp` on the running instance. Zero config change, same `claude mcp add` command.
+Since v0.9.2, when flux7-mesh starts in `--mcp` mode, it probes `GET /health` on the configured port before doing anything else. If a daemon (or another flux7-mesh instance) is already running, it skips all heavy initialization and becomes a thin stdio→HTTP proxy — forwarding JSON-RPC from stdin to `POST /mcp` on the running instance. Zero config change, same `claude mcp add` command.
 
 ### Config 6: Claude + supervisor (active spawn)
 
 ```
-Claude ──stdio──> agent-mesh (auto-proxy) ──POST /mcp──> agent-mesh :9090 (daemon)
-supervisor ──spawn──> agent-mesh :9090 (daemon)
+Claude ──stdio──> flux7-mesh (auto-proxy) ──POST /mcp──> flux7-mesh :9090 (daemon)
+supervisor ──spawn──> flux7-mesh :9090 (daemon)
 ```
 
 The supervisor starts the daemon. Claude's MCP subprocess detects it and proxies to it. No port conflict. Traces, approvals, and grants are all on the daemon — one unified state.
@@ -238,8 +238,8 @@ The supervisor starts the daemon. Claude's MCP subprocess detects it and proxies
 ### Config 7: Two Claude sessions
 
 ```
-Claude session 1 ──stdio──> agent-mesh :9090 (full instance, first to start)
-Claude session 2 ──stdio──> agent-mesh (auto-proxy) ──POST /mcp──> :9090
+Claude session 1 ──stdio──> flux7-mesh :9090 (full instance, first to start)
+Claude session 2 ──stdio──> flux7-mesh (auto-proxy) ──POST /mcp──> :9090
 ```
 
 The first session starts normally. The second detects the running instance and proxies. Both sessions share the same policy engine, approval queue, trace store, and durable state.
@@ -271,8 +271,8 @@ Do you use Claude/Cursor?
 | Component | Who starts it | Who stops it | Persists across sessions |
 |-----------|--------------|-------------|------------------------|
 | **Ollama** | System daemon | System | Yes |
-| **agent-mesh** | Claude (config 1/2/5) or supervisor (config 3) | Dies with parent | Durable state (SQLite) survives restarts |
-| **Upstream MCP servers** | agent-mesh (subprocesses) | Die with agent-mesh | No |
+| **flux7-mesh** | Claude (config 1/2/5) or supervisor (config 3) | Dies with parent | Durable state (SQLite) survives restarts |
+| **Upstream MCP servers** | flux7-mesh (subprocesses) | Die with flux7-mesh | No |
 | **Supervisor** | User (terminal) | User (Ctrl+C) | Yes (as long as terminal lives) |
 | **Claude Code** | User | User | No |
 
@@ -281,7 +281,7 @@ Do you use Claude/Cursor?
 The auto-proxy (v0.9.2) solves port conflicts — but the first instance is still ephemeral (tied to whoever started it). The next step is a proper daemon:
 
 ```
-                    agent-mesh serve (daemon, persistent)
+                    mesh7 serve (daemon, persistent)
                     ┌─────────────────────────────────────┐
 Claude ──proxy───>  │                                     │──> tools
 Agent B ───HTTP───> │  registry · policy · approval       │
@@ -293,13 +293,13 @@ Agent C ───HTTP───> │  trace · grants · rate limiting     │
 
 ```bash
 # Start the daemon
-agent-mesh serve --config config.yaml
+mesh7 serve --config config.yaml
 
 # Claude auto-proxies to it (same command as before)
-claude mcp add agent-mesh -- agent-mesh --mcp --config config.yaml
+claude mcp add mesh7 -- mesh7 --mcp --config config.yaml
 ```
 
-- **`agent-mesh serve`** — runs as a persistent daemon (HTTP + manages upstream MCP servers, survives client disconnects)
+- **`mesh7 serve`** — runs as a persistent daemon (HTTP + manages upstream MCP servers, survives client disconnects)
 - **Auto-proxy** handles the MCP side automatically — Claude's `--mcp` instance detects the daemon and proxies to it. No explicit `connect` subcommand needed.
 
 This solves Config 2's limitation (mesh dies with Claude). The supervisor manages the daemon lifecycle. Durable state (v0.9.2) ensures approvals and grants survive daemon restarts.
@@ -315,4 +315,4 @@ This solves Config 2's limitation (mesh dies with Claude). The supervisor manage
 | `supervisor.enabled` (hide approval tools) | Done |
 | Durable state (SQLite) | Done (v0.9.2) |
 | Auto-proxy (stdio→HTTP on daemon detect) | Done (v0.9.2) |
-| `agent-mesh serve` (daemon) | Done (v0.9.4) |
+| `mesh7 serve` (daemon) | Done (v0.9.4) |
