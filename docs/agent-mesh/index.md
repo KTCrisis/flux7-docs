@@ -53,7 +53,7 @@ Three layers :
 | 1+ | External supervisor | ~20s | Novel cases (rule engine + LLM) |
 | 2 | Human | minutes | Unknowns, high-stakes decisions |
 
-Every decision is stored as a fact in [mem7](https://github.com/KTCrisis/mem7). Every tool call is a trace. Both are queryable.
+Every decision is stored as a fact in [mem7](https://github.com/KTCrisis/flux7-memory). Every tool call is a trace. Both are queryable.
 
 ## What makes it different
 
@@ -81,7 +81,7 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 - **Auto-proxy** — in MCP mode, detects running daemon and becomes a thin stdio→HTTP proxy (zero config change, solves port conflicts)
 - **Daemon mode** — `agent-mesh serve` runs as persistent daemon, MCP clients auto-proxy to it
 - **Python SDK** — `pip install flux7-mesh` — GovernedToolkit decorator for Claude API tool_use, direct HTTP client for grants/approvals/traces
-- **Integrations** — [mem7](https://github.com/KTCrisis/mem7) (decision persistence + auto-approve), [agent7](https://github.com/KTCrisis/agent7) (dashboard + governance UI)
+- **Integrations** — [mem7](https://github.com/KTCrisis/flux7-memory) (decision persistence + auto-approve), [agent7](https://github.com/KTCrisis/flux7-console) (dashboard + governance UI)
 - **Next** — operator auth, policy hot-reload
 
 ## Claude ecosystem integration
@@ -104,7 +104,7 @@ agent-mesh and mem7 cover every Claude surface with a native integration path.
 
 ```bash
 # Install
-go install github.com/KTCrisis/agent-mesh/cmd/agent-mesh@latest
+go install github.com/KTCrisis/flux7-mesh/cmd/agent-mesh@latest
 
 # Add to Claude Code
 claude mcp add agent-mesh -- agent-mesh --mcp --config config.yaml
@@ -113,4 +113,4 @@ claude mcp add agent-mesh -- agent-mesh --mcp --config config.yaml
 agent-mesh --config config.yaml
 ```
 
-MIT licensed. [github.com/KTCrisis/agent-mesh](https://github.com/KTCrisis/agent-mesh)
+MIT licensed. [github.com/KTCrisis/flux7-mesh](https://github.com/KTCrisis/flux7-mesh)

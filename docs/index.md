@@ -39,6 +39,6 @@ Each step is independently valuable. Start with agent-mesh — five minutes from
 
 ## Source
 
-- [agent-mesh](https://github.com/KTCrisis/agent-mesh) — MIT
-- [mem7](https://github.com/KTCrisis/mem7) — MIT
-- [agent7](https://github.com/KTCrisis/agent7)
+- [agent-mesh](https://github.com/KTCrisis/flux7-mesh) — MIT
+- [mem7](https://github.com/KTCrisis/flux7-memory) — MIT
+- [agent7](https://github.com/KTCrisis/flux7-console)

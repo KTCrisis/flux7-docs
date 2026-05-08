@@ -209,7 +209,7 @@ Level 2: Human
 > **Two supervisor layers.** Level 1 is built into agent-mesh — a `MemoryReader`
 > that queries mem7 before the approval queue. It's a pre-filter, not a full
 > resolver. Level 1+ is the external Python supervisor in agent7 that implements
-> the [supervisor protocol](https://github.com/KTCrisis/agent-mesh/blob/main/docs/supervisor-protocol.md)
+> the [supervisor protocol](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/supervisor-protocol.md)
 > — it polls pending approvals and resolves them with rule evaluation + LLM.
 > The `supervisor/` package inside agent-mesh handles content redaction and
 > injection detection on the protocol's outbound payloads (`RedactParams`,

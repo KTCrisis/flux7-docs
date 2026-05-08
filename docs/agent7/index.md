@@ -92,4 +92,4 @@ Day 60:  + agent7 — dashboard, team approval UI, governance scoring
 
 Each step is independently valuable. agent7 is the last layer, not the first.
 
-[github.com/KTCrisis/agent7](https://github.com/KTCrisis/agent7)
+[github.com/KTCrisis/flux7-console](https://github.com/KTCrisis/flux7-console)

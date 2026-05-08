@@ -292,7 +292,7 @@ CLI tool calls are traced like any other tool, with the addition of `exit_code`:
 
 ## Example
 
-See `examples/cli-tools/config.yaml` in the [agent-mesh repo](https://github.com/KTCrisis/agent-mesh) for a complete example with terraform (fine-tuned), kubectl (strict), and gh (simple).
+See `examples/cli-tools/config.yaml` in the [agent-mesh repo](https://github.com/KTCrisis/flux7-mesh) for a complete example with terraform (fine-tuned), kubectl (strict), and gh (simple).
 
 ```bash
 # Start with CLI tools
