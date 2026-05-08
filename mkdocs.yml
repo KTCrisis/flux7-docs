@@ -1,6 +1,6 @@
 site_name: flux7 docs
 site_url: https://docs.flux7.art
-site_description: Documentation for flux7-mesh, flux7-memory, and flux7-console — governance infrastructure for AI agents
+site_description: Documentation for flux7-mesh, flux7-memory, flux7-supervisor, and flux7-console — governance infrastructure for AI agents
 site_author: Marc Verchiani
 
 theme:
@@ -47,6 +47,10 @@ nav:
     - Observability: agent-mesh/otel.md
   - flux7-memory:
     - Overview: mem7/index.md
+  - flux7-supervisor:
+    - Overview: sup7/index.md
+    - Configuration: sup7/configuration.md
+    - Claude Code Callback: sup7/claude-code-callback.md
   - flux7-console:
     - Overview: agent7/index.md
     - System Design: agent7/system-design.md
