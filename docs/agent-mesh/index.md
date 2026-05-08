@@ -70,16 +70,18 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 
 ## Current state (May 2026)
 
-- **v0.9.2** — 307 tests, 15 packages, race clean
+- **v0.10.1** — 260 Go tests + 29 Python SDK tests, 15 packages, race clean
 - **Import** — MCP servers (stdio + SSE), OpenAPI specs, CLI binaries
 - **Export** — MCP stdio + MCP Streamable HTTP + HTTP REST
 - **Governance** — YAML policies, glob patterns, conditions, per-agent policy files, specificity sort
+- **Policy API** — `POST /decide` evaluates policy without executing (allow/deny/human_approval), enables any runtime to query governance
 - **Approval** — async queue, temporal grants, supervisor protocol, mem7 auto-approve
 - **Observability** — JSONL traces, OTEL export, session tracking, Prometheus metrics
 - **Durable state** — approvals and grants persisted in SQLite, survive restarts (`storage_path: state.db`)
 - **Auto-proxy** — in MCP mode, detects running daemon and becomes a thin stdio→HTTP proxy (zero config change, solves port conflicts)
-- **Integrations** — [mem7](https://github.com/KTCrisis/mem7) (decision persistence + auto-approve), [agent7](https://github.com/KTCrisis/agent7) (dashboard + governance UI)
 - **Daemon mode** — `agent-mesh serve` runs as persistent daemon, MCP clients auto-proxy to it
+- **Python SDK** — `pip install agent-mesh` — GovernedToolkit decorator for Claude API tool_use, direct HTTP client for grants/approvals/traces
+- **Integrations** — [mem7](https://github.com/KTCrisis/mem7) (decision persistence + auto-approve), [agent7](https://github.com/KTCrisis/agent7) (dashboard + governance UI)
 - **Next** — operator auth, policy hot-reload
 
 ## Get started
