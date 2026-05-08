@@ -1,4 +1,4 @@
-# mem7 — Governed Memory for AI Agents
+# flux7-memory — Governed Memory for AI Agents
 
 ## The problem
 

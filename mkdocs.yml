@@ -1,6 +1,6 @@
 site_name: flux7 docs
 site_url: https://docs.flux7.art
-site_description: Documentation for agent-mesh, mem7, and agent7 — governance infrastructure for AI agents
+site_description: Documentation for flux7-mesh, flux7-memory, and flux7-console — governance infrastructure for AI agents
 site_author: Marc Verchiani
 
 theme:
@@ -35,7 +35,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - agent-mesh:
+  - flux7-mesh:
     - Overview: agent-mesh/index.md
     - Getting Started: agent-mesh/getting-started.md
     - Writing Policies: agent-mesh/writing-policies.md
@@ -45,9 +45,9 @@ nav:
     - Supervisor Protocol: agent-mesh/supervisor-protocol.md
     - Deployment Modes: agent-mesh/deployment-modes.md
     - Observability: agent-mesh/otel.md
-  - mem7:
+  - flux7-memory:
     - Overview: mem7/index.md
-  - agent7:
+  - flux7-console:
     - Overview: agent7/index.md
     - System Design: agent7/system-design.md
 

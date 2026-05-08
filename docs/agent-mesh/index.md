@@ -1,4 +1,4 @@
-# agent-mesh — Governance Mesh for AI Agents
+# flux7-mesh — Governance Mesh for AI Agents
 
 ## The problem
 
