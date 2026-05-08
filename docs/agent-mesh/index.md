@@ -80,7 +80,7 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 - **Durable state** — approvals and grants persisted in SQLite, survive restarts (`storage_path: state.db`)
 - **Auto-proxy** — in MCP mode, detects running daemon and becomes a thin stdio→HTTP proxy (zero config change, solves port conflicts)
 - **Daemon mode** — `agent-mesh serve` runs as persistent daemon, MCP clients auto-proxy to it
-- **Python SDK** — `pip install agent-mesh` — GovernedToolkit decorator for Claude API tool_use, direct HTTP client for grants/approvals/traces
+- **Python SDK** — `pip install flux7-mesh` — GovernedToolkit decorator for Claude API tool_use, direct HTTP client for grants/approvals/traces
 - **Integrations** — [mem7](https://github.com/KTCrisis/mem7) (decision persistence + auto-approve), [agent7](https://github.com/KTCrisis/agent7) (dashboard + governance UI)
 - **Next** — operator auth, policy hot-reload
 
@@ -93,7 +93,7 @@ agent-mesh and mem7 cover every Claude surface with a native integration path.
 | **Claude Code / Cursor** | MCP stdio (auto-proxy if daemon running) | MCP stdio (auto-proxy if daemon running) |
 | **Claude Platform / Console** | MCP Streamable HTTP (`POST /mcp`) | Via agent-mesh (tools `memory.*`) |
 | **Managed Agents** | MCP connector URL → `POST /mcp` | Via agent-mesh (tools `memory.*`) |
-| **Claude API (raw)** | Python SDK + `POST /decide` | Python SDK (`pip install mem7`) |
+| **Claude API (raw)** | Python SDK + `POST /decide` | Python SDK (`pip install flux7-memory`) |
 | **Agent SDK (custom)** | HTTP direct (`/tool/{name}`, `/decide`) | HTTP direct (`/rpc`) |
 
 **Key insight** : mem7 access from Platform, Console, and Managed Agents goes through agent-mesh policy — no direct exposure. This means governance is enforced at every layer, not just in local development.

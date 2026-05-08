@@ -45,7 +45,7 @@ Go binary. MCP server for persistent, searchable, governed memory.
 | Structured recall | `memory_context` returns JSON for SDK consumption |
 | Tag-scoped access | Any agent reads/writes its own observations via tags |
 | Temporal range queries | `since` / `until` filters on RFC3339 timestamps |
-| Python SDK | `pip install mem7`, provider-agnostic, wraps all tools via HTTP |
+| Python SDK | `pip install flux7-memory`, provider-agnostic, wraps all tools via HTTP |
 
 **Current state:** v0.4.1, 71% LoCoMo benchmark, SDK + SSE transport + daemon mode shipped.
 
@@ -359,7 +359,7 @@ agent-mesh queries mem7 before submitting to the approval queue. This is the bui
 Replace the current ad-hoc memory debug view with proper SDK integration.
 
 **agent7 changes:**
-- `pip install mem7` in backend dependencies
+- `pip install flux7-memory` in backend dependencies
 - Backend service: `Mem7Client` wrapping the SDK, configured via env var
 - API routes: `/api/v1/memory/search`, `/api/v1/memory/decisions`
 - Frontend: memory viewer page, decision audit trail with filters
