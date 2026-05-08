@@ -79,7 +79,8 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 - **Durable state** — approvals and grants persisted in SQLite, survive restarts (`storage_path: state.db`)
 - **Auto-proxy** — in MCP mode, detects running daemon and becomes a thin stdio→HTTP proxy (zero config change, solves port conflicts)
 - **Integrations** — [mem7](https://github.com/KTCrisis/mem7) (decision persistence + auto-approve), [agent7](https://github.com/KTCrisis/agent7) (dashboard + governance UI)
-- **Next** — daemon mode (`agent-mesh serve`), operator auth, policy hot-reload
+- **Daemon mode** — `agent-mesh serve` runs as persistent daemon, MCP clients auto-proxy to it
+- **Next** — operator auth, policy hot-reload
 
 ## Get started
 

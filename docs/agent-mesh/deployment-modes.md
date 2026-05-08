@@ -291,7 +291,15 @@ Agent C ───HTTP───> │  trace · grants · rate limiting     │
                             supervisor (poll)
 ```
 
-- **`agent-mesh serve`** — run as a persistent daemon (HTTP + manages upstream MCP servers, survives client disconnects)
+```bash
+# Start the daemon
+agent-mesh serve --config config.yaml
+
+# Claude auto-proxies to it (same command as before)
+claude mcp add agent-mesh -- agent-mesh --mcp --config config.yaml
+```
+
+- **`agent-mesh serve`** — runs as a persistent daemon (HTTP + manages upstream MCP servers, survives client disconnects)
 - **Auto-proxy** handles the MCP side automatically — Claude's `--mcp` instance detects the daemon and proxies to it. No explicit `connect` subcommand needed.
 
 This solves Config 2's limitation (mesh dies with Claude). The supervisor manages the daemon lifecycle. Durable state (v0.9.2) ensures approvals and grants survive daemon restarts.
@@ -307,4 +315,4 @@ This solves Config 2's limitation (mesh dies with Claude). The supervisor manage
 | `supervisor.enabled` (hide approval tools) | Done |
 | Durable state (SQLite) | Done (v0.9.2) |
 | Auto-proxy (stdio→HTTP on daemon detect) | Done (v0.9.2) |
-| `agent-mesh serve` (daemon) | Next |
+| `agent-mesh serve` (daemon) | Done (v0.9.4) |
