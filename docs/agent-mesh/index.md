@@ -70,14 +70,16 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 
 ## Current state (May 2026)
 
-- **v0.9.1** — 238+ tests, 14 packages, race clean
+- **v0.9.2** — 307 tests, 15 packages, race clean
 - **Import** — MCP servers (stdio + SSE), OpenAPI specs, CLI binaries
 - **Export** — MCP stdio + MCP Streamable HTTP + HTTP REST
 - **Governance** — YAML policies, glob patterns, conditions, per-agent policy files, specificity sort
 - **Approval** — async queue, temporal grants, supervisor protocol, mem7 auto-approve
 - **Observability** — JSONL traces, OTEL export, session tracking, Prometheus metrics
+- **Durable state** — approvals and grants persisted in SQLite, survive restarts (`storage_path: state.db`)
+- **Auto-proxy** — in MCP mode, detects running daemon and becomes a thin stdio→HTTP proxy (zero config change, solves port conflicts)
 - **Integrations** — [mem7](https://github.com/KTCrisis/mem7) (decision persistence + auto-approve), [agent7](https://github.com/KTCrisis/agent7) (dashboard + governance UI)
-- **Next** — durable state, daemon mode (`agent-mesh serve`), operator auth
+- **Next** — daemon mode (`agent-mesh serve`), operator auth, policy hot-reload
 
 ## Get started
 

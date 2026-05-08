@@ -11,10 +11,10 @@ Agent-mesh supports different configurations depending on who connects and how.
 | **3** | Supervisor standalone (no Claude) | HTTP | Supervisor spawns it | Active | Works |
 | **4** | External agent (LangChain, script) | HTTP | Manual or supervisor | Optional | Works |
 | **5** | Claude + external agent | MCP stdio + HTTP | Claude spawns it | Optional | Works |
-| **6** | Claude + supervisor (active spawn) | MCP stdio + HTTP | Both try to spawn | Active | **Port conflict** |
-| **7** | 2 Claude sessions | MCP stdio × 2 | Both spawn | - | **Port conflict** |
+| **6** | Claude + supervisor (active spawn) | MCP stdio + HTTP | Both try to spawn | Active | Works (auto-proxy) |
+| **7** | 2 Claude sessions | MCP stdio × 2 | Both spawn | - | Works (auto-proxy) |
 
-Configs 1–5 work today. Configs 6–7 have a port conflict that requires either passive mode or the future daemon mode.
+Configs 1–5 work natively. Configs 6–7 are solved by auto-proxy (v0.9.2) — the second instance detects the running daemon and becomes a thin stdio→HTTP proxy instead of crashing.
 
 ---
 
@@ -222,39 +222,27 @@ agent-mesh extracts the agent ID from `Authorization: Bearer agent:<id>` and app
 
 ---
 
-## Configs that don't work
+## Configs solved by auto-proxy (v0.9.2)
+
+Since v0.9.2, when agent-mesh starts in `--mcp` mode, it probes `GET /health` on the configured port before doing anything else. If a daemon (or another agent-mesh instance) is already running, it skips all heavy initialization and becomes a thin stdio→HTTP proxy — forwarding JSON-RPC from stdin to `POST /mcp` on the running instance. Zero config change, same `claude mcp add` command.
 
 ### Config 6: Claude + supervisor (active spawn)
 
-Both Claude and the supervisor try to spawn agent-mesh on port `:9090`.
-
 ```
-Claude ──stdio──> agent-mesh :9090     ← process A
-supervisor ──spawn──> agent-mesh :9090 ← process B  💥 bind: address already in use
+Claude ──stdio──> agent-mesh (auto-proxy) ──POST /mcp──> agent-mesh :9090 (daemon)
+supervisor ──spawn──> agent-mesh :9090 (daemon)
 ```
 
-The second instance crashes with exit code 1. The supervisor restart loop detects the crash and spawns again — infinite crash loop.
-
-**Fix:** Set `mesh_process.enabled: false` in the supervisor config (→ Config 2).
+The supervisor starts the daemon. Claude's MCP subprocess detects it and proxies to it. No port conflict. Traces, approvals, and grants are all on the daemon — one unified state.
 
 ### Config 7: Two Claude sessions
 
-Two Claude Code sessions with the same MCP config both spawn agent-mesh.
-
 ```
-Claude session 1 ──stdio──> agent-mesh :9090  ← process A
-Claude session 2 ──stdio──> agent-mesh :9090  ← process B  💥 conflict
+Claude session 1 ──stdio──> agent-mesh :9090 (full instance, first to start)
+Claude session 2 ──stdio──> agent-mesh (auto-proxy) ──POST /mcp──> :9090
 ```
 
-The second instance's HTTP background server fails silently (MCP stdio still works, but `:9090` is taken). Traces and approvals are split across two isolated instances.
-
-**Fix:** Use different configs with different ports, or run only one Claude session with agent-mesh.
-
-**Detection:**
-
-```bash
-lsof -i :9090
-```
+The first session starts normally. The second detects the running instance and proxies. Both sessions share the same policy engine, approval queue, trace store, and durable state.
 
 ---
 
@@ -283,19 +271,19 @@ Do you use Claude/Cursor?
 | Component | Who starts it | Who stops it | Persists across sessions |
 |-----------|--------------|-------------|------------------------|
 | **Ollama** | System daemon | System | Yes |
-| **agent-mesh** | Claude (config 1/2/5) or supervisor (config 3) | Dies with parent | No (unless daemon mode) |
+| **agent-mesh** | Claude (config 1/2/5) or supervisor (config 3) | Dies with parent | Durable state (SQLite) survives restarts |
 | **Upstream MCP servers** | agent-mesh (subprocesses) | Die with agent-mesh | No |
 | **Supervisor** | User (terminal) | User (Ctrl+C) | Yes (as long as terminal lives) |
 | **Claude Code** | User | User | No |
 
-## Future: daemon mode
+## Next: daemon mode
 
-The ideal architecture — a single persistent agent-mesh instance shared by everyone:
+The auto-proxy (v0.9.2) solves port conflicts — but the first instance is still ephemeral (tied to whoever started it). The next step is a proper daemon:
 
 ```
                     agent-mesh serve (daemon, persistent)
                     ┌─────────────────────────────────────┐
-Claude ──connect──> │                                     │──> tools
+Claude ──proxy───>  │                                     │──> tools
 Agent B ───HTTP───> │  registry · policy · approval       │
 Agent C ───HTTP───> │  trace · grants · rate limiting     │
                     └──────────────┬──────────────────────┘
@@ -303,12 +291,10 @@ Agent C ───HTTP───> │  trace · grants · rate limiting     │
                             supervisor (poll)
 ```
 
-Two new subcommands:
+- **`agent-mesh serve`** — run as a persistent daemon (HTTP + manages upstream MCP servers, survives client disconnects)
+- **Auto-proxy** handles the MCP side automatically — Claude's `--mcp` instance detects the daemon and proxies to it. No explicit `connect` subcommand needed.
 
-- **`agent-mesh serve`** — run as a persistent daemon (HTTP + manages upstream MCP servers)
-- **`agent-mesh connect --url http://localhost:9090`** — thin MCP stdio proxy for Claude Code
-
-This solves both Config 6 (port conflict) and Config 2's limitation (mesh dies with Claude). Claude uses `connect` instead of spawning the full agent-mesh. The supervisor manages the daemon lifecycle.
+This solves Config 2's limitation (mesh dies with Claude). The supervisor manages the daemon lifecycle. Durable state (v0.9.2) ensures approvals and grants survive daemon restarts.
 
 | Feature | Status |
 |---------|--------|
@@ -319,5 +305,6 @@ This solves both Config 6 (port conflict) and Config 2's limitation (mesh dies w
 | Config 5: Shared mesh | Done |
 | Config 8: Managed Agents (MCP Streamable HTTP) | Done (v0.9.0) |
 | `supervisor.enabled` (hide approval tools) | Done |
-| `agent-mesh serve` (daemon) | Not yet |
-| `agent-mesh connect` (MCP-to-HTTP proxy) | Not yet |
+| Durable state (SQLite) | Done (v0.9.2) |
+| Auto-proxy (stdio→HTTP on daemon detect) | Done (v0.9.2) |
+| `agent-mesh serve` (daemon) | Next |

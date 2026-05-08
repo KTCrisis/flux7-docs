@@ -80,7 +80,7 @@ The server is a single Go binary — zero dependencies, runs anywhere, deploys i
 
 ## Current state (May 2026)
 
-- **v0.4.1** — 7 MCP tools, Python SDK, hybrid search + LLM reranking, SSE daemon mode
+- **v0.4.1** — 7 MCP tools, Python SDK, hybrid search + LLM reranking, SSE daemon mode, auto-proxy (stdio detects running daemon)
 - **71% LoCoMo benchmark** — competitive with VC-backed solutions, without gaming the eval
 - **Production use** — backing [agent-mesh](https://github.com/KTCrisis/agent-mesh) orchestrator and [agent7](https://github.com/KTCrisis/agent7) management plane
 - **Next** — per-fact ACL + provenance (v0.5), lifecycle states, temporal bi-temporal queries (v1.0)
