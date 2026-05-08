@@ -140,10 +140,24 @@
 body, .md-typeset {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.72rem;
+  font-weight: 300;
   letter-spacing: 0.2px;
 }
 
 .md-typeset code,
 .md-typeset pre {
   font-family: 'JetBrains Mono', monospace;
+  font-weight: 300;
+}
+
+/* Pygments code comments — visible on dark bg */
+[data-md-color-scheme="flux7"] .highlight .c,
+[data-md-color-scheme="flux7"] .highlight .c1,
+[data-md-color-scheme="flux7"] .highlight .cm,
+[data-md-color-scheme="flux7"] .highlight .cs,
+[data-md-color-scheme="flux7"] .highlight .ch,
+[data-md-color-scheme="flux7"] .highlight .cp,
+[data-md-color-scheme="flux7"] .highlight .cpf {
+  color: #6a9a6a;
+  font-style: italic;
 }
