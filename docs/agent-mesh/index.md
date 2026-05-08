@@ -84,6 +84,22 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 - **Integrations** — [mem7](https://github.com/KTCrisis/mem7) (decision persistence + auto-approve), [agent7](https://github.com/KTCrisis/agent7) (dashboard + governance UI)
 - **Next** — operator auth, policy hot-reload
 
+## Claude ecosystem integration
+
+agent-mesh and mem7 cover every Claude surface with a native integration path.
+
+| Surface | agent-mesh | mem7 |
+|---|---|---|
+| **Claude Code / Cursor** | MCP stdio (auto-proxy if daemon running) | MCP stdio (auto-proxy if daemon running) |
+| **Claude Platform / Console** | MCP Streamable HTTP (`POST /mcp`) | Via agent-mesh (tools `memory.*`) |
+| **Managed Agents** | MCP connector URL → `POST /mcp` | Via agent-mesh (tools `memory.*`) |
+| **Claude API (raw)** | Python SDK + `POST /decide` | Python SDK (`pip install mem7`) |
+| **Agent SDK (custom)** | HTTP direct (`/tool/{name}`, `/decide`) | HTTP direct (`/rpc`) |
+
+**Key insight** : mem7 access from Platform, Console, and Managed Agents goes through agent-mesh policy — no direct exposure. This means governance is enforced at every layer, not just in local development.
+
+**Gaps (tracked)** : operator auth (Anthropic native token validation), MCP registry listing, `memory_context` system prompt helper for Platform.
+
 ## Get started
 
 ```bash
