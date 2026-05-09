@@ -1,0 +1,264 @@
+{% extends "main.html" %}
+
+{% block tabs %}
+  {{ super() }}
+{% endblock %}
+
+{% block htmltitle %}
+  <title>flux7 — Governance infrastructure for AI agents</title>
+{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ 'stylesheets/home.css' | url }}">
+{% endblock %}
+
+{% block content %}{% endblock %}
+{% block hero %}
+
+<div class="f7-home">
+
+  <!-- Hero -->
+  <section class="f7-hero">
+    <div class="f7-hero-tag">// governance infrastructure for AI agents</div>
+    <h1 class="f7-hero-title">
+      <span class="f7-t1">flux</span><span class="f7-t2">7</span>
+    </h1>
+    <p class="f7-hero-sub">
+      Four projects, one system. Policy enforcement, governed memory, automated evaluation, human oversight.
+    </p>
+    <div class="f7-hero-actions">
+      <a href="mesh7/getting-started/" class="f7-btn f7-btn-primary">Get started</a>
+      <a href="mesh7/" class="f7-btn f7-btn-ghost">Read the docs</a>
+    </div>
+  </section>
+
+  <!-- Problem -->
+  <section class="f7-section">
+    <div class="f7-section-header">
+      <span class="f7-section-num">01</span>
+      <h2 class="f7-section-title">The problem</h2>
+      <div class="f7-section-line"></div>
+    </div>
+    <div class="f7-prose">
+      <p>AI agents call tools. Tools have consequences. An agent with access to your filesystem, email, database, and cloud APIs is one hallucination away from an irreversible action.</p>
+      <p>The current answer is either <strong>trust everything</strong> (dangerous) or <strong>approve everything manually</strong> (doesn't scale). Between "allow all" and "human in the loop for every call," there's a gap — and no standard infrastructure to fill it.</p>
+      <p>flux7 fills that gap with a layered governance system that handles the routine automatically and escalates the ambiguous to humans.</p>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="f7-section">
+    <div class="f7-section-header">
+      <span class="f7-section-num">02</span>
+      <h2 class="f7-section-title">Architecture</h2>
+      <div class="f7-section-line"></div>
+    </div>
+    <div class="f7-arch">
+<pre class="f7-diagram">
+L0  flux7-mesh          Policy engine             allow / deny / escalate    &lt;1ms
+     │
+     │  pending approval
+     ▼
+L1  flux7-mesh          Memory lookup             3+ past approvals → allow  ~100ms
+     │
+     │  novel case
+     ▼
+L1+ flux7-supervisor    Rules + LLM evaluation    approve / deny / escalate  ~2-20s
+     │
+     │  uncertain
+     ▼
+L2  Human               Console UI / Claude Code  final decision             minutes
+     │
+     ▼
+    flux7-memory         Decisions as facts        remembered for next time
+</pre>
+      <p class="f7-arch-caption">Each layer reduces the load on the next. Most tool calls never reach a human.</p>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section class="f7-section">
+    <div class="f7-section-header">
+      <span class="f7-section-num">03</span>
+      <h2 class="f7-section-title">The system</h2>
+      <div class="f7-section-line"></div>
+    </div>
+    <div class="f7-grid">
+
+      <a href="mesh7/" class="f7-card">
+        <div class="f7-card-accent f7-accent-green"></div>
+        <div class="f7-card-header">
+          <span class="f7-card-name">flux7-mesh</span>
+          <span class="f7-card-badge">Go</span>
+        </div>
+        <div class="f7-card-role">L0 — Policy engine</div>
+        <p class="f7-card-desc">Enforces what agents can do. YAML policies, first-match-wins, glob patterns, approval queue, rate limiting, JSONL tracing. One binary, one config file. Fail-closed.</p>
+        <div class="f7-card-tags">
+          <span>MCP proxy</span><span>hot-reload</span><span>per-agent policies</span>
+        </div>
+      </a>
+
+      <a href="mem7/" class="f7-card">
+        <div class="f7-card-accent f7-accent-gold"></div>
+        <div class="f7-card-header">
+          <span class="f7-card-name">flux7-memory</span>
+          <span class="f7-card-badge">Go</span>
+        </div>
+        <div class="f7-card-role">Memory substrate</div>
+        <p class="f7-card-desc">Remembers what happened. Persistent, searchable, governed memory. Hybrid search (BM25 + dense cosine + LLM reranking). Decisions stored as queryable facts.</p>
+        <div class="f7-card-tags">
+          <span>decisions as facts</span><span>temporal</span><span>multi-agent</span>
+        </div>
+      </a>
+
+      <a href="sup7/" class="f7-card">
+        <div class="f7-card-accent f7-accent-pink"></div>
+        <div class="f7-card-header">
+          <span class="f7-card-name">flux7-supervisor</span>
+          <span class="f7-card-badge">Python</span>
+        </div>
+        <div class="f7-card-role">L1+ — Automated evaluation</div>
+        <p class="f7-card-desc">Evaluates what's ambiguous. Polls pending approvals, applies rules, evaluates via pluggable LLM (Ollama, Anthropic, Claude Code MCP), auto-resolves the routine.</p>
+        <div class="f7-card-tags">
+          <span>rule engine</span><span>3 LLM providers</span><span>confidence threshold</span>
+        </div>
+      </a>
+
+      <a href="console/" class="f7-card">
+        <div class="f7-card-accent f7-accent-cyan"></div>
+        <div class="f7-card-header">
+          <span class="f7-card-name">flux7-console</span>
+          <span class="f7-card-badge">Next.js</span>
+        </div>
+        <div class="f7-card-role">L2 — Human oversight</div>
+        <p class="f7-card-desc">Shows it all and lets humans intervene. Dashboard, approval UI, trace viewer, memory browser, OTEL waterfall. The management plane for the entire system.</p>
+        <div class="f7-card-tags">
+          <span>dashboard</span><span>approval UI</span><span>OTEL traces</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- Progressive adoption -->
+  <section class="f7-section">
+    <div class="f7-section-header">
+      <span class="f7-section-num">04</span>
+      <h2 class="f7-section-title">Progressive adoption</h2>
+      <div class="f7-section-line"></div>
+    </div>
+    <div class="f7-timeline">
+      <div class="f7-timeline-item">
+        <div class="f7-timeline-marker f7-accent-green"></div>
+        <div class="f7-timeline-content">
+          <div class="f7-timeline-when">Day 1</div>
+          <div class="f7-timeline-what">flux7-mesh</div>
+          <div class="f7-timeline-detail">Policies, tracing, approval queue. Five minutes from install to first governed tool call.</div>
+        </div>
+      </div>
+      <div class="f7-timeline-item">
+        <div class="f7-timeline-marker f7-accent-gold"></div>
+        <div class="f7-timeline-content">
+          <div class="f7-timeline-when">Day 30</div>
+          <div class="f7-timeline-what">+ flux7-memory</div>
+          <div class="f7-timeline-detail">Persistent memory, decision history, auto-approve patterns seen 3+ times.</div>
+        </div>
+      </div>
+      <div class="f7-timeline-item">
+        <div class="f7-timeline-marker f7-accent-pink"></div>
+        <div class="f7-timeline-content">
+          <div class="f7-timeline-when">Day 45</div>
+          <div class="f7-timeline-what">+ flux7-supervisor</div>
+          <div class="f7-timeline-detail">Automated L1 evaluation, reduced approval fatigue, LLM-driven judgment for novel cases.</div>
+        </div>
+      </div>
+      <div class="f7-timeline-item">
+        <div class="f7-timeline-marker f7-accent-cyan"></div>
+        <div class="f7-timeline-content">
+          <div class="f7-timeline-when">Day 60</div>
+          <div class="f7-timeline-what">+ flux7-console</div>
+          <div class="f7-timeline-detail">Dashboard, team approval UI, governance scoring, full audit trail.</div>
+        </div>
+      </div>
+    </div>
+    <p class="f7-timeline-note">Each step is independently valuable. No project requires the others to function.</p>
+  </section>
+
+  <!-- Positioning -->
+  <section class="f7-section">
+    <div class="f7-section-header">
+      <span class="f7-section-num">05</span>
+      <h2 class="f7-section-title">How it compares</h2>
+      <div class="f7-section-line"></div>
+    </div>
+    <div class="f7-compare">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Anthropic Console</th>
+            <th>LangSmith</th>
+            <th>Agent Gateways</th>
+            <th>flux7</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Scope</td>
+            <td>Anthropic agents</td>
+            <td>LangChain ecosystem</td>
+            <td>HTTP/API routing</td>
+            <td>Any agent, any SDK</td>
+          </tr>
+          <tr>
+            <td>Governance</td>
+            <td>Permission policies</td>
+            <td>None</td>
+            <td>Rate limiting</td>
+            <td>Policy + rules + LLM + human</td>
+          </tr>
+          <tr>
+            <td>Memory</td>
+            <td>None</td>
+            <td>Trace replay</td>
+            <td>None</td>
+            <td>Decisions as facts</td>
+          </tr>
+          <tr>
+            <td>Approvals</td>
+            <td>Inline in SDK</td>
+            <td>None</td>
+            <td>None</td>
+            <td>Web UI + API + supervisor</td>
+          </tr>
+          <tr>
+            <td>Self-hosted</td>
+            <td>No</td>
+            <td>Partial</td>
+            <td>Yes</td>
+            <td>Yes, fully</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Source -->
+  <section class="f7-section f7-section-last">
+    <div class="f7-section-header">
+      <span class="f7-section-num">06</span>
+      <h2 class="f7-section-title">Source</h2>
+      <div class="f7-section-line"></div>
+    </div>
+    <div class="f7-source-grid">
+      <a href="https://github.com/KTCrisis/flux7-mesh" class="f7-source-link">flux7-mesh<span>MIT</span></a>
+      <a href="https://github.com/KTCrisis/flux7-memory" class="f7-source-link">flux7-memory<span>MIT</span></a>
+      <a href="https://github.com/KTCrisis/flux7-supervisor" class="f7-source-link">flux7-supervisor<span>MIT</span></a>
+      <a href="https://github.com/KTCrisis/flux7-console" class="f7-source-link">flux7-console<span>MIT</span></a>
+    </div>
+  </section>
+
+</div>
+
+{% endblock %}
