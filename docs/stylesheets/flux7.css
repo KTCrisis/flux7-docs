@@ -190,7 +190,9 @@ body, .md-typeset {
   line-height: 1.5;
 }
 
-/* Pygments code comments — visible on dark bg */
+/* Pygments syntax highlighting — full palette for dark bg */
+
+/* Comments */
 [data-md-color-scheme="flux7"] .highlight .c,
 [data-md-color-scheme="flux7"] .highlight .c1,
 [data-md-color-scheme="flux7"] .highlight .cm,
@@ -200,4 +202,76 @@ body, .md-typeset {
 [data-md-color-scheme="flux7"] .highlight .cpf {
   color: #6a9a6a;
   font-style: italic;
+}
+
+/* Strings */
+[data-md-color-scheme="flux7"] .highlight .s,
+[data-md-color-scheme="flux7"] .highlight .s1,
+[data-md-color-scheme="flux7"] .highlight .s2,
+[data-md-color-scheme="flux7"] .highlight .sb,
+[data-md-color-scheme="flux7"] .highlight .sc,
+[data-md-color-scheme="flux7"] .highlight .sd,
+[data-md-color-scheme="flux7"] .highlight .sh,
+[data-md-color-scheme="flux7"] .highlight .si,
+[data-md-color-scheme="flux7"] .highlight .sx,
+[data-md-color-scheme="flux7"] .highlight .se {
+  color: var(--f7-gold);
+}
+
+/* Keys / tags (YAML keys, HTML tags) */
+[data-md-color-scheme="flux7"] .highlight .nt,
+[data-md-color-scheme="flux7"] .highlight .na {
+  color: var(--f7-green);
+}
+
+/* Keywords */
+[data-md-color-scheme="flux7"] .highlight .k,
+[data-md-color-scheme="flux7"] .highlight .kc,
+[data-md-color-scheme="flux7"] .highlight .kd,
+[data-md-color-scheme="flux7"] .highlight .kn,
+[data-md-color-scheme="flux7"] .highlight .kp,
+[data-md-color-scheme="flux7"] .highlight .kr,
+[data-md-color-scheme="flux7"] .highlight .kt {
+  color: var(--f7-pink);
+}
+
+/* Numbers */
+[data-md-color-scheme="flux7"] .highlight .m,
+[data-md-color-scheme="flux7"] .highlight .mi,
+[data-md-color-scheme="flux7"] .highlight .mf,
+[data-md-color-scheme="flux7"] .highlight .mh,
+[data-md-color-scheme="flux7"] .highlight .mo {
+  color: var(--f7-cyan);
+}
+
+/* Operators, punctuation */
+[data-md-color-scheme="flux7"] .highlight .o,
+[data-md-color-scheme="flux7"] .highlight .p {
+  color: var(--f7-text);
+}
+
+/* Variables, names */
+[data-md-color-scheme="flux7"] .highlight .nv,
+[data-md-color-scheme="flux7"] .highlight .nb,
+[data-md-color-scheme="flux7"] .highlight .n {
+  color: var(--f7-text);
+}
+
+/* Functions */
+[data-md-color-scheme="flux7"] .highlight .nf,
+[data-md-color-scheme="flux7"] .highlight .fm {
+  color: var(--f7-cyan);
+}
+
+/* Classes, types */
+[data-md-color-scheme="flux7"] .highlight .nc,
+[data-md-color-scheme="flux7"] .highlight .nn {
+  color: var(--f7-green);
+}
+
+/* Literals / scalar values (YAML unquoted values) */
+[data-md-color-scheme="flux7"] .highlight .l,
+[data-md-color-scheme="flux7"] .highlight .l-Scalar,
+[data-md-color-scheme="flux7"] .highlight .l-Scalar-Plain {
+  color: var(--f7-text);
 }
