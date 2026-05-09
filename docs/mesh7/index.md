@@ -80,7 +80,7 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 - **Durable state** — approvals and grants persisted in SQLite, survive restarts (`storage_path: state.db`)
 - **Auto-proxy** — in MCP mode, detects running daemon and becomes a thin stdio→HTTP proxy (zero config change, solves port conflicts)
 - **Daemon mode** — `mesh7 serve` runs as persistent daemon, MCP clients auto-proxy to it
-- **Python SDK** — `pip install flux7-mesh` — GovernedToolkit decorator for Claude API tool_use, direct HTTP client for grants/approvals/traces
+- **Python SDK** — `pip install flux7-mesh` v0.3.0 — GovernedToolkit with namespace-qualified tool names (aligns with MCP `server.tool` convention), direct HTTP client for grants/approvals/traces
 - **Integrations** — [flux7-memory](https://github.com/KTCrisis/flux7-memory) (decision persistence + auto-approve), [flux7-console](https://github.com/KTCrisis/flux7-console) (dashboard + governance UI)
 - **Next** — operator auth, condition engine v2 (AND/OR/nested)
 
