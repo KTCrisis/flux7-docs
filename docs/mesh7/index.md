@@ -70,10 +70,10 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 
 ## Current state (May 2026)
 
-- **v0.10.1** — 260 Go tests + 29 Python SDK tests, 15 packages, race clean
+- **v0.12.0** — 266 Go tests + 29 Python SDK tests, 15 packages, race clean
 - **Import** — MCP servers (stdio + SSE), OpenAPI specs, CLI binaries
 - **Export** — MCP stdio + MCP Streamable HTTP + HTTP REST
-- **Governance** — YAML policies, glob patterns, conditions, per-agent policy files, specificity sort
+- **Governance** — YAML policies, glob patterns, conditions, per-agent policy files, specificity sort, hot-reload
 - **Policy API** — `POST /decide` evaluates policy without executing (allow/deny/human_approval), enables any runtime to query governance
 - **Approval** — async queue, temporal grants, supervisor protocol, flux7-memory auto-approve
 - **Observability** — JSONL traces, OTEL export, session tracking, Prometheus metrics
@@ -82,7 +82,7 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 - **Daemon mode** — `mesh7 serve` runs as persistent daemon, MCP clients auto-proxy to it
 - **Python SDK** — `pip install flux7-mesh` — GovernedToolkit decorator for Claude API tool_use, direct HTTP client for grants/approvals/traces
 - **Integrations** — [flux7-memory](https://github.com/KTCrisis/flux7-memory) (decision persistence + auto-approve), [flux7-console](https://github.com/KTCrisis/flux7-console) (dashboard + governance UI)
-- **Next** — operator auth, policy hot-reload
+- **Next** — operator auth, condition engine v2 (AND/OR/nested)
 
 ## Claude ecosystem integration
 

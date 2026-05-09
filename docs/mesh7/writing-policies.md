@@ -100,6 +100,48 @@ rules:
 
 Files are loaded alphabetically after any inline `policies:`. Duplicate names produce an error.
 
+## Hot-reload
+
+Policies are reloaded automatically when files change — no daemon restart required. The daemon watches both `config.yaml` and the `policy_dir/` directory using filesystem notifications.
+
+**What gets reloaded:**
+
+- Inline `policies:` in `config.yaml`
+- All `*.yaml` files in `policy_dir/`
+- Rate limits defined in policies
+
+**What does NOT get reloaded** (requires restart):
+
+- MCP servers, CLI tools, OpenAPI specs
+- Port, storage path, supervisor config
+
+**Safety guarantees:**
+
+- Changes are debounced (200ms) to handle editors that write multiple events per save
+- New policies are fully parsed and validated before swapping — invalid YAML is logged and rejected
+- The mesh never crashes on a bad reload; current policies stay active
+
+**Example: add a policy at runtime**
+
+```bash
+# Takes effect in <1s
+cat > policies/temp-agent.yaml << 'EOF'
+name: temp-agent
+agent: "temp"
+rules:
+  - tools: ["weather.*"]
+    action: allow
+EOF
+
+# Verify
+curl -s -X POST localhost:9090/decide \
+  -d '{"agent":"temp","tool":"weather.weather_forecast"}' | jq .action
+# → "allow"
+
+# Remove — reverts immediately
+rm policies/temp-agent.yaml
+```
+
 ## Policy specificity
 
 When multiple policies match an agent, more specific agent globs are evaluated first:
