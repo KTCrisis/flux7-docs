@@ -32,7 +32,7 @@ Go binary. Sidecar proxy between agents and their tools.
 
 **Transports:** MCP stdio (Claude Code, Cursor) · MCP Streamable HTTP at `POST /mcp` (Anthropic Managed Agents, remote clients) · HTTP REST (`POST /tool/{name}`)
 
-**Current state:** v0.9.0, stable, docs polished.
+**Current state:** v0.12.0, stable. Policy hot-reload, Python SDK, `/decide` endpoint, daemon mode.
 
 ### flux7-memory (memory substrate)
 
@@ -47,23 +47,43 @@ Go binary. MCP server for persistent, searchable, governed memory.
 | Temporal range queries | `since` / `until` filters on RFC3339 timestamps |
 | Python SDK | `pip install flux7-memory`, provider-agnostic, wraps all tools via HTTP |
 
-**Current state:** v0.4.1, 71% LoCoMo benchmark, SDK + SSE transport + daemon mode shipped.
+**Current state:** v0.5.0, 71% LoCoMo benchmark, SDK + SSE transport + daemon mode shipped.
 
-### flux7-console (management plane / product)
+### flux7-supervisor (L1 supervisor)
 
-Next.js 16 + FastAPI + PostgreSQL. Dashboard, governance engine, supervisor UI.
+Python agent. Standalone evaluation process between policy engine and human.
 
 | What it does | How |
 |---|---|
+| Poll pending approvals | Consumes flux7-mesh SDK (`pending()`, `approval_detail()`, `resolve()`) |
+| Rule-based evaluation | YAML conditions (tool, params, injection_risk), first-match-wins |
+| LLM fallback | Pluggable providers: Ollama, Anthropic, Claude Code MCP callback |
+| Decision persistence | Writes to flux7-memory via SDK |
+
+**Current state:** v0.1.0, 49 tests, 3 LLM providers. Extracted from flux7-console (May 2026).
+
+### flux7-console (management plane / product)
+
+Next.js 16 + TanStack Query. Dashboard and human governance UI (L2).
+
+| What it does | How |
+|---|---|
+| Trace viewer | Reads flux7-mesh `/traces`, `/otel-traces`, aggregates stats |
+| Session browser | Session list and drill-down via flux7-mesh `/sessions` |
+| Memory viewer | Reads flux7-memory, displays stored facts and decisions |
+| Human approval UI | Shows pending approvals from flux7-mesh, human clicks approve/reject |
+| OTEL waterfall | Visual trace timeline from flux7-mesh OTEL export |
+
+Planned (scaffolded, not yet implemented) :
+
+| What it will do | How |
+|---|---|
 | Agent catalog | Registry of declared agents with metadata, scoring, lifecycle |
 | Governance engine | Rules, scoring (3-axis), severity escalation, validation verdicts |
-| Trace viewer | Ingests flux7-mesh JSONL, aggregates stats, detects ghosts/orphans |
-| Memory viewer | Reads flux7-memory via SDK, displays stored facts and decisions |
-| Human approval UI | Shows pending approvals from flux7-mesh, human clicks approve/reject |
 | Dependency graph | Declared (YAML) + inferred (traces), impact analysis |
 | Diff engine | Breaking change detection on agent config changes |
 
-**Current state:** Early stage, dashboard + traces + sessions + memory debug view working. No version tag yet.
+**Current state:** Early stage, dashboard + traces + sessions + approvals + memory viewer working. No version tag yet.
 
 ---
 
@@ -195,8 +215,8 @@ Level 1: Built-in supervisor (in flux7-mesh, Go)
          Checks past decisions: 3+ approvals, 0 rejections → auto-approve.
          Escalates unknowns to Level 1+.
 
-Level 1+: External supervisor (in flux7-console, Python)
-          Rule engine + Ollama LLM. ~2s rules, ~20s LLM. Bounded judgment.
+Level 1+: External supervisor (flux7-supervisor / sup7)
+          Rule engine + pluggable LLM (Ollama/Anthropic/Claude Code). ~2s rules, ~20s LLM.
           Handles novel cases, complex conditions, injection detection.
           Escalates unknowns to Level 2.
 
@@ -208,9 +228,11 @@ Level 2: Human
 
 > **Two supervisor layers.** Level 1 is built into flux7-mesh — a `MemoryReader`
 > that queries flux7-memory before the approval queue. It's a pre-filter, not a full
-> resolver. Level 1+ is the external Python supervisor in flux7-console that implements
-> the [supervisor protocol](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/supervisor-protocol.md)
-> — it polls pending approvals and resolves them with rule evaluation + LLM.
+> resolver. Level 1+ is [flux7-supervisor (sup7)](https://github.com/KTCrisis/flux7-supervisor),
+> a standalone Python agent that implements the
+> [supervisor protocol](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/supervisor-protocol.md)
+> — it polls pending approvals and resolves them with rule evaluation + pluggable LLM
+> (Ollama, Anthropic, or Claude Code MCP callback).
 > The `supervisor/` package inside flux7-mesh handles content redaction and
 > injection detection on the protocol's outbound payloads (`RedactParams`,
 > `DetectInjection`) — a separate concern from both layers.
@@ -274,14 +296,14 @@ No flux7-console needed. flux7-mesh + flux7-memory provide full governance + mem
 shared server
 ├── flux7-mesh (central, HTTP mode)
 ├── mem7 serve (HTTP, shared memory)
-└── flux7-console (dashboard + supervisor)
-    └── PostgreSQL
+├── sup7 (L1 supervisor, polls mesh approvals)
+└── flux7-console (dashboard + approval UI)
 
 developer laptops
 └── agents connect to shared flux7-mesh
 ```
 
-flux7-console adds value: team visibility, approval UI for shared agents, governance scoring, audit trail.
+flux7-console adds value: team visibility, approval UI for shared agents, audit trail. sup7 handles automated evaluation.
 
 ### Enterprise (future)
 
@@ -295,6 +317,7 @@ flux7-console SaaS (hosted)
 customer infra
 ├── flux7-mesh (sidecar per agent)
 ├── flux7-memory (per-team or central)
+├── sup7 (L1 supervisor)
 └── agents (any framework)
 ```
 

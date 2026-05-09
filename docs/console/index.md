@@ -16,17 +16,16 @@ These are management plane problems. flux7-mesh is the data plane (runtime enfor
 A web-based governance platform for AI agents. Dashboard, approval UI, audit trail, governance engine.
 
 ```
-flux7-console (management plane)
-├── Agent Catalog     — registry, metadata, lifecycle, scoring
-├── Trace Viewer      — ingests flux7-mesh JSONL, aggregates stats
-├── Memory Viewer     — reads flux7-memory via SDK, displays decisions + facts
+flux7-console (management plane — L2 visibility + human control)
+├── Trace Viewer      — reads flux7-mesh traces, aggregates stats
+├── Session Browser   — session list and drill-down
+├── Memory Viewer     — reads flux7-memory, displays decisions + facts
 ├── Approval UI       — shows pending approvals, human clicks approve/reject
-├── Governance Engine — rules, 3-axis scoring, severity, validation verdicts
-├── Dependency Graph  — declared (YAML) + inferred (traces), impact analysis
-└── Diff Engine       — breaking change detection on agent config changes
+├── OTEL Waterfall    — visual trace timeline from OTEL export
+└── (planned) Governance Engine, Agent Catalog, Dependency Graph
 ```
 
-**Stack :** Next.js 16 + FastAPI + PostgreSQL. Auth-agnostic (Supabase SaaS or API key on-prem).
+**Stack :** Next.js 16 + TanStack Query. Backend API and PostgreSQL are scaffolded for future phases. Currently a direct HTTP client of flux7-mesh and flux7-memory.
 
 ## How it fits
 
@@ -53,6 +52,8 @@ flux7-console (management plane)
 
 flux7-console is a thin client of flux7-mesh and flux7-memory. If flux7-console goes down, everything keeps working — agents are still governed, decisions are still stored. flux7-console adds visibility, not runtime dependency.
 
+Supervisor evaluation (L1) lives in [flux7-supervisor (sup7)](https://github.com/KTCrisis/flux7-supervisor) — a standalone agent that polls flux7-mesh approvals and resolves them via rules + LLM. flux7-console is the human layer (L2), not the judgment layer.
+
 **Agent-agnostic.** flux7-console doesn't know or care which SDK produced the tool call. Claude Code, Managed Agents, LangChain, cron scripts — if it goes through flux7-mesh, flux7-console sees it.
 
 ## What it enables
@@ -77,10 +78,15 @@ Anthropic Console is great for Managed Agents visibility. flux7-console compleme
 
 ## Current state (May 2026)
 
-- **Dashboard** — flux7-mesh trace viewer, session browser, memory debug view
-- **Supervisor** — Python service with rule engine + Ollama LLM evaluation
-- **Working** — trace ingestion, session aggregation, pending approval polling
-- **Next** — governance engine (scoring, lifecycle), approval UI, flux7-memory SDK integration, dependency graph
+- **Dashboard** — Next.js 16 with mesh-oriented routes :
+    - `/mesh` — health, connected MCP servers, tool inventory
+    - `/mesh/traces` — trace browser
+    - `/mesh/sessions` — session list and drill-down
+    - `/mesh/approvals` — pending approvals, approve/deny
+    - `/mesh/otel` — OTEL waterfall view
+    - `/mesh/memory` — flux7-memory browser (search, filter by agent)
+- **Supervisor** — migrated to [flux7-supervisor (sup7)](https://github.com/KTCrisis/flux7-supervisor) as a standalone L1 agent (rules + pluggable LLM: Ollama, Anthropic, Claude Code MCP callback)
+- **Next** — governance engine (scoring, lifecycle), flux7-memory SDK integration, dependency graph
 
 ## Progressive adoption
 
