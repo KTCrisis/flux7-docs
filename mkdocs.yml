@@ -35,6 +35,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Getting Started: getting-started.md
   - flux7-mesh:
     - Overview: mesh7/index.md
     - Getting Started: mesh7/getting-started.md
