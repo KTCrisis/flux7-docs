@@ -47,6 +47,9 @@ nav:
     - Observability: mesh7/otel.md
   - flux7-memory:
     - Overview: mem7/index.md
+    - Configuration: mem7/configuration.md
+    - API Reference: mem7/api-reference.md
+    - Python SDK: mem7/python-sdk.md
   - flux7-supervisor:
     - Overview: sup7/index.md
     - Configuration: sup7/configuration.md

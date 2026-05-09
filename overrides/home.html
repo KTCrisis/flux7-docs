@@ -77,10 +77,92 @@ L2  Human               Console UI / Claude Code  final decision             min
     </div>
   </section>
 
-  <!-- Projects -->
+  <!-- Quickstart -->
   <section class="f7-section">
     <div class="f7-section-header">
       <span class="f7-section-num">03</span>
+      <h2 class="f7-section-title">Quickstart</h2>
+      <div class="f7-section-line"></div>
+    </div>
+    <p class="f7-qs-intro">Each project works on its own. Add layers as you need them.</p>
+
+    <div class="f7-qs-grid">
+
+      <div class="f7-qs-block">
+        <div class="f7-qs-header">
+          <span class="f7-qs-dot f7-accent-green"></span>
+          <span class="f7-qs-label">flux7-mesh alone</span>
+          <span class="f7-qs-when">Day 1 — policy enforcement</span>
+        </div>
+<pre class="f7-qs-code"><span class="f7-qs-comment"># Install</span>
+go install github.com/KTCrisis/flux7-mesh/cmd/mesh7@latest
+
+<span class="f7-qs-comment"># Write a policy</span>
+cat &gt; config.yaml &lt;&lt;'EOF'
+mcp_servers:
+  - name: filesystem
+    transport: stdio
+    command: npx
+    args: ["-y", "@anthropic/mcp-filesystem"]
+
+policies:
+  - tools: ["filesystem.read_file"]
+    action: allow
+  - tools: ["filesystem.write_file"]
+    action: human_approval
+  - tools: ["*"]
+    action: deny
+EOF
+
+<span class="f7-qs-comment"># Run — agents connect via MCP, policies enforced</span>
+mesh7 --config config.yaml</pre>
+      </div>
+
+      <div class="f7-qs-block">
+        <div class="f7-qs-header">
+          <span class="f7-qs-dot f7-accent-gold"></span>
+          <span class="f7-qs-label">+ flux7-memory</span>
+          <span class="f7-qs-when">Day 30 — auto-approve from history</span>
+        </div>
+<pre class="f7-qs-code"><span class="f7-qs-comment"># Start the memory daemon</span>
+go install github.com/KTCrisis/flux7-memory/cmd/mem7@latest
+mem7 serve --listen :9070
+
+<span class="f7-qs-comment"># Add memory to mesh config</span>
+mcp_servers:
+  - name: memory
+    transport: stdio
+    command: mem7
+
+<span class="f7-qs-comment"># mesh auto-checks: "seen 3+ approvals?" → allow</span>
+<span class="f7-qs-comment"># decisions stored as facts for next time</span></pre>
+      </div>
+
+      <div class="f7-qs-block">
+        <div class="f7-qs-header">
+          <span class="f7-qs-dot f7-accent-pink"></span>
+          <span class="f7-qs-label">+ supervisor + console</span>
+          <span class="f7-qs-when">Day 45 — full governance stack</span>
+        </div>
+<pre class="f7-qs-code"><span class="f7-qs-comment"># Supervisor polls pending approvals, evaluates via LLM</span>
+pip install flux7-supervisor
+sup7 --mesh http://localhost:8080 --provider ollama
+
+<span class="f7-qs-comment"># Console gives humans the dashboard</span>
+docker run -p 3000:3000 ktcrisis/flux7-console
+
+<span class="f7-qs-comment"># The full chain:</span>
+<span class="f7-qs-comment"># L0 mesh → L1 memory → L1+ supervisor → L2 console</span>
+<span class="f7-qs-comment"># Most calls never reach a human.</span></pre>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section class="f7-section">
+    <div class="f7-section-header">
+      <span class="f7-section-num">04</span>
       <h2 class="f7-section-title">The system</h2>
       <div class="f7-section-line"></div>
     </div>
@@ -144,7 +226,7 @@ L2  Human               Console UI / Claude Code  final decision             min
   <!-- Progressive adoption -->
   <section class="f7-section">
     <div class="f7-section-header">
-      <span class="f7-section-num">04</span>
+      <span class="f7-section-num">05</span>
       <h2 class="f7-section-title">Progressive adoption</h2>
       <div class="f7-section-line"></div>
     </div>
@@ -188,7 +270,7 @@ L2  Human               Console UI / Claude Code  final decision             min
   <!-- Positioning -->
   <section class="f7-section">
     <div class="f7-section-header">
-      <span class="f7-section-num">05</span>
+      <span class="f7-section-num">06</span>
       <h2 class="f7-section-title">How it compares</h2>
       <div class="f7-section-line"></div>
     </div>
@@ -247,7 +329,7 @@ L2  Human               Console UI / Claude Code  final decision             min
   <!-- Source -->
   <section class="f7-section f7-section-last">
     <div class="f7-section-header">
-      <span class="f7-section-num">06</span>
+      <span class="f7-section-num">07</span>
       <h2 class="f7-section-title">Source</h2>
       <div class="f7-section-line"></div>
     </div>

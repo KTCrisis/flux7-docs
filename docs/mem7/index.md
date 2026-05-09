@@ -1,48 +1,52 @@
-# flux7-memory — Governed Memory for AI Agents
+# flux7-memory
+
+Persistent, searchable, governed memory for AI agents. Single Go binary, zero dependencies.
 
 ## The problem
 
-You're building agents. They work for one session, then forget everything. You add memory — a vector store, maybe Mem0 or Zep — and single-agent workflows improve. Then you scale to multiple agents, and new problems appear that no memory system addresses :
+Agents work for one session, then forget everything. You add memory — a vector store, maybe Mem0 or Zep — and single-agent workflows improve. Then you scale to multiple agents, and new problems appear :
 
-- **Agent A approved something last week. Agent B doesn't know.** Human decisions aren't stored as queryable facts. They're lost in chat logs.
-- **Three agents write to the same memory. Who wrote what ? Who can read what ?** No existing system tracks provenance or enforces access control at the fact level.
-- **Your agent confidently uses a memory from 6 months ago.** No staleness signal, no lifecycle management. Memory rots silently.
-- **A client asks for an audit trail of what the agent decided.** You have logs somewhere. They're not queryable. Good luck.
+- **Agent A approved something last week. Agent B doesn't know.** Human decisions aren't stored as queryable facts.
+- **Three agents write to the same memory. Who wrote what ?** No provenance, no access control at the fact level.
+- **Your agent uses a memory from 6 months ago.** No staleness signal, no lifecycle management.
+- **A client asks for an audit trail.** You have logs somewhere. They're not queryable.
 
-These aren't retrieval problems. They're governance problems. And they've been solved before — in databases, event platforms, schema registries. They just haven't been brought to AI memory yet.
+These aren't retrieval problems. They're governance problems.
 
-## What flux7-memory is
+## Quick start
 
-Persistent, searchable, governed memory for your agents. `pip install flux7-memory` and go :
+```bash
+go install github.com/KTCrisis/flux7-memory/cmd/mem7@latest
+
+# Daemon mode (shared across clients)
+MEM7_TOKEN=mem7_secret123 mem7 serve --listen :9070
+
+# Or stdio mode (MCP client spawns the binary)
+mem7
+```
 
 ```python
 from mem7 import Mem7
 
-m = Mem7("http://localhost:9070", token="my-token")
+m = Mem7("http://localhost:9070", token="mem7_secret123")
+m.store("deploy.decision", "approved by ops lead",
+        tags=["decision"], agent="supervisor")
 
-# Any agent stores facts
-m.store("deploy.decision", "approved by ops lead, prod deploy greenlit",
-        tags=["decision", "deploy"], agent="supervisor")
-
-# Any agent searches
-for mem in m.context("deployment approval status", limit=5):
+for mem in m.context("deployment approval", limit=5):
     print(f"{mem.key}: {mem.value}")
 ```
 
-The server is a single Go binary — zero dependencies, runs anywhere, deploys in one command. The SDK talks to it over HTTP, so your agents can be in Python, TypeScript, or anything that speaks JSON-RPC.
+## Features
 
-**Under the hood :**
+- **7 MCP tools** — `store`, `recall`, `search`, `context`, `get`, `list`, `forget`
+- **Hybrid search** — BM25 + dense cosine + LLM reranking (71% LoCoMo benchmark)
+- **Markdown source of truth** — SQLite index is rebuildable via `mem7 rescan`
+- **Three transports** — MCP stdio, HTTP JSON-RPC, MCP SSE (daemon mode)
+- **Auto-proxy** — stdio mode detects a running daemon and proxies transparently
+- **Provider-agnostic** — works with Ollama, OpenAI, or any compatible embedding API
+- **Python SDK** — `pip install flux7-memory` — structured `Memory` objects, not raw text
 
-- Hybrid search : BM25 + dense cosine + LLM reranking — 71% on the LoCoMo benchmark
-- Markdown source of truth + SQLite index, rebuildable with `mem7 rescan`
-- Natural language queries — agents don't need to learn FTS5 syntax
-- Neighbor expansion — automatically fetches surrounding context for sequential entries
-- Tag-based filtering, agent tracking, TTL, temporal range queries
-- Three transports : MCP stdio (Claude Code, Cursor) + HTTP JSON-RPC (SDKs) + MCP SSE (daemon mode for flux7-mesh)
-- Provider-agnostic : works with Ollama, OpenAI, or any compatible embedding API. No vendor lock-in
-- Python SDK with structured responses (`Memory` objects, not raw text to parse)
-
-## How it fits in a multi-agent system
+## How it fits
 
 ```
 ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
@@ -54,48 +58,33 @@ The server is a single Go binary — zero dependencies, runs anywhere, deploys i
        │ tags=["research"] │ tags=["exec"]    │ tags=["decision"]
        └──────────┬────────┴──────────────────┘
                   │
-            ┌─────▼─────┐
-            │ flux7-memory │  ← one binary, shared memory
-            │           │     with agent-scoped tags
-            └───────────┘
+           ┌──────▼──────┐
+           │ flux7-memory │  ← one binary, shared memory
+           │              │    with agent-scoped tags
+           └──────────────┘
 ```
 
-**Agent memory** — each agent reads and writes its own observations, scoped by tags.
+**Agent memory** — each agent reads and writes observations, scoped by tags.
 
-**Supervisor memory** — cross-agent view. Policies, human approvals, rejections stored as first-class facts. The supervisor checks "has this been approved ?" before acting, not "let me search the chat history."
+**Supervisor memory** — cross-agent view. Policies and human approvals stored as first-class facts.
 
 **Audit** — every fact carries who wrote it, when, with which tags. Queryable.
 
-## What makes it different
+## Comparison
 
 | | Mem0 / Zep / Letta | flux7-memory |
 |---|---|---|
-| **Scope** | Single agent, single user | Multi-agent, multi-role |
-| **Human decisions** | Not modeled | First-class facts (tags, agent, timestamps) |
-| **Access control** | None or coarse | Tag/agent-scoped, governed by [flux7-mesh](../mesh7/index.md) policy on `memory.*` tools |
+| **Scope** | Single agent | Multi-agent, multi-role |
+| **Human decisions** | Not modeled | First-class facts |
 | **Provenance** | None | Agent + timestamp on every fact |
-| **Vendor lock-in** | Tied to specific LLM providers | Go binary + HTTP SDK, works with anything |
+| **Vendor lock-in** | Tied to specific providers | Go binary + HTTP, works with anything |
 | **Storage** | Opaque | Markdown files you can read and edit |
-| **Deployment** | SaaS or heavy dependencies | Single binary, zero CGO, runs anywhere |
+| **Deployment** | SaaS or heavy deps | Single binary, zero CGO |
 
 ## Current state (May 2026)
 
-- **v0.4.1** — 7 MCP tools, Python SDK, hybrid search + LLM reranking, SSE daemon mode, auto-proxy (stdio detects running daemon)
-- **71% LoCoMo benchmark** — competitive with VC-backed solutions, without gaming the eval
-- **Production use** — backing [flux7-mesh](https://github.com/KTCrisis/flux7-mesh) orchestrator and [flux7-console](https://github.com/KTCrisis/flux7-console) management plane
-- **Next** — provenance enrichment (v0.5), search quality 75%+ LoCoMo (v0.6), temporal bi-temporal queries (v1.0). Access control handled by [flux7-mesh](../mesh7/index.md) policy on `memory.*` tools — no per-fact ACL in flux7-memory
+**v0.5.0** — 7 MCP tools, Python SDK, hybrid search + LLM reranking, SSE daemon mode, auto-proxy (stdio detects running daemon).
 
-## Get started
-
-```bash
-# Install the server
-go install github.com/KTCrisis/flux7-memory/cmd/mem7@latest
-
-# Run with hybrid search (optional, needs Ollama)
-MEM7_EMBED_URL=http://localhost:11434 mem7 serve --listen :9070
-
-# Or pure BM25, no dependencies
-mem7 serve --listen :9070
-```
+71% LoCoMo benchmark — competitive with VC-backed solutions without gaming the eval.
 
 MIT licensed. [github.com/KTCrisis/flux7-memory](https://github.com/KTCrisis/flux7-memory)
