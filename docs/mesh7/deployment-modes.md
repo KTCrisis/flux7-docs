@@ -13,6 +13,8 @@ Agent-mesh supports different configurations depending on who connects and how.
 | **5** | Claude + external agent | MCP stdio + HTTP | Claude spawns it | Optional | Works |
 | **6** | Claude + supervisor (active spawn) | MCP stdio + HTTP | Both try to spawn | Active | Works (auto-proxy) |
 | **7** | 2 Claude sessions | MCP stdio × 2 | Both spawn | - | Works (auto-proxy) |
+| **8** | Managed Agents (cloud) | MCP Streamable HTTP | Manual / deploy | Optional | Works |
+| **9** | Agent SDK + hooks | HTTP `/decide` | Manual (`mesh7 serve`) | None | Works |
 
 Configs 1–5 work natively. Configs 6–7 are solved by auto-proxy (v0.9.2) — the second instance detects the running daemon and becomes a thin stdio→HTTP proxy instead of crashing.
 
@@ -220,6 +222,36 @@ flux7-mesh extracts the agent ID from `Authorization: Bearer agent:<id>` and app
 
 **Permission policies:** Set `always_allow` on the Managed Agent side — let flux7-mesh handle governance. Double-layer approval (Managed Agents `always_ask` + flux7-mesh `human_approval`) works but adds friction.
 
+## Config 9: Anthropic Agent SDK + hooks
+
+Agent SDK agents governed by mesh7 via `MeshHooks`. No MCP — hooks call `/decide` directly.
+
+```
+Agent SDK agent
+├── PreToolUse hook ── POST /decide ──> flux7-mesh :9090
+│                                          │
+│                                     policies, traces, grants
+│                                          │
+└── tool execution (local) ───────────────┘
+```
+
+**Setup:**
+
+```python
+from mesh7 import MeshHooks
+
+hooks = MeshHooks(agent="my-agent")
+agent = Agent(
+    model="claude-sonnet-4-6",
+    tools=[...],
+    options=ClaudeAgentOptions(hooks=hooks.agent_sdk_hooks()),
+)
+```
+
+Same YAML policies as every other mode. `human_approval` maps to Agent SDK's `"ask"` (terminal prompt). For the full approval workflow (webhooks, CLI, auto-approve), use Config 1 or 8 instead.
+
+Requires `pip install flux7-mesh` v0.4.0+. See `examples/agent-sdk-hooks/`.
+
 ---
 
 ## Configs solved by auto-proxy (v0.9.2)
@@ -263,7 +295,9 @@ Do you use Claude/Cursor?
        │
        ├─ Just HTTP proxy ─────────────────────→ Config 4 (standalone)
        │
-       └─ Anthropic Managed Agents (cloud) ─→ Config 8 (MCP Streamable HTTP)
+       ├─ Anthropic Managed Agents (cloud) ─→ Config 8 (MCP Streamable HTTP)
+       │
+       └─ Anthropic Agent SDK (hooks) ──────→ Config 9 (POST /decide)
 ```
 
 ## Component lifecycle
@@ -312,6 +346,7 @@ This solves Config 2's limitation (mesh dies with Claude). The supervisor manage
 | Config 4: Standalone HTTP | Done |
 | Config 5: Shared mesh | Done |
 | Config 8: Managed Agents (MCP Streamable HTTP) | Done (v0.9.0) |
+| Config 9: Agent SDK hooks (POST /decide) | Done (SDK v0.4.0) |
 | `supervisor.enabled` (hide approval tools) | Done |
 | Durable state (SQLite) | Done (v0.9.2) |
 | Auto-proxy (stdio→HTTP on daemon detect) | Done (v0.9.2) |
