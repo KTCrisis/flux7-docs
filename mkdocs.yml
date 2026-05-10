@@ -40,6 +40,7 @@ nav:
     - Overview: mesh7/index.md
     - Getting Started: mesh7/getting-started.md
     - Writing Policies: mesh7/writing-policies.md
+    - JWT Authentication: mesh7/jwt-auth.md
     - Approval Flow: mesh7/approval-flow.md
     - CLI Tools: mesh7/cli-tools.md
     - Memory Integration: mesh7/mem7-auto-approve.md

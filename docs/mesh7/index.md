@@ -70,19 +70,20 @@ Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidec
 
 ## Current state (May 2026)
 
-- **v0.12.0** — 266 Go tests + 29 Python SDK tests, 15 packages, race clean
+- **v0.13.0** — 281 Go tests + 49 Python SDK tests, 16 packages, race clean
 - **Import** — MCP servers (stdio + SSE), OpenAPI specs, CLI binaries
 - **Export** — MCP stdio + MCP Streamable HTTP + HTTP REST
 - **Governance** — YAML policies, glob patterns, conditions, per-agent policy files, specificity sort, hot-reload
-- **Policy API** — `POST /decide` evaluates policy without executing (allow/deny/human_approval), enables any runtime to query governance
+- **Policy API** — `POST /decide` evaluates policy without executing, `GET /policies` exposes active rules
+- **Auth** — [JWT validation](jwt-auth.md) against external IdPs (Cloudflare Access, Auth0, Keycloak), JWKS cached with background refresh. Legacy `Bearer agent:<name>` still works
 - **Approval** — async queue, temporal grants, supervisor protocol, flux7-memory auto-approve
 - **Observability** — JSONL traces, OTEL export, session tracking, Prometheus metrics
 - **Durable state** — approvals and grants persisted in SQLite, survive restarts (`storage_path: state.db`)
 - **Auto-proxy** — in MCP mode, detects running daemon and becomes a thin stdio→HTTP proxy (zero config change, solves port conflicts)
 - **Daemon mode** — `mesh7 serve` runs as persistent daemon, MCP clients auto-proxy to it
-- **Python SDK** — `pip install flux7-mesh` v0.3.0 — GovernedToolkit with namespace-qualified tool names (aligns with MCP `server.tool` convention), direct HTTP client for grants/approvals/traces
+- **Python SDK** — `pip install flux7-mesh` v0.4.0 — GovernedToolkit (namespace-qualified tool names), MeshHooks (Anthropic Agent SDK integration), direct HTTP client
 - **Integrations** — [flux7-memory](https://github.com/KTCrisis/flux7-memory) (decision persistence + auto-approve), [flux7-console](https://github.com/KTCrisis/flux7-console) (dashboard + governance UI)
-- **Next** — operator auth, condition engine v2 (AND/OR/nested)
+- **Next** — claim-based policy conditions, Claude Connectors Directory listing
 
 ## Claude ecosystem integration
 
@@ -98,7 +99,7 @@ flux7-mesh and flux7-memory cover every Claude surface with a native integration
 
 **Key insight** : flux7-memory access from Platform, Console, and Managed Agents goes through flux7-mesh policy — no direct exposure. This means governance is enforced at every layer, not just in local development.
 
-**Gaps (tracked)** : operator auth (Anthropic native token validation), MCP registry listing, `memory_context` system prompt helper for Platform.
+**Gaps (tracked)** : MCP registry listing, `memory_context` system prompt helper for Platform, claim-based policy conditions.
 
 ## Get started
 
