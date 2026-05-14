@@ -114,4 +114,4 @@ claude mcp add mesh7 -- mesh7 --mcp --config config.yaml
 mesh7 --config config.yaml
 ```
 
-MIT licensed. [github.com/KTCrisis/flux7-mesh](https://github.com/KTCrisis/flux7-mesh)
+Apache 2.0 licensed. [github.com/KTCrisis/flux7-mesh](https://github.com/KTCrisis/flux7-mesh)

@@ -85,4 +85,4 @@ The Claude Code provider is the most interesting : instead of calling an API, th
 - **SDKs** — consumes `mesh7` (AgentMesh) and `mem7` (Mem7) Python SDKs
 - **Extracted** from flux7-console backend, now standalone
 
-MIT licensed. [github.com/KTCrisis/flux7-supervisor](https://github.com/KTCrisis/flux7-supervisor)
+Apache 2.0 licensed. [github.com/KTCrisis/flux7-supervisor](https://github.com/KTCrisis/flux7-supervisor)

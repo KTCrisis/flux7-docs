@@ -9,7 +9,7 @@
 ## Design principles
 
 1. **Each project works alone.** flux7-mesh without flux7-memory still enforces policies. flux7-memory without flux7-mesh is a standalone memory server. flux7-console without the others is a governance dashboard. Integration is opt-in, not required.
-2. **Open-source runtime, product on top.** flux7-mesh and flux7-memory are MIT/Apache — free, adoptable, no lock-in. flux7-console is the management plane that makes them manageable at scale. That's where the business model sits.
+2. **Open-source runtime, product on top.** flux7-mesh and flux7-memory are Apache 2.0 — free, adoptable, no lock-in. flux7-console is the management plane that makes them manageable at scale. That's where the business model sits.
 3. **Decisions are facts.** When a human approves an action or a supervisor auto-resolves a request, that decision is stored as a queryable fact in flux7-memory. It doesn't vanish into a log file.
 4. **Write path matters more than read path.** The system becomes valuable when events automatically flow between components — not when a human manually checks dashboards.
 

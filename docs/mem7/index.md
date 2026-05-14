@@ -87,4 +87,4 @@ for mem in m.context("deployment approval", limit=5):
 
 71% LoCoMo benchmark — competitive with VC-backed solutions without gaming the eval.
 
-MIT licensed. [github.com/KTCrisis/flux7-memory](https://github.com/KTCrisis/flux7-memory)
+Apache 2.0 licensed. [github.com/KTCrisis/flux7-memory](https://github.com/KTCrisis/flux7-memory)
