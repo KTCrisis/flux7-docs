@@ -42,6 +42,11 @@ auth:
 
 **No `auth.jwt` block = no validation.** The legacy `Bearer agent:<name>` format still works, backward compatible.
 
+!!! note "Data plane only"
+    JWT governs *agent identity* on the data plane. Operator endpoints
+    (traces, grants, approvals, policies) are guarded separately — see
+    [Control Plane Auth](control-plane-auth.md).
+
 ## Auth flow
 
 ```
