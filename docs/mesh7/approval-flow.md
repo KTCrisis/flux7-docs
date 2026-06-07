@@ -34,11 +34,15 @@ Claude Code shows a permission prompt inline. The developer says yes or no. This
 
 ### Via MCP virtual tools
 
-Agents can resolve approvals themselves (unless supervisor mode is on):
+The `approval.*` virtual tools are **operator-only**: only a declared supervisor
+agent (`supervisor.supervisor_agents` glob) may list or resolve approvals over
+MCP. A regular agent cannot — otherwise it could approve its own pending
+`human_approval` request and defeat the gate. With no supervisor configured,
+resolve approvals via the CLI or HTTP API below.
 
 ```
-approval.pending                → list pending approvals
-approval.resolve {id, decision} → approve or deny
+approval.pending                → list pending approvals (supervisor agents only)
+approval.resolve {id, decision} → approve or deny (supervisor agents only)
 ```
 
 ### Via CLI
