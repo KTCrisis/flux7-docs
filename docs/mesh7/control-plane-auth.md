@@ -71,6 +71,34 @@ curl -X POST -H "Authorization: Bearer $MESH_ADMIN_TOKEN" \
   https://mesh.internal:9090/approvals/abc123/approve
 ```
 
+## Transport security (TLS)
+
+mesh7 serves plaintext by default and logs a warning at startup to make that
+explicit. There are two ways to add TLS, in order of preference:
+
+**1. Terminate at the ingress (recommended).** Put mesh7 behind a reverse proxy
+or service mesh (nginx, Caddy, Traefik, a cloud load balancer, or Istio/Linkerd
+mTLS) and keep mesh7 on loopback or an internal network. The certificate lives
+at the ingress; mesh7 stays simple. This is the idiomatic sidecar posture.
+
+**2. In-binary TLS (standalone).** For a single-host deployment with no ingress,
+point mesh7 at a certificate and key directly:
+
+```yaml
+tls:
+  cert_file: /etc/mesh7/tls/cert.pem
+  key_file: /etc/mesh7/tls/key.pem
+```
+
+When both are set, mesh7 serves HTTPS. The certificate can come from your
+internal CA, Let's Encrypt (if the host has a public domain), or be self-signed
+for trusted internal use (clients must then trust it).
+
+!!! note "Loopback needs no TLS"
+    With the default loopback-only posture, traffic never leaves the host and
+    TLS adds little. TLS matters once mesh7 is reachable across the network —
+    which is also when you should set an `admin_token`.
+
 ## Recommendations
 
 - **Local development**: leave `admin_token` unset — loopback-only is enough.
