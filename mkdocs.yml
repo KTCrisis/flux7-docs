@@ -39,6 +39,7 @@ nav:
   - flux7-mesh:
     - Overview: mesh7/index.md
     - Getting Started: mesh7/getting-started.md
+    - Agent Security: mesh7/security.md
     - Writing Policies: mesh7/writing-policies.md
     - JWT Authentication: mesh7/jwt-auth.md
     - Control Plane Auth: mesh7/control-plane-auth.md
