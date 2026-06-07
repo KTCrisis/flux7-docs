@@ -29,7 +29,7 @@ Agent calls filesystem.write_file
 ## Routing: `approval.channel`
 
 !!! note "Version"
-    Requires a build newer than v0.14.3 (on `main`, unreleased at the time of writing). Older binaries silently ignore the key.
+    Since v0.15.0. Older binaries silently ignore the key.
 
 In MCP mode, `approval.channel` decides where a `human_approval` request goes:
 
