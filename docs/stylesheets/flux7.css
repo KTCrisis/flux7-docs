@@ -1,16 +1,18 @@
 :root {
-  --f7-bg: #0a0e0a;
-  --f7-bg2: #0f150f;
-  --f7-bg3: #151d15;
-  --f7-green: #00ff88;
-  --f7-green-soft: #00cc6e;
-  --f7-pink: #ff2d6b;
-  --f7-cyan: #00e5ff;
-  --f7-gold: #ffd166;
-  --f7-text: #c8dcc8;
-  --f7-text2: #6a8a6a;
-  --f7-border: #1e2e1e;
-  --f7-dim: #2a3a2a;
+  /* darksynth · espace · pro — palette alignée sur flux7.art
+     (tokens conservés ; seules les valeurs changent) */
+  --f7-bg: #070611;          /* violet-noir spatial */
+  --f7-bg2: #0d0b1a;
+  --f7-bg3: #15122a;
+  --f7-green: #2ee6ff;       /* primaire = cyan (liens, nav active, clés YAML) */
+  --f7-green-soft: #6fe0ff;  /* cyan clair — titres h3, en-têtes de table */
+  --f7-pink: #ff5cc8;        /* magenta — mots-clés */
+  --f7-cyan: #8b7bff;        /* violet — code inline, nombres, fonctions, info */
+  --f7-gold: #b9a7ff;        /* violet doux — chaînes, admonitions warning */
+  --f7-text: #c7c4dc;
+  --f7-text2: #6f6b95;
+  --f7-border: #221d3d;
+  --f7-dim: #3a3460;
 }
 
 /* --- Slate scheme override --- */
@@ -30,7 +32,7 @@
 
   --md-code-bg-color: var(--f7-bg2);
   --md-code-fg-color: var(--f7-text);
-  --md-code-hl-color: rgba(0, 255, 136, 0.1);
+  --md-code-hl-color: rgba(139,123,255,0.12);
 
   --md-typeset-color: var(--f7-text);
 
@@ -46,7 +48,7 @@
 }
 
 [data-md-color-scheme="flux7"] .md-header {
-  background: linear-gradient(180deg, var(--f7-bg) 0%, rgba(10,14,10,0.95) 100%);
+  background: linear-gradient(180deg, var(--f7-bg) 0%, rgba(7,6,17,0.95) 100%);
   border-bottom: 1px solid var(--f7-border);
   backdrop-filter: blur(8px);
 }
@@ -168,7 +170,7 @@
 }
 
 [data-md-color-scheme="flux7"] .md-typeset table:not([class]) tr:hover td {
-  background: rgba(0,255,136,0.03);
+  background: rgba(46,230,255,0.04);
 }
 
 /* Nav logo styling */
@@ -301,7 +303,7 @@ body, .md-typeset {
 [data-md-color-scheme="flux7"] .highlight .ch,
 [data-md-color-scheme="flux7"] .highlight .cp,
 [data-md-color-scheme="flux7"] .highlight .cpf {
-  color: #6a9a6a;
+  color: #7c789e;
   font-style: italic;
 }
 
