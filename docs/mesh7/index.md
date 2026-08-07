@@ -2,11 +2,11 @@
 
 ## The problem
 
-You're deploying agents. They call tools — file writes, emails, API calls, database queries. You need to answer three questions before going to production :
+You're deploying agents. They call tools — file writes, emails, API calls, database queries. You need to answer three questions before going to production:
 
-- **Which agent can call which tool ?** Frameworks don't enforce boundaries. An agent can call anything it discovers.
-- **Who approved that action ?** The developer clicked "yes" in a terminal prompt 3 weeks ago. That decision is gone.
-- **What happened ?** You have stdout logs somewhere. They're not structured, not queryable, and definitely not auditable.
+- **Which agent can call which tool?** Frameworks don't enforce boundaries. An agent can call anything it discovers.
+- **Who approved that action?** The developer clicked "yes" in a terminal prompt 3 weeks ago. That decision is gone.
+- **What happened?** You have stdout logs somewhere. They're not structured, not queryable, and definitely not auditable.
 
 These aren't agent framework problems. They're infrastructure problems. Service meshes solved them for microservices a decade ago — policy enforcement, observability, access control at the network layer. Agents need the same thing, at the tool call layer.
 
@@ -28,7 +28,7 @@ Agent (Claude, LangChain, script)
 
 Agents don't know the proxy exists. They call tools, get results. The governance layer is invisible to the agent, visible to the operator.
 
-**Transports :** MCP stdio (Claude Code, Cursor) · MCP Streamable HTTP at `POST /mcp` (Anthropic Managed Agents, remote clients) · HTTP REST (`POST /tool/{name}`)
+**Transports:** MCP stdio (Claude Code, Cursor) · MCP Streamable HTTP at `POST /mcp` (Anthropic Managed Agents, remote clients) · HTTP REST (`POST /tool/{name}`)
 
 ## Adaptive governance
 
@@ -44,7 +44,7 @@ Day 30: routine patterns auto-resolve in ~100ms
         humans only see genuinely new or ambiguous requests
 ```
 
-Three layers :
+Three layers:
 
 | Level | Who | Speed | What it handles |
 |-------|-----|-------|-----------------|
@@ -57,6 +57,14 @@ Every decision is stored as a fact in [flux7-memory](https://github.com/KTCrisis
 
 ## What makes it different
 
+Three things, and only three. The rest is table stakes, well executed.
+
+**1. The enforcement point is protocol-agnostic.** A policy attaches to a tool's identity, not to the transport carrying it. The same rule governs a stdio MCP server, an imported OpenAPI operation and a local binary, in one catalog. Change your agent framework or your tool protocol and the rule survives both.
+
+**2. The audit trail is causal, not chronological.** A trace carries `parent_trace_id` and `grant_id`. `GET /traces/{id}/why` walks the chain back, so the answer is not "allowed by rule X" but "allowed by grant G, which came from approval A, which came from call T". Most systems record what happened. This one records why it was permitted, back to the human decision.
+
+**3. Enforcement is decoupled from proxying.** [`POST /decide`](writing-policies.md) evaluates policy without executing anything. A PreToolUse hook asks "would you allow this?" and enforces locally, which means flux7-mesh governs tools that never transit it, including a harness's built-in tools. That is the difference between a proxy and a policy authority.
+
 | | API Gateways (Kong, Apigee) | Agent Frameworks (LangChain, CrewAI) | flux7-mesh |
 |---|---|---|---|
 | **Traffic** | North-south (user → LLM) | Internal (agent runtime) | East-west (agent → tools) |
@@ -66,24 +74,36 @@ Every decision is stored as a fact in [flux7-memory](https://github.com/KTCrisis
 | **Decision persistence** | None | None | Facts in flux7-memory, queryable, auditable |
 | **Deployment** | Heavy infrastructure | Embedded in code | Single binary sidecar, zero config to start |
 
-Closest comparable : Microsoft Agent Governance Toolkit. But middleware vs sidecar — flux7-mesh requires zero changes to agent code.
+Closest comparable: Microsoft Agent Governance Toolkit. But middleware vs sidecar — flux7-mesh requires zero changes to agent code.
 
-## Current state (May 2026)
+## Current state (August 2026)
 
-- **v0.13.0** — 281 Go tests + 49 Python SDK tests, 16 packages, race clean
-- **Import** — MCP servers (stdio + SSE), OpenAPI specs, CLI binaries
+- **v0.15.1** — 374 Go test functions across 17 packages, race clean, plus the Python SDK suite
+- **Import** — MCP servers over stdio, SSE and Streamable HTTP; OpenAPI specs (URL or file); CLI binaries with a tightening-only dispatch floor
 - **Export** — MCP stdio + MCP Streamable HTTP + HTTP REST
-- **Governance** — YAML policies, glob patterns, conditions, per-agent policy files, specificity sort, hot-reload
-- **Policy API** — `POST /decide` evaluates policy without executing, `GET /policies` exposes active rules
-- **Auth** — [JWT validation](jwt-auth.md) against external IdPs (Cloudflare Access, Auth0, Keycloak), JWKS cached with background refresh. Legacy `Bearer agent:<name>` still works
-- **Approval** — async queue, temporal grants, supervisor protocol, flux7-memory auto-approve
-- **Observability** — JSONL traces, OTEL export, session tracking, Prometheus metrics
+- **Governance** — YAML policies, glob patterns, numeric and string conditions on arguments, per-agent policy files, specificity sort, hot-reload
+- **Policy API** — `POST /decide` evaluates policy without executing, `GET /policies` exposes active rules with the file each came from
+- **Auth** — [JWT validation](jwt-auth.md) against external IdPs (Cloudflare Access, Auth0, Keycloak), JWKS cached with background refresh. The legacy `Bearer agent:<name>` form is opt-in and off by default once JWT is configured
+- **Approval** — async queue, routing via `queue | tty | tty-fallback`, temporal grants that record their origin, [supervisor protocol](supervisor-protocol.md), flux7-memory auto-approve
+- **Content safety** — raw parameters can be withheld from an external resolver, and a prompt-injection tripwire suppresses auto-approval so the call escalates to a human instead
+- **Observability** — JSONL traces with rotation, OTEL export, session tracking, Prometheus metrics, token accounting that distinguishes real provider counts from estimates
+- **Lineage** — traces carry `grant_id` and `parent_trace_id`; `GET /traces/{id}/why` walks the chain from a call back to the human approval that authorised it
 - **Durable state** — approvals and grants persisted in SQLite, survive restarts (`storage_path: state.db`)
-- **Auto-proxy** — in MCP mode, detects running daemon and becomes a thin stdio→HTTP proxy (zero config change, solves port conflicts)
-- **Daemon mode** — `mesh7 serve` runs as persistent daemon, MCP clients auto-proxy to it
-- **Python SDK** — `pip install flux7-mesh` v0.4.0 — GovernedToolkit (namespace-qualified tool names), MeshHooks (Anthropic Agent SDK integration), direct HTTP client
-- **Integrations** — [flux7-memory](https://github.com/KTCrisis/flux7-memory) (decision persistence + auto-approve), [flux7-console](https://github.com/KTCrisis/flux7-console) (dashboard + governance UI)
-- **Next** — claim-based policy conditions, Claude Connectors Directory listing
+- **Auto-proxy** — in MCP mode, detects a running instance and becomes a thin stdio→HTTP shuttle (zero config change, removes the port conflict between clients)
+- **Daemon mode** — `mesh7 serve` runs as a persistent daemon, MCP clients auto-proxy to it
+- **Python SDK** — `pip install flux7-mesh` v0.5.0 — GovernedToolkit (namespace-qualified tool names), MeshHooks (Anthropic Agent SDK), and `mesh7-hook`, a PreToolUse hook for the Claude Code CLI
+- **Integrations** — [flux7-memory](https://github.com/KTCrisis/flux7-memory) (decision persistence + auto-approve), [flux7-console](https://github.com/KTCrisis/flux7-console) (dashboard + governance UI), [flux7-supervisor](https://github.com/KTCrisis/flux7-supervisor) (L1 evaluation agent)
+- **Next** — claim-based policy conditions, semantic conditions beyond text matching
+
+## Known limits
+
+Stated plainly, because a governance tool that oversells itself is worse than none.
+
+- Policy conditions match text, case-sensitively. Denying `rm -rf` does not stop `RM -RF` or a base64 payload.
+- Injection detection is a regex tripwire wired to auto-approval, not a defence.
+- CLI positional arguments are metacharacter-filtered but not allowlisted; the allowlist governs flags.
+- Rate-limit counters live in memory and reset with the daemon. Approvals and grants do not.
+- The `--mcp` auto-proxy probes localhost, so it is a same-host mechanism.
 
 ## Claude ecosystem integration
 
@@ -97,9 +117,9 @@ flux7-mesh and flux7-memory cover every Claude surface with a native integration
 | **Claude API (raw)** | Python SDK + `POST /decide` | Python SDK (`pip install flux7-memory`) |
 | **Agent SDK (custom)** | HTTP direct (`/tool/{name}`, `/decide`) | HTTP direct (`/rpc`) |
 
-**Key insight** : flux7-memory access from Platform, Console, and Managed Agents goes through flux7-mesh policy — no direct exposure. This means governance is enforced at every layer, not just in local development.
+**Key insight**: flux7-memory access from Platform, Console, and Managed Agents goes through flux7-mesh policy — no direct exposure. This means governance is enforced at every layer, not just in local development.
 
-**Gaps (tracked)** : MCP registry listing, `memory_context` system prompt helper for Platform, claim-based policy conditions.
+**Gaps (tracked)**: MCP registry listing, `memory_context` system prompt helper for Platform, claim-based policy conditions.
 
 ## Get started
 
