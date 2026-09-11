@@ -43,8 +43,62 @@
   --md-footer-fg-color--lighter: var(--f7-border);
 
   --md-typeset-table-color: var(--f7-border);
+  --md-typeset-table-color--light: rgba(46,230,255,0.04);
 
   --md-admonition-bg-color: var(--f7-bg2);
+  --md-admonition-fg-color: var(--f7-text);
+
+  /* Tell the browser this is a dark scheme. Material only does it for
+     "slate"; a custom scheme name inherits "light", so native widgets —
+     search field, autofill, <select>, <details> markers — paint themselves
+     with the UA's light colours: black text on our dark surfaces. */
+  color-scheme: dark;
+
+  /* Everything below is a Material default that is a light-theme literal.
+     Without an override it leaks into this scheme unchanged. Mapped to the
+     palette so no element can fall back to a light-on-dark or dark-on-dark
+     pairing. Roles follow the comments at the top of this file. */
+  --md-default-bg-color--light: rgba(7,6,17,0.7);
+  --md-default-bg-color--lighter: rgba(7,6,17,0.3);
+  --md-default-bg-color--lightest: rgba(7,6,17,0.12);
+  --md-primary-fg-color--light: var(--f7-bg3);
+  --md-primary-fg-color--dark: var(--f7-bg);
+  --md-primary-bg-color--light: var(--f7-green-soft);
+  --md-accent-bg-color: var(--f7-bg);
+  --md-accent-bg-color--light: var(--f7-bg2);
+  --md-accent-fg-color--transparent: rgba(46,230,255,0.10);
+
+  --md-code-bg-color--light: rgba(13,11,26,0.7);
+  --md-code-bg-color--lighter: rgba(13,11,26,0.3);
+  --md-code-hl-color--light: rgba(139,123,255,0.06);
+  --md-code-hl-keyword-color: var(--f7-pink);
+  --md-code-hl-string-color: var(--f7-gold);
+  --md-code-hl-number-color: var(--f7-cyan);
+  --md-code-hl-constant-color: var(--f7-cyan);
+  --md-code-hl-function-color: var(--f7-cyan);
+  --md-code-hl-special-color: var(--f7-pink);
+  --md-code-hl-name-color: var(--f7-text);
+  --md-code-hl-operator-color: var(--f7-text);
+  --md-code-hl-punctuation-color: var(--f7-text);
+  --md-code-hl-variable-color: var(--f7-text);
+  --md-code-hl-comment-color: #7c789e;
+  --md-code-hl-generic-color: var(--f7-text2);
+
+  --md-typeset-kbd-color: var(--f7-bg3);
+  --md-typeset-kbd-accent-color: var(--f7-bg2);
+  --md-typeset-kbd-border-color: var(--f7-dim);
+  --md-typeset-mark-color: rgba(46,230,255,0.25);
+  --md-typeset-del-color: rgba(255,92,200,0.18);
+  --md-typeset-ins-color: rgba(46,230,255,0.18);
+
+  --md-warning-bg-color: var(--f7-bg3);
+  --md-warning-fg-color: var(--f7-gold);
+
+  --md-mermaid-edge-color: var(--f7-text2);
+  --md-mermaid-label-bg-color: var(--f7-bg2);
+  --md-mermaid-label-fg-color: var(--f7-text);
+  --md-mermaid-node-bg-color: var(--f7-bg3);
+  --md-mermaid-node-fg-color: var(--f7-green);
 }
 
 [data-md-color-scheme="flux7"] .md-header {
