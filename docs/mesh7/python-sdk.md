@@ -73,3 +73,19 @@ the harness runs itself — `Bash`, `Read`, `Write`, `Edit`. The SDK ships a
 It starts in observe mode — it traces without refusing anything — so you can
 write the rules from what you actually see before switching to enforce. See
 [docs/harness-hook.md](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/harness-hook.md).
+
+## Identity: self-declared or a JWT
+
+`agent="my-agent"` is a self-declared identity, sent as `Bearer agent:my-agent`.
+A mesh that validates JWTs (`auth.jwt` set, `allow_legacy` off) rejects it.
+Pass the token your identity provider issued instead:
+
+```python
+mesh = AgentMesh("https://mesh.example.com", agent="my-agent", token=jwt)
+```
+
+The mesh then resolves the agent from the token's claims — and, if the token
+carries one, the human the agent acts for ([`user_claim`](jwt-auth.md)), which
+lands on every trace as `user_id`. The same `token=` exists on
+`GovernedToolkit` and `MeshHooks`; the CLI hook reads it from `MESH7_TOKEN`.
+Available from SDK 0.6.0.
