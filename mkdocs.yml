@@ -39,6 +39,7 @@ nav:
   - flux7-mesh:
     - Overview: mesh7/index.md
     - Getting Started: mesh7/getting-started.md
+    - Configuration: mesh7/configuration.md
     - Agent Security: mesh7/security.md
     - Writing Policies: mesh7/writing-policies.md
     - JWT Authentication: mesh7/jwt-auth.md
@@ -49,6 +50,8 @@ nav:
     - Supervisor Protocol: mesh7/supervisor-protocol.md
     - Deployment Modes: mesh7/deployment-modes.md
     - Observability: mesh7/otel.md
+    - Python SDK: mesh7/python-sdk.md
+    - Reference: mesh7/reference.md
   - flux7-memory:
     - Overview: mem7/index.md
     - Configuration: mem7/configuration.md

@@ -39,8 +39,24 @@ auth:
 | `issuer` | No | — | Validate `iss` claim if set |
 | `audience` | No | — | Validate `aud` claim if set |
 | `agent_claim` | No | `sub` | Which claim is used as agent ID for policies |
+| `user_claim` | No | *(off)* | Which claim names the human the agent acts for. Empty means tokens carry no user and traces record none |
 
 **No `auth.jwt` block = no validation.** The legacy `Bearer agent:<name>` format still works, backward compatible.
+
+### Delegation: the agent and the user
+
+A token can carry two identities at once — the agent making the call, and the
+human it acts for. With `user_claim` set, every trace entry records `user_id`
+and the OTel export carries `enduser.id`, so a call answers *on whose behalf*
+it happened, not only *by which agent*.
+
+The user is optional by design: a client-credentials token (an agent acting for
+no one) has no user, and that absence is a fact the policy may act on, never a
+validation error.
+
+The session on the MCP Streamable HTTP transport is bound to the full identity
+(agent **and** user) on every request: a session ID is not a credential, and
+cannot be reused by another agent or across users.
 
 !!! note "Data plane only"
     JWT governs *agent identity* on the data plane. Operator endpoints
@@ -136,7 +152,14 @@ auth:
     jwks_url: https://<host>/realms/<realm>/protocol/openid-connect/certs
     issuer: https://<host>/realms/<realm>
     audience: mesh7
+    agent_claim: azp   # the client — the agent
+    user_claim: sub    # the subject — the human it acts for
 ```
+
+Keycloak puts the client id in `azp` and the user in `sub`, which is the
+delegation pair. Keycloak also documents the OAuth identity-chaining draft and
+its use as an MCP authorization server, so the same realm can issue the token
+an API gateway (Kong, ...) validates before handing the call to mesh7.
 
 ## Local development
 
