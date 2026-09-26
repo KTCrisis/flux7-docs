@@ -119,9 +119,9 @@ L2  Human               Console UI / Claude Code  final decision             min
           <span class="f7-card-badge">Python</span>
         </div>
         <div class="f7-card-role">L1+ — Automated evaluation</div>
-        <p class="f7-card-desc">Evaluates what's ambiguous. Polls pending approvals, applies rules, evaluates via pluggable LLM (Ollama, Anthropic, Claude Code MCP), auto-resolves the routine.</p>
+        <p class="f7-card-desc">Evaluates what's ambiguous. Polls pending approvals, applies rules, evaluates via pluggable LLM (Ollama, Anthropic, Jev), chained with a circuit breaker, auto-resolves the routine.</p>
         <div class="f7-card-tags">
-          <span>rule engine</span><span>3 LLM providers</span><span>confidence threshold</span>
+          <span>rule engine</span><span>provider chain</span><span>confidence threshold</span>
         </div>
       </a>
 
@@ -132,7 +132,7 @@ L2  Human               Console UI / Claude Code  final decision             min
           <span class="f7-card-badge">Next.js</span>
         </div>
         <div class="f7-card-role">L2 — Human oversight</div>
-        <p class="f7-card-desc">Shows it all and lets humans intervene. Dashboard, approval UI, trace viewer, memory browser, OTEL waterfall. The management plane for the entire system.</p>
+        <p class="f7-card-desc">Shows it all and lets humans intervene. Dashboard, approval UI, trace viewer with chain of authority and integrity check, memory browser, OTEL waterfall. The management plane for the entire system.</p>
         <div class="f7-card-tags">
           <span>dashboard</span><span>approval UI</span><span>OTEL traces</span>
         </div>
@@ -178,7 +178,7 @@ L2  Human               Console UI / Claude Code  final decision             min
         <div class="f7-timeline-content">
           <div class="f7-timeline-when">Day 60</div>
           <div class="f7-timeline-what">+ flux7-console</div>
-          <div class="f7-timeline-detail">Dashboard, team approval UI, governance scoring, full audit trail.</div>
+          <div class="f7-timeline-detail">Dashboard, team approval UI, policy and grant management, trace integrity.</div>
         </div>
       </div>
     </div>
@@ -255,7 +255,7 @@ L2  Human               Console UI / Claude Code  final decision             min
       <a href="https://github.com/KTCrisis/flux7-mesh" class="f7-source-link">flux7-mesh<span>Apache 2.0</span></a>
       <a href="https://github.com/KTCrisis/flux7-memory" class="f7-source-link">flux7-memory<span>Apache 2.0</span></a>
       <a href="https://github.com/KTCrisis/flux7-supervisor" class="f7-source-link">flux7-supervisor<span>Apache 2.0</span></a>
-      <a href="https://github.com/KTCrisis/flux7-console" class="f7-source-link">flux7-console<span>Apache 2.0</span></a>
+      <a href="https://github.com/KTCrisis/flux7-console" class="f7-source-link">flux7-console</a>
     </div>
   </section>
 

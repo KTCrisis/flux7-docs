@@ -68,7 +68,7 @@ claude
 sup7 -c sup7.yaml start
 ```
 
-With `supervisor.enabled: true` in the flux7-mesh config, `approval.resolve` and `approval.pending` tools are hidden from Claude. Tool calls block until the supervisor resolves them.
+With `supervisor.enabled: true` in the flux7-mesh config, Claude's tool calls block until the supervisor resolves them. `approval.resolve` and `approval.pending` are hidden from Claude in any case: only agents matching `supervisor.supervisor_agents` see them.
 
 **Supervisor config (`sup7.yaml`):**
 
@@ -215,9 +215,22 @@ client.beta.vaults.credentials.create(
 
 flux7-mesh extracts the agent ID from `Authorization: Bearer agent:<id>` and applies per-agent policies.
 
+!!! warning "Static bearer and JWT"
+    `agent:<id>` is a self-declared identity: anyone who can reach the URL can
+    claim any agent. A mesh with `auth.jwt` configured rejects it with `401`
+    unless `allow_legacy: true`. For an internet-facing mesh, store a JWT issued
+    by your IdP in the vault instead (`"token": "<jwt>"`), keep `allow_legacy`
+    off, and see [JWT Authentication](jwt-auth.md).
+
 **Networking:** flux7-mesh must be accessible from Anthropic's cloud. Options:
 - Dev: Tailscale funnel or ngrok → `localhost:9090`
 - Prod: deploy flux7-mesh on a VPS or cloud host
+
+**Internet-facing checklist:**
+- Set `auth.admin_token` (or `MESH_ADMIN_TOKEN`): the control plane then answers only with that bearer, from any interface ([Control Plane Auth](control-plane-auth.md)).
+- Terminate TLS at the ingress (Tailscale funnel and ngrok already do), or set `tls.cert_file` / `tls.key_file` on a standalone host.
+- Set `auth.require_authentication: true` so calls without a credential get `401` instead of running as `anonymous`.
+- See [Agent Security](security.md#production-hardening-checklist) for the full list.
 
 **Permission policies:** Set `always_allow` on the Managed Agent side — let flux7-mesh handle governance. Double-layer approval (Managed Agents `always_ask` + flux7-mesh `human_approval`) works but adds friction.
 
@@ -340,6 +353,8 @@ Two subcommands:
 - **`mesh7 serve`** — run as a persistent daemon (HTTP + manages upstream MCP servers)
 - **`mesh7 --mcp`** — auto-detects a running daemon and proxies to it (MCP stdio for Claude Code)
 
+The auto-proxy identifies itself to the daemon as `Bearer agent:<--mcp-agent>`. If the daemon validates JWTs (`auth.jwt` set, `allow_legacy` off), that form is rejected: set `MESH_AGENT_TOKEN` to a JWT in the MCP client's environment and the proxy sends it instead. See [JWT Authentication](jwt-auth.md#stdio-clients-under-auto-proxy).
+
 This settles Config 2's limitation (the mesh dies with Claude) and makes Config 7 durable rather than merely working. Every client uses the auto-proxy instead of spawning its own mesh7, and the daemon outlives all of them.
 
 | Feature | Status |
@@ -350,6 +365,6 @@ This settles Config 2's limitation (the mesh dies with Claude) and makes Config 
 | Config 4: Standalone HTTP | Done |
 | Config 5: Shared mesh | Done |
 | Config 8: Managed Agents (MCP Streamable HTTP) | Done (v0.9.0) |
-| `supervisor.enabled` (hide approval tools) | Done |
+| `supervisor.enabled` (block until resolved) + `supervisor_agents` (operator tools gated) | Done |
 | `mesh7 serve` (daemon) | Done (v0.9.4) |
 | `mesh7 --mcp` (auto-proxy to daemon) | Done (v0.9.3) |

@@ -7,8 +7,8 @@ different trust requirements, so they are authorized differently.
 
 | Plane | Endpoints | Who calls them | Auth |
 |-------|-----------|----------------|------|
-| **Data** | `POST /tool/{name}`, `POST /decide`, `POST /mcp`, `GET /tools`, `GET /mcp-servers`, `GET /health`, `GET /version` | Agents | Per-agent identity (see [JWT Authentication](jwt-auth.md)) |
-| **Control** | `GET /traces`, `GET /otel-traces`, `GET/POST /grants`, `DELETE /grants/{id}`, `GET /approvals`, `POST /approvals/{id}/approve`, `POST /approvals/{id}/deny`, `GET /sessions`, `GET /policies`, `GET /metrics` | Operators, dashboards, supervisors | Admin token (this page) |
+| **Data** | `POST /tool/{name}`, `POST /decide`, `POST`/`DELETE /mcp`, `GET /tools`, `GET /mcp-servers`, `GET /health`, `GET /version` | Agents | Per-agent identity (see [JWT Authentication](jwt-auth.md)) |
+| **Control** | `GET /traces`, `GET /traces/{id}/why`, `GET /traces/verify`, `GET /otel-traces`, `GET/POST /grants`, `DELETE /grants/{id}`, `GET /approvals`, `GET /approvals/{id}`, `POST /approvals/{id}/approve`, `POST /approvals/{id}/deny`, `GET /sessions`, `GET /sessions/{id}`, `GET /policies`, `GET /metrics` | Operators, dashboards, supervisors | Admin token (this page) |
 
 The control plane is the governance plane: reading the full trace history,
 resolving approvals, and minting temporal grants. A caller with control-plane

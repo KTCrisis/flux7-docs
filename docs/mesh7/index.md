@@ -76,22 +76,22 @@ Three things, and only three. The rest is table stakes, well executed.
 
 Closest comparable: Microsoft Agent Governance Toolkit. But middleware vs sidecar — flux7-mesh requires zero changes to agent code.
 
-## Current state (August 2026)
+## Current state (September 2026)
 
-- **v0.15.1** — 374 Go test functions across 17 packages, race clean, plus the Python SDK suite
-- **Import** — MCP servers over stdio, SSE and Streamable HTTP; OpenAPI specs (URL or file); CLI binaries with a tightening-only dispatch floor
+- **v0.16.0** — 412 Go test functions across 17 packages, race clean, plus 77 Python SDK tests
+- **Import** — MCP servers over stdio, SSE and Streamable HTTP (`transport: streamable-http` for hosted upstreams); OpenAPI specs (URL or file); CLI binaries whose `default_action` acts as a tightening-only floor under the dispatcher
 - **Export** — MCP stdio + MCP Streamable HTTP + HTTP REST
-- **Governance** — YAML policies, glob patterns, numeric and string conditions on arguments, per-agent policy files, specificity sort, hot-reload
-- **Policy API** — `POST /decide` evaluates policy without executing, `GET /policies` exposes active rules with the file each came from
-- **Auth** — [JWT validation](jwt-auth.md) against external IdPs (Cloudflare Access, Auth0, Keycloak), JWKS cached with background refresh. The legacy `Bearer agent:<name>` form is opt-in and off by default once JWT is configured
+- **Governance** — YAML policies, glob patterns, numeric conditions and string operators (`contains`, `not_contains`, `starts_with`, `not_starts_with`) on arguments, per-agent policy files, specificity sort, hot-reload
+- **Policy API** — `POST /decide` evaluates policy without executing, `GET /policies` exposes active rules with the file each came from (`source_file`); `mesh7-hook`, a Claude Code PreToolUse hook, asks `POST /decide` before every tool call, including the harness's built-in tools that never transit the proxy
+- **Auth** — [JWT validation](jwt-auth.md) against external IdPs (Cloudflare Access, Auth0, Keycloak), JWKS cached with background refresh. `auth.jwt.user_claim` records the human the agent acts for, exported as `enduser.id`. The legacy `Bearer agent:<name>` form is opt-in and off by default once JWT is configured. An MCP Streamable HTTP session is bound to the identity that opened it: another caller presenting its `Mcp-Session-Id` gets a `403`
 - **Approval** — async queue, routing via `queue | tty | tty-fallback`, temporal grants that record their origin, [supervisor protocol](supervisor-protocol.md), flux7-memory auto-approve
 - **Content safety** — raw parameters can be withheld from an external resolver, and a prompt-injection tripwire suppresses auto-approval so the call escalates to a human instead
-- **Observability** — JSONL traces with rotation, OTEL export, session tracking, Prometheus metrics, token accounting that distinguishes real provider counts from estimates
-- **Lineage** — traces carry `grant_id` and `parent_trace_id`; `GET /traces/{id}/why` walks the chain from a call back to the human approval that authorised it
+- **Observability** — JSONL traces with rotation, OTEL export (batched, retried on network errors, 429 and 5xx, GenAI semantic conventions, custom headers and TLS options), session tracking, Prometheus metrics, token accounting that distinguishes real provider counts from estimates. Each trace line is hash-chained to the previous one (HMAC-SHA256 when `MESH_TRACE_KEY` is set); `mesh7 trace verify` checks files offline and `GET /traces/verify` checks the running store ([Trace Integrity](trace-integrity.md))
+- **Lineage** — traces carry `grant_id` and `parent_trace_id`, grants carry the `approval_id` and `trace_id` they came from; `GET /traces/{id}/why` walks the chain from a call back to the human approval that authorised it
 - **Durable state** — approvals and grants persisted in SQLite, survive restarts (`storage_path: state.db`)
 - **Auto-proxy** — in MCP mode, detects a running instance and becomes a thin stdio→HTTP shuttle (zero config change, removes the port conflict between clients)
 - **Daemon mode** — `mesh7 serve` runs as a persistent daemon, MCP clients auto-proxy to it
-- **Python SDK** — `pip install flux7-mesh` v0.5.0 — GovernedToolkit (namespace-qualified tool names), MeshHooks (Anthropic Agent SDK), and `mesh7-hook`, a PreToolUse hook for the Claude Code CLI
+- **Python SDK** — `pip install flux7-mesh` v0.6.0 — `AgentMesh(token=...)` for JWT identity, GovernedToolkit (namespace-qualified tool names), MeshHooks (Anthropic Agent SDK), and `mesh7-hook` for the Claude Code CLI
 - **Integrations** — [flux7-memory](https://github.com/KTCrisis/flux7-memory) (decision persistence + auto-approve), [flux7-console](https://github.com/KTCrisis/flux7-console) (dashboard + governance UI), [flux7-supervisor](https://github.com/KTCrisis/flux7-supervisor) (L1 evaluation agent)
 - **Next** — claim-based policy conditions, semantic conditions beyond text matching
 

@@ -1,6 +1,6 @@
 # System Design — flux7-mesh + flux7-memory + flux7-console
 
-*May 2026. Living document.*
+*September 2026. Living document.*
 
 ## The stack in one sentence
 
@@ -32,7 +32,7 @@ Go binary. Sidecar proxy between agents and their tools.
 
 **Transports:** MCP stdio (Claude Code, Cursor) · MCP Streamable HTTP at `POST /mcp` (Anthropic Managed Agents, remote clients) · HTTP REST (`POST /tool/{name}`)
 
-**Current state:** v0.12.0, stable. Policy hot-reload, Python SDK, `/decide` endpoint, daemon mode.
+**Current state:** v0.16.0, stable. Policy hot-reload, Python SDK, `/decide` endpoint, daemon mode.
 
 ### flux7-memory (memory substrate)
 
@@ -47,7 +47,7 @@ Go binary. MCP server for persistent, searchable, governed memory.
 | Temporal range queries | `since` / `until` filters on RFC3339 timestamps |
 | Python SDK | `pip install flux7-memory`, provider-agnostic, wraps all tools via HTTP |
 
-**Current state:** v0.5.0, 71% LoCoMo benchmark, SDK + SSE transport + daemon mode shipped.
+**Current state:** v0.5.1, 71% LoCoMo benchmark, SDK + SSE transport + daemon mode shipped.
 
 ### flux7-supervisor (L1 supervisor)
 
@@ -57,24 +57,33 @@ Python agent. Standalone evaluation process between policy engine and human.
 |---|---|
 | Poll pending approvals | Consumes flux7-mesh SDK (`pending()`, `approval_detail()`, `resolve()`) |
 | Rule-based evaluation | YAML conditions (tool, params, injection_risk), first-match-wins |
-| LLM fallback | Pluggable providers: Ollama, Anthropic, Claude Code MCP callback |
-| Decision persistence | Writes to flux7-memory via SDK |
+| LLM fallback | Pluggable providers: Ollama, Anthropic, Jev (TypeSafe AI), Claude Code MCP callback (not functional yet: the MCP server is not started) |
+| Provider chain | Providers tried in order, next one on failure, circuit breaker skips a failing provider |
+| Admin API | HTTP on `127.0.0.1:9096` (off by default, bearer token): status, config, recent decisions, pause/resume |
+| Decision persistence | Writes to flux7-memory via SDK (`memory.enabled`, off by default) |
 
-**Current state:** v0.1.0, 49 tests, 3 LLM providers. Extracted from flux7-console (May 2026).
+**Current state:** v0.1.0, 85 tests, 4 providers + chain, admin API, systemd unit. Extracted from flux7-console in May 2026, now lives in [flux7-supervisor](https://github.com/KTCrisis/flux7-supervisor). See [flux7-supervisor](../sup7/index.md).
 
 ### flux7-console (management plane / product)
 
-Next.js 16 + TanStack Query. Dashboard and human governance UI (L2).
+Next.js 16 + TanStack Query. Dashboard and human governance UI (L2). The whole product is the frontend: Next.js route handlers proxy `/api/mesh/*`, `/api/mem7/*` and `/api/sup7/*` to the three services and inject their tokens server-side (`MESH_ADMIN_TOKEN`, `MEM7_TOKEN`, `SUP7_ADMIN_TOKEN`), so no token reaches the browser. The `backend/` FastAPI directory is an empty skeleton: no routes, no database.
 
 | What it does | How |
 |---|---|
-| Trace viewer | Reads flux7-mesh `/traces`, `/otel-traces`, aggregates stats |
+| Trace viewer | Reads flux7-mesh `/traces`, time range and agent/tool/policy filters, `user_id` shown when the credential carried one |
+| Trace chain of authority | Per trace, the grant and the call that motivated it, from flux7-mesh `/traces/{id}/why` |
+| Integrity badge | Hash-chain status of the trace file, from flux7-mesh `/traces/verify` (the mesh holds the key and runs the check) |
 | Session browser | Session list and drill-down via flux7-mesh `/sessions` |
-| Memory viewer | Reads flux7-memory, displays stored facts and decisions |
-| Human approval UI | Shows pending approvals from flux7-mesh, human clicks approve/reject |
-| OTEL waterfall | Visual trace timeline from flux7-mesh OTEL export |
+| OTEL waterfall | Visual trace timeline from flux7-mesh `/otel-traces` |
+| Agents | Agent list with stats, detail view with tool usage, derived from traces and approvals |
+| Human approval UI | `GET /approvals?status=`, then `POST /approvals/{id}/approve` or `/deny` on flux7-mesh |
+| Policies | Viewer from flux7-mesh `/policies`; YAML editor that overwrites existing files in `POLICY_DIR` on the console host |
+| Grants | List, create and revoke via flux7-mesh `/grants` |
+| Tools | Tool catalog (MCP, CLI, REST) from `/tools`, MCP server status from `/mcp-servers` |
+| Supervisor | L1 statistics derived from mesh traces; live status, config, recent decisions and pause/resume through the sup7 admin API (`SUP7_URL`, default `http://localhost:9096`) |
+| Memory browser | Search, store, edit, forget via flux7-memory JSON-RPC `/rpc` |
 
-Planned (scaffolded, not yet implemented) :
+Planned (not implemented; `governance-engine/` and `backend/` hold only empty `__init__.py` files) :
 
 | What it will do | How |
 |---|---|
@@ -83,7 +92,7 @@ Planned (scaffolded, not yet implemented) :
 | Dependency graph | Declared (YAML) + inferred (traces), impact analysis |
 | Diff engine | Breaking change detection on agent config changes |
 
-**Current state:** Early stage, dashboard + traces + sessions + approvals + memory viewer working. No version tag yet.
+**Current state:** Early stage, frontend `0.1.0`, no release tag. Dashboard, traces, sessions, agents, approvals, policies, grants, tools, supervisor and memory pages working. Responsive layout (navigation becomes a drawer on phone widths).
 
 ---
 
@@ -159,8 +168,8 @@ Developer → Claude Code → flux7-mesh → gmail.send_email
                     │  governance, audit trail    │
                     └──────┬──────────┬──────────┘
                            │          │
-              reads via    │          │  reads via
-              HTTP API     │          │  Python SDK
+              HTTP via     │          │  JSON-RPC /rpc
+              proxy        │          │  via proxy
                            │          │
                            ▼          ▼
 ┌─────────────────┐    ┌─────────────────┐
@@ -185,8 +194,9 @@ Developer → Claude Code → flux7-mesh → gmail.send_email
 | flux7-mesh | flux7-memory | Approval/rejection decisions | On approval resolve (opt-in) |
 | flux7-mesh | JSONL | Tool call traces | Every tool call (always) |
 | Supervisor | flux7-memory | Auto-resolve rationale | On auto-approve (opt-in) |
-| Human via flux7-console | flux7-mesh API | Approve/reject action | Clicking in UI |
-| flux7-console | PostgreSQL | Aggregated stats, governance scores | On trace ingestion, on sync |
+| Human via flux7-console | flux7-mesh API | Approve/deny, grant create/revoke | Clicking in UI |
+| Human via flux7-console | Policy YAML files | Edited policy | Saving in the policy editor |
+| Human via flux7-console | sup7 admin API | Pause/resume | Clicking in UI |
 
 ### Read paths (who reads what from where)
 
@@ -194,10 +204,9 @@ Developer → Claude Code → flux7-mesh → gmail.send_email
 |---|---|---|---|
 | Supervisor | flux7-memory | Past decisions for same pattern | Before deciding to auto-approve |
 | Any agent | flux7-memory | Stored facts, context, history | During execution, via MCP search |
-| flux7-console | flux7-mesh API | Pending approvals | Polling for approval UI |
-| flux7-console | flux7-mesh JSONL | Trace history | On ingestion (CLI or API push) |
-| flux7-console | flux7-memory (SDK) | Stored decisions, facts | For memory viewer, audit trail |
-| flux7-console | PostgreSQL | Scores, rules, lifecycle | For governance dashboard |
+| flux7-console | flux7-mesh API | Pending approvals, traces, sessions, policies, grants, tools | Polling (TanStack Query) |
+| flux7-console | flux7-memory `/rpc` | Stored decisions, facts | For memory browser |
+| flux7-console | sup7 admin API | Status, config, recent decisions | Supervisor page |
 
 ---
 
@@ -216,7 +225,7 @@ Level 1: Built-in supervisor (in flux7-mesh, Go)
          Escalates unknowns to Level 1+.
 
 Level 1+: External supervisor (flux7-supervisor / sup7)
-          Rule engine + pluggable LLM (Ollama/Anthropic/Claude Code). ~2s rules, ~20s LLM.
+          Rule engine + pluggable LLM (Ollama/Anthropic/Jev, chainable). ~2s rules, ~20s LLM.
           Handles novel cases, complex conditions, injection detection.
           Escalates unknowns to Level 2.
 
@@ -232,7 +241,7 @@ Level 2: Human
 > a standalone Python agent that implements the
 > [supervisor protocol](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/supervisor-protocol.md)
 > — it polls pending approvals and resolves them with rule evaluation + pluggable LLM
-> (Ollama, Anthropic, or Claude Code MCP callback).
+> (Ollama, Anthropic, Jev, or a chain of them; the Claude Code MCP callback is not functional yet).
 > The `supervisor/` package inside flux7-mesh handles content redaction and
 > injection detection on the protocol's outbound payloads (`RedactParams`,
 > `DetectInjection`) — a separate concern from both layers.
@@ -268,7 +277,7 @@ def evaluate(request, mem7_client):
 
 **Claude Code terminal** — the developer gets the prompt inline. This is the current flow, works for solo use.
 
-**flux7-console web UI** — for team use, overnight runs, or when multiple agents generate approvals faster than one human can handle. flux7-console polls flux7-mesh's pending queue, displays context, human clicks. flux7-console POSTs back to flux7-mesh `/approval/resolve`.
+**flux7-console web UI** — for team use, overnight runs, or when multiple agents generate approvals faster than one human can handle. flux7-console polls flux7-mesh's pending queue, displays context, human clicks. flux7-console POSTs back to flux7-mesh `/approvals/{id}/approve` or `/deny`.
 
 Both are **thin clients** of the flux7-mesh approval API. If flux7-console goes down, Claude Code still works. If both go down, requests queue in flux7-mesh until someone resolves them (fail-safe, not fail-open).
 
@@ -297,7 +306,7 @@ shared server
 ├── flux7-mesh (central, HTTP mode)
 ├── mem7 serve (HTTP, shared memory)
 ├── sup7 (L1 supervisor, polls mesh approvals)
-└── flux7-console (dashboard + approval UI)
+└── flux7-console (dashboard + approval UI, systemd unit, loopback :8790)
 
 developer laptops
 └── agents connect to shared flux7-mesh
@@ -305,11 +314,13 @@ developer laptops
 
 flux7-console adds value: team visibility, approval UI for shared agents, audit trail. sup7 handles automated evaluation.
 
+flux7-console ships a systemd unit, `deploy/flux7-console.service`, which runs `next start` on `127.0.0.1:8790` after `mesh7.service`; tokens and URLs come from an optional `EnvironmentFile`. sup7 ships its own unit (`contrib/systemd/sup7.service`). Reaching the console from a phone goes through whatever puts that loopback port on your network (reverse proxy, tunnel); the layout is usable at phone width.
+
 ### Enterprise (future)
 
 ```
 flux7-console SaaS (hosted)
-├── governance engine
+├── governance engine (planned)
 ├── approval UI
 ├── audit + compliance
 └── policy push → customer flux7-mesh
@@ -342,7 +353,7 @@ Anthropic cloud (harness, sandbox, multi-agent orchestration)
 
 **Integration point:** flux7-mesh `POST /mcp` endpoint serves MCP Streamable HTTP. Managed Agent's MCP connector discovers tools via `tools/list`, calls them via `tools/call`. Policies apply transparently. Vault injects `Authorization: Bearer agent:<id>` for per-agent policy evaluation.
 
-**flux7-console role:** same as for any deployment — dashboard, approval UI, governance scoring, audit trail. The Managed Agent sessions generate traces and decisions that flow to flux7-console like any other agent.
+**flux7-console role:** same as for any deployment: dashboard, approval UI, audit trail. The Managed Agent sessions generate traces and decisions that flow to flux7-console like any other agent.
 
 ---
 
@@ -375,31 +386,26 @@ flux7-mesh queries flux7-memory before submitting to the approval queue. This is
 - Auto-approved decisions traced as `supervisor:mem7` and written back to flux7-memory
 - Config: `supervisor.auto_approve` (default true), `supervisor.min_approvals` (default 3)
 
-**Complements the external Python supervisor** (in flux7-console): the built-in handles routine patterns (~100ms); the external supervisor handles novel cases with rule engine + Ollama LLM evaluation (~20s). Both escalate unknowns to humans.
+**Complements the external Python supervisor** ([flux7-supervisor](../sup7/index.md), formerly in flux7-console): the built-in handles routine patterns (~100ms); the external supervisor handles novel cases with rule engine + LLM evaluation (~20s). Both escalate unknowns to humans.
 
-### Phase 3: flux7-console reads flux7-memory via SDK
+### Phase 3: flux7-console reads flux7-memory ✓
 
-Replace the current ad-hoc memory debug view with proper SDK integration.
+Shipped in the frontend, without a Python backend and without the SDK.
 
-**flux7-console changes:**
-- `pip install flux7-memory` in backend dependencies
-- Backend service: `Mem7Client` wrapping the SDK, configured via env var
-- API routes: `/api/v1/memory/search`, `/api/v1/memory/decisions`
-- Frontend: memory viewer page, decision audit trail with filters
+- Next.js route handler `/api/mem7/*` proxies to flux7-memory (`MEM7_URL`, optional `MEM7_TOKEN`)
+- `lib/api/mem7.ts` calls JSON-RPC `/rpc` with `tools/call`: `memory_list`, `memory_recall`, `memory_search`, `memory_store`, `memory_forget`
+- Memory browser page: search, store, edit, forget
+- Planned: a decision audit trail joining stored decisions with traces
 
-**Estimated effort:** ~500 lines Python + frontend.
+### Phase 4: flux7-console approval UI as thin client ✓
 
-### Phase 4: flux7-console approval UI as thin client
+Shipped in the frontend.
 
-flux7-console displays pending approvals from flux7-mesh and lets humans resolve them.
-
-**flux7-console changes:**
-- Poll flux7-mesh `/approval/pending` (API already exists)
-- Display: tool call details, agent identity, past decisions from flux7-memory (context)
-- Action: approve/reject button → POST flux7-mesh `/approval/resolve`
-- flux7-mesh handles the flux7-memory write (phase 1), flux7-console doesn't write to flux7-memory directly
-
-**Estimated effort:** ~400 lines Python + frontend.
+- `GET /approvals?status=` on flux7-mesh through the `/api/mesh/*` proxy; pending count in the navigation
+- Display: tool call details, agent identity, resolution history
+- Action: approve/deny → `POST /approvals/{id}/approve` or `/deny`
+- flux7-mesh handles the flux7-memory write (phase 1), flux7-console doesn't write decisions to flux7-memory itself
+- Planned: past decisions from flux7-memory shown as context next to a pending approval
 
 ---
 

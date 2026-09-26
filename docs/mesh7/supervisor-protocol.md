@@ -64,6 +64,8 @@ Worker Agent ────────────>│  policy ──> approval s
 
 ## API reference
 
+Every endpoint below is on the control plane. From the mesh host with no `admin_token` configured, plain requests work; from another host, or whenever `admin_token` (or `MESH_ADMIN_TOKEN`) is set, each request must carry `Authorization: Bearer <admin_token>`, otherwise it gets `401`. See [Control Plane Auth](control-plane-auth.md).
+
 ### List pending approvals
 
 ```
@@ -196,6 +198,37 @@ POST /approvals/{id}/deny
 
 Same body format as approve. On deny, the agent receives a 403 response.
 
+### Grant after approval
+
+A supervisor that approves a routine call can extend the decision into a temporal grant, so the same call does not ask again for a while. Pass the approval (and optionally the call) it answers, so every call the grant later authorises walks back to this decision through `GET /traces/{id}/why`:
+
+```
+POST /grants
+```
+
+```json
+{
+  "agent": "claude",
+  "tools": "filesystem.write_file",
+  "duration": "1h",
+  "approval_id": "a1b2c3d4e5f67890",
+  "trace_id": "abc123..."
+}
+```
+
+`agent`, `tools` and `duration` are required; `approval_id` and `trace_id` are optional and recorded as the grant's origin. `mesh approve <id> --grant 1h` does the same from the CLI.
+
+## Over MCP
+
+A supervisor can also run as an MCP client (for instance a Managed Agent on `POST /mcp`). The operator tools `approval.pending`, `approval.resolve`, `grant.create` and `grant.revoke` are listed and callable **only** for agents whose identity matches `supervisor.supervisor_agents`. Any other agent does not see them in `tools/list` and gets a `-32601` error if it calls them by name; `grant.list` stays visible to everyone. `grant.create` accepts the same optional `approval_id` and `trace_id`.
+
+```yaml
+supervisor:
+  supervisor_agents: ["supervisor-*"]
+```
+
+`supervisor.enabled: true` is a separate switch: it makes worker agents on MCP block on `human_approval` until the supervisor (or a human) resolves the request, instead of receiving an immediate "pending" result.
+
 ## Configuration
 
 ### Content isolation
@@ -243,24 +276,32 @@ A supervisor is any program that implements this loop:
 import requests
 import time
 
+import os
+
 MESH_URL = "http://localhost:9090"
 CONFIDENCE_THRESHOLD = 0.8
 
+# Control-plane credential: required off-host, or whenever admin_token is set.
+TOKEN = os.environ.get("MESH_ADMIN_TOKEN")
+HEADERS = {"Authorization": f"Bearer {TOKEN}"} if TOKEN else {}
+
 while True:
     # 1. Poll for pending approvals (optionally filter by tool)
-    pending = requests.get(f"{MESH_URL}/approvals",
+    pending = requests.get(f"{MESH_URL}/approvals", headers=HEADERS,
         params={"status": "pending", "tool": "filesystem.*"}).json()
 
     for approval in pending:
         # 2. Get full context
-        detail = requests.get(f"{MESH_URL}/approvals/{approval['id']}").json()
+        detail = requests.get(f"{MESH_URL}/approvals/{approval['id']}",
+                              headers=HEADERS).json()
 
         # 3. Evaluate
         verdict = evaluate(detail)
 
         # 4. Act
         if verdict["confidence"] >= CONFIDENCE_THRESHOLD:
-            requests.post(f"{MESH_URL}/approvals/{approval['id']}/{verdict['action']}", json={
+            requests.post(f"{MESH_URL}/approvals/{approval['id']}/{verdict['action']}",
+                          headers=HEADERS, json={
                 "resolved_by": "agent:supervisor",
                 "reasoning": verdict["reasoning"],
                 "confidence": verdict["confidence"],
@@ -318,7 +359,7 @@ Recommended reasons to escalate to a human instead of auto-resolving:
 Every supervisor decision is recorded in traces:
 
 ```bash
-# All supervisor-resolved traces
+# All supervisor-resolved traces (add -H "Authorization: Bearer $MESH_ADMIN_TOKEN" off-host)
 curl http://localhost:9090/traces | \
   jq '[.[] | select(.supervisor_reasoning != null)]'
 

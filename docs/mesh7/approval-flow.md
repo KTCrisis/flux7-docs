@@ -28,9 +28,6 @@ Agent calls filesystem.write_file
 
 ## Routing: `approval.channel`
 
-!!! note "Version"
-    Since v0.15.0. Older binaries silently ignore the key.
-
 In MCP mode, `approval.channel` decides where a `human_approval` request goes:
 
 ```yaml
@@ -38,6 +35,9 @@ approval:
   timeout_seconds: 300
   channel: queue        # queue | tty | tty-fallback
 ```
+
+!!! note "Version"
+    Since v0.15.0. Older binaries silently ignore the key.
 
 | Channel | Behavior |
 |---|---|
@@ -59,7 +59,7 @@ Claude Code shows a permission prompt inline. The developer says yes or no. This
 
 The `approval.*` virtual tools are **operator-only**: only a declared supervisor
 agent (`supervisor.supervisor_agents` glob) may list or resolve approvals over
-MCP. A regular agent cannot — otherwise it could approve its own pending
+MCP. A regular agent cannot, otherwise it could approve its own pending
 `human_approval` request and defeat the gate. With no supervisor configured,
 resolve approvals via the CLI or HTTP API below.
 
@@ -77,12 +77,24 @@ mesh pending
 # Approve (prefix match)
 mesh approve a1b2c3d4
 
+# Approve, and stop being asked about this exact tool for an hour.
+# The grant records this approval as its origin (see "Chain of authority").
+mesh approve a1b2c3d4 --grant 1h
+
+# Same, widening the grant beyond the single tool (deliberate)
+mesh approve a1b2c3d4 --grant 1h --tools "filesystem.write_*"
+
 # Deny
 mesh deny a1b2c3d4
 
-# Watch (live updates)
+# Watch (live updates): [a]pprove, [g]rant, [d]eny, [s]kip
 mesh watch
 ```
+
+In `watch`, `[g]` approves and opens a grant in one keystroke. Its duration comes
+from `MESH_GRANT_DURATION` (default `1h`), and its pattern is the exact tool
+approved. A failing grant never fails the approval: the call was already let
+through, and losing the shortcut is the lesser harm.
 
 ### Via HTTP API
 
@@ -115,13 +127,56 @@ grant.create {tools: "filesystem.write_*", duration: "30m"}
 
 For the next 30 minutes, all `filesystem.write_*` calls bypass the approval queue. Traced as `grant:<id>`.
 
+### Chain of authority
+
+A grant issued out of nowhere is an orphan: it authorizes calls without saying
+why it exists, and "why was this allowed?" stops at "because a grant covered it".
+
+So a grant can record its origin, the approval and the call it answers:
+
+```bash
+curl -X POST http://localhost:9090/grants -d '{
+  "agent": "claude", "tools": "filesystem.write_*", "duration": "1h",
+  "approval_id": "<the approval>", "trace_id": "<the call being approved>"
+}'
+```
+
+`mesh approve <id> --grant <duration>` and `[g]` in `watch` fill both fields on
+their own; nobody copies an ID by hand. Every call the grant later waves through
+then carries `grant_id` and `parent_trace_id`, and the chain is walkable:
+
+```bash
+curl "http://localhost:9090/traces/<trace-id>/why"
+```
+
+The response is JSON (`trace_id`, `chain_length`, `chain`); the `chain` array
+holds the full trace entries, oldest first. Reduced to the fields that matter:
+
+```
+0. fa12168e  echo7.run  human_approval  rule=demo
+1. 384b0ab7  echo7.run  allow           rule=grant:a9b240ef  grant=a9b240ef
+```
+
+`depth` bounds the walk (default 10, capped at 50). The same edge appears as
+`parentSpanId` in the OTLP export, so Jaeger or Tempo renders the tree directly
+(see [OpenTelemetry](otel.md)). The flux7-console trace detail reads the same
+endpoint and shows the chain (approval, grant, call) next to the trace.
+
+Origin is always optional. A grant issued without one still works and yields a
+chain of one, which is an honest answer rather than a gap.
+
 ### MCP tools
 
 ```
-grant.create  {tools: "filesystem.*", duration: "1h"}
-grant.list
-grant.revoke  {id: "abc123"}
+grant.create  {tools: "filesystem.*", duration: "1h"}   (supervisor agents only)
+grant.list                                              (everyone, read-only)
+grant.revoke  {id: "abc123"}                            (supervisor agents only)
 ```
+
+`grant.create` and `grant.revoke` are operator-only, like `approval.*`: only an
+agent matching `supervisor.supervisor_agents` sees or calls them. Otherwise an
+agent could grant itself a bypass of its own `human_approval` gate. Everyone
+else creates grants with the CLI (`mesh approve --grant`) or the HTTP API.
 
 ### HTTP API
 
@@ -177,7 +232,7 @@ When the approval resolves, flux7-mesh POSTs the result to `X-Callback-URL`.
 
 ## Supervisor mode
 
-When `supervisor.enabled: true`, the approval tools (`approval.resolve`, `approval.pending`) are hidden from agents. Only an external supervisor can resolve approvals:
+The approval and grant-mutating tools are hidden from every agent that does not match `supervisor_agents`, whether or not supervisor mode is on. With `supervisor.enabled: true`, an external supervisor resolves approvals:
 
 ```yaml
 supervisor:

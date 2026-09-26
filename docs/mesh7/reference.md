@@ -36,6 +36,7 @@ mesh7 --version                         # print version
 |----------|--------|
 | `MESH_ADMIN_TOKEN` | Bearer token for the control plane (overrides `auth.admin_token`) |
 | `MESH_TRACE_KEY` | HMAC key for the trace hash chain; without it the chain is plain SHA-256 |
+| `MESH_AGENT_TOKEN` | In `--mcp` auto-proxy mode, a pre-issued JWT sent as `Authorization: Bearer <token>` to the daemon instead of the legacy `agent:<id>` form. Required when the daemon enforces JWT without `allow_legacy` |
 
 ## `mesh` (approval CLI)
 
@@ -43,11 +44,20 @@ mesh7 --version                         # print version
 mesh pending                    # list pending approvals
 mesh show <id>                  # full details
 mesh approve <id>               # approve
+mesh approve <id> --grant 1h    # approve and open a temporal grant on the same tool
+mesh approve <id> --grant 30m --tools "filesystem.*"   # widen the grant explicitly
 mesh deny <id>                  # deny
-mesh watch                      # interactive poll + prompt
+mesh watch                      # interactive poll + prompt: [a]pprove / [g]rant / [d]eny / [s]kip
 ```
 
-Set `MESH_URL` to override the default `http://localhost:9090`.
+`--grant <duration>` opens a grant that records the approval as its origin, so later calls it authorises trace back to this decision (`GET /traces/{id}/why`). Without `--tools` the grant covers the exact tool approved, never a glob. In `watch`, `[g]` approves and grants for `MESH_GRANT_DURATION`.
+
+| Variable | Default | Effect |
+|----------|---------|--------|
+| `MESH_URL` | `http://localhost:9090` | Mesh to talk to |
+| `MESH_GRANT_DURATION` | `1h` | Grant length used by `[g]` in `watch` |
+
+The `mesh` CLI sends no `Authorization` header, so it reaches the control plane only on loopback with no `admin_token` set. Against a token-protected mesh, use the HTTP API with `Authorization: Bearer $MESH_ADMIN_TOKEN`.
 
 ---
 
@@ -76,8 +86,11 @@ Set `MESH_URL` to override the default `http://localhost:9090`.
 | `GET` | `/grants` | List active grants |
 | `POST` | `/grants` | Create a grant |
 | `DELETE` | `/grants/{id}` | Revoke a grant |
+| `GET` | `/metrics` | Prometheus counters (mem7 decision writes) |
 | `GET` | `/health` | Health check and stats |
 | `GET` | `/version` | Version info |
+
+Data plane (never gated by `admin_token`): `/decide`, `/tool/{name}`, `/mcp`, `/tools`, `/mcp-servers`, `/health`, `/version`. Every other route is control plane: it requires `Authorization: Bearer <admin_token>`, or a loopback caller when no token is set. See [Control-plane auth](control-plane-auth.md).
 
 ---
 
@@ -87,8 +100,9 @@ Set `MESH_URL` to override the default `http://localhost:9090`.
 ```
 flux7-mesh/
 ├── cmd/
-│   ├── mesh7/        # Main binary (entry point, wiring)
+│   ├── mesh7/             # Main binary (entry point, wiring, auto-proxy, trace verify)
 │   └── mesh/              # Approval CLI (pending/approve/deny/watch)
+├── auth/                  # Agent identity: JWT validation, JWKS cache, legacy agent: form
 ├── config/                # YAML config parsing + validation
 ├── registry/              # Tool registry (OpenAPI + MCP + CLI imports)
 ├── policy/                # Rule evaluation (globs, conditions, fail-closed)
@@ -100,9 +114,12 @@ flux7-mesh/
 ├── ratelimit/             # Sliding window + loop detection
 ├── supervisor/            # Content isolation + injection detection
 ├── exec/                  # Secure CLI execution (no shell, arg validation)
-├── trace/                 # In-memory + JSONL + OTEL export
+├── trace/                 # In-memory + JSONL (hash chain) + OTEL export
+├── internal/              # Shared helpers: glob matching, SSRF guard
 ├── policies/              # Per-agent policy files (used with policy_dir)
 ├── sdk/python/            # Python SDK (pip install flux7-mesh)
+├── plugin/                # Claude Code plugin skills (approve, catalog, setup, status, traces)
+├── contrib/systemd/       # mesh7.service unit for daemon mode
 ├── examples/              # Example configs (filesystem, petstore, travel, langchain)
 └── docs/                  # CLI tools guide, OTEL guide, supervisor protocol
 ```
@@ -115,4 +132,4 @@ go test ./...              # all tests
 go test ./... -race        # with race detector
 ```
 
-281 Go tests across 16 packages + 49 Python SDK tests, covering config parsing, policy evaluation, JWT auth validation, HTTP/MCP proxy flows, approval lifecycle, mem7 auto-approve, supervisor agent whitelist, CLI execution security, rate limiting, tracing, OTEL export, supervisor content isolation, injection detection, durable state persistence, and auto-proxy daemon detection.
+412 Go test functions across 17 packages + 77 Python SDK tests, covering config parsing, policy evaluation (string operators, dispatcher floor), JWT auth validation, HTTP/MCP proxy flows, MCP session binding, approval lifecycle, grant lineage, mem7 auto-approve, supervisor agent whitelist, CLI execution security, SSRF guard, rate limiting, tracing and the hash chain, OTEL export, supervisor content isolation, injection detection, durable state persistence, auto-proxy daemon detection, and the `mesh7-hook` PreToolUse hook.

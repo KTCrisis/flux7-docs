@@ -15,28 +15,40 @@ go install github.com/KTCrisis/flux7-mesh/cmd/mesh7@latest
 ### Write a policy
 
 ```yaml title="config.yaml"
+port: 9090
+trace_file: traces.jsonl
+
 mcp_servers:
   - name: filesystem
     transport: stdio
     command: npx
-    args: ["-y", "@anthropic/mcp-filesystem"]
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/me/projects"]
 
 policies:
-  - tools: ["filesystem.read_file"]
-    action: allow
-  - tools: ["filesystem.write_file"]
-    action: human_approval
-  - tools: ["*"]
-    action: deny
+  - name: claude
+    agent: "claude"
+    rules:
+      - tools: ["filesystem.read_*", "filesystem.list_*"]
+        action: allow
+      - tools: ["filesystem.write_file", "filesystem.edit_file"]
+        action: human_approval
+
+  - name: default
+    agent: "*"
+    rules:
+      - tools: ["*"]
+        action: deny
 ```
+
+A policy names the agents it applies to; its rules are evaluated first match wins, and anything no rule matches is denied.
 
 ### Run
 
 ```bash
-mesh7 --config config.yaml
+mesh7 serve --config config.yaml
 ```
 
-Agents connect via MCP. Reads are allowed, writes require approval, everything else is denied. Traces are logged to `traces.jsonl`.
+Agents connect over MCP (`mesh7 --mcp --mcp-agent claude` in the agent's MCP config, which proxies to the daemon) or HTTP on `:9090`. Reads are allowed, writes wait for a human, everything else is denied. Every call is traced to `traces.jsonl`, [hash-chained](mesh7/trace-integrity.md).
 
 ---
 
@@ -56,32 +68,22 @@ go install github.com/KTCrisis/flux7-memory/cmd/mem7@latest
 MEM7_TOKEN=mem7_secret123 mem7 serve --listen :9070
 ```
 
-### Add memory to mesh config
+### Connect the mesh to memory
 
 ```yaml title="config.yaml"
-mcp_servers:
-  - name: filesystem
-    transport: stdio
-    command: npx
-    args: ["-y", "@anthropic/mcp-filesystem"]
-  - name: memory
-    transport: stdio
-    command: mem7
-    env:
-      MEM7_DIR: /home/user/.mem7
+memory:
+  url: http://localhost:9070
+  token: mem7_secret123
 
-policies:
-  - tools: ["filesystem.read_file"]
-    action: allow
-  - tools: ["filesystem.write_file"]
-    action: human_approval
-  - tools: ["memory.*"]
-    action: allow
-  - tools: ["*"]
-    action: deny
+mcp_servers:
+  - name: memory                      # optional: memory tools for the agents too
+    transport: sse
+    url: http://localhost:9070/sse
+    headers:
+      Authorization: "Bearer mem7_secret123"
 ```
 
-The mesh automatically checks memory : if a tool call has been approved 3+ times before, it's auto-approved. Decisions are stored as facts for next time.
+With a `memory:` block, the mesh writes every approval decision to mem7, and auto-approves a call that has already been approved 3 times (`supervisor.min_approvals`; `supervisor.auto_approve: false` turns it off). Arguments that look like prompt injection are never auto-approved.
 
 ### Use memory from Python
 
@@ -111,37 +113,49 @@ Automated evaluation for pending approvals. Reduces approval fatigue.
 
 ### Install
 
-```bash
-pip install flux7-supervisor
-```
-
-### Run
+Not published on PyPI yet: install from the repository.
 
 ```bash
-sup7 --mesh http://localhost:8080 --provider ollama
+pip install "git+https://github.com/KTCrisis/flux7-supervisor"
+# with the Anthropic provider
+pip install "flux7-supervisor[anthropic] @ git+https://github.com/KTCrisis/flux7-supervisor"
 ```
 
-The supervisor polls the mesh for pending approvals, applies rules, and evaluates ambiguous cases via LLM. Three providers supported : Ollama, Anthropic API, Claude Code MCP.
+### Configure and run
+
+```yaml title="sup7.yaml"
+mesh:
+  url: http://localhost:9090
+  agent_id: supervisor
+
+evaluator:
+  provider: ollama              # ollama | anthropic | claude-code | jev
+  model: qwen3:14b
+  url: http://localhost:11434
+  confidence_threshold: 0.8
+```
 
 ```bash
-# With Anthropic API
-sup7 --mesh http://localhost:8080 --provider anthropic --api-key $ANTHROPIC_API_KEY
-
-# With local Ollama
-sup7 --mesh http://localhost:8080 --provider ollama --model gemma4:e4b
+sup7 -c sup7.yaml status        # check mesh (and memory) connectivity
+sup7 -c sup7.yaml start         # start the poll loop
 ```
+
+The supervisor polls the mesh for pending approvals, applies its rules, and asks an LLM about the ambiguous cases. Providers can be chained with a circuit breaker; see [configuration](sup7/configuration.md).
 
 ---
 
 ## Add flux7-console
 
-Human oversight dashboard. Approval UI, trace viewer, memory browser.
+Human oversight dashboard: approvals, traces with their chain of authority, sessions, grants, policies, memory browser.
 
 ```bash
-docker run -p 3000:3000 ktcrisis/flux7-console
+git clone https://github.com/KTCrisis/flux7-console
+cd flux7-console/frontend
+npm install
+npm run dev                     # http://localhost:3000
 ```
 
-Open `http://localhost:3000` — the console connects to mesh and memory to show the full governance picture.
+It reads the mesh on `localhost:9090` and mem7 on `localhost:9070`; override with `MESH_URL` / `MEM7_URL` (and `MESH_ADMIN_TOKEN` for a remote mesh) in `frontend/.env.local`.
 
 ---
 
