@@ -13,7 +13,7 @@
 }
 
 .f7-hero-tag {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.72rem;
   letter-spacing: 2px;
   color: var(--f7-text2);
@@ -51,7 +51,7 @@
 }
 
 .f7-btn {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -68,8 +68,8 @@
 }
 
 .f7-btn-primary:hover {
-  background: #5cf0ff;
-  box-shadow: 0 0 20px rgba(46,230,255, 0.2);
+  background: #8fe4eb;
+  box-shadow: 0 0 20px rgba(98,214,224, 0.2);
 }
 
 .f7-btn-ghost {
@@ -101,7 +101,7 @@
 }
 
 .f7-section-num {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.72rem;
   color: var(--f7-green);
   letter-spacing: 2px;
@@ -143,7 +143,7 @@
 }
 
 .f7-diagram {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.72rem;
   line-height: 1.6;
   color: var(--f7-text);
@@ -198,19 +198,19 @@
   flex-shrink: 0;
 }
 
-.f7-qs-dot.f7-accent-green { background: var(--f7-green); box-shadow: 0 0 6px rgba(46,230,255,0.4); }
-.f7-qs-dot.f7-accent-gold { background: var(--f7-gold); box-shadow: 0 0 6px rgba(185,167,255,0.4); }
-.f7-qs-dot.f7-accent-pink { background: var(--f7-pink); box-shadow: 0 0 6px rgba(255,92,200,0.4); }
+.f7-qs-dot.f7-accent-green { background: var(--f7-green); box-shadow: 0 0 6px rgba(98,214,224,0.4); }
+.f7-qs-dot.f7-accent-gold { background: var(--f7-gold); box-shadow: 0 0 6px rgba(169,155,224,0.4); }
+.f7-qs-dot.f7-accent-pink { background: var(--f7-pink); box-shadow: 0 0 6px rgba(232,179,92,0.4); }
 
 .f7-qs-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.82rem;
   font-weight: 600;
   color: #fff;
 }
 
 .f7-qs-when {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.65rem;
   color: var(--f7-text2);
   letter-spacing: 1px;
@@ -218,7 +218,7 @@
 }
 
 .f7-qs-code {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.7rem;
   line-height: 1.7;
   color: var(--f7-text);
@@ -231,7 +231,7 @@
 }
 
 .f7-qs-comment {
-  color: #7c789e;
+  color: #5f7385;
   font-style: italic;
 }
 
@@ -286,7 +286,7 @@
 }
 
 .f7-card-name {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 1.05rem;
   font-weight: 700;
   color: #fff;
@@ -294,7 +294,7 @@
 }
 
 .f7-card-badge {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.65rem;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -305,7 +305,7 @@
 }
 
 .f7-card-role {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.72rem;
   color: var(--f7-green);
   letter-spacing: 1px;
@@ -327,7 +327,7 @@
 }
 
 .f7-card-tags span {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.62rem;
   letter-spacing: 1px;
   padding: 3px 8px;
@@ -371,13 +371,13 @@
   border-radius: 50%;
 }
 
-.f7-timeline-marker.f7-accent-green { background: var(--f7-green); box-shadow: 0 0 8px rgba(46,230,255, 0.3); }
-.f7-timeline-marker.f7-accent-gold { background: var(--f7-gold); box-shadow: 0 0 8px rgba(185,167,255, 0.3); }
-.f7-timeline-marker.f7-accent-pink { background: var(--f7-pink); box-shadow: 0 0 8px rgba(255,92,200, 0.3); }
-.f7-timeline-marker.f7-accent-cyan { background: var(--f7-cyan); box-shadow: 0 0 8px rgba(139,123,255, 0.3); }
+.f7-timeline-marker.f7-accent-green { background: var(--f7-green); box-shadow: 0 0 8px rgba(98,214,224, 0.3); }
+.f7-timeline-marker.f7-accent-gold { background: var(--f7-gold); box-shadow: 0 0 8px rgba(169,155,224, 0.3); }
+.f7-timeline-marker.f7-accent-pink { background: var(--f7-pink); box-shadow: 0 0 8px rgba(232,179,92, 0.3); }
+.f7-timeline-marker.f7-accent-cyan { background: var(--f7-cyan); box-shadow: 0 0 8px rgba(114,217,163, 0.3); }
 
 .f7-timeline-when {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.68rem;
   color: var(--f7-text2);
   letter-spacing: 1.5px;
@@ -417,7 +417,7 @@
 }
 
 .f7-compare th {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -469,7 +469,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--f7-mono);
   font-size: 0.82rem;
   font-weight: 600;
   color: #fff;
