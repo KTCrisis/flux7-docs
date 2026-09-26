@@ -439,3 +439,38 @@ body, .md-typeset {
 [data-md-color-scheme="flux7"] .highlight .l-Scalar-Plain {
   color: var(--f7-text);
 }
+
+/* --- How it works: Art Deco diagram (symmetric, stepped tiers) --- */
+.f7-deco {
+  margin: 1.6rem auto 2rem;
+  max-width: 760px;
+  --f7d-brass: var(--f7-pink);  /* amber doubles as brass */
+}
+.f7-deco svg { width: 100%; height: auto; display: block; }
+.f7-deco svg text { text-anchor: middle; }
+.f7-deco .f7d-rays line { stroke: var(--f7d-brass); stroke-width: 1; opacity: 0.55; }
+.f7-deco .f7d-arc { fill: none; stroke: var(--f7d-brass); stroke-width: 1.2; opacity: 0.8; }
+.f7-deco .f7d-arc.f7d-thin { stroke-width: 0.8; opacity: 0.5; }
+.f7-deco .f7d-agent { fill: var(--f7-bg2); stroke: var(--f7-green); stroke-width: 1.5; }
+.f7-deco .f7d-cap { font-family: var(--f7-display); font-size: 9px; letter-spacing: 0.16em; fill: var(--f7-green); dominant-baseline: middle; }
+.f7-deco .f7d-axis { stroke: var(--f7-green); stroke-width: 1.2; stroke-dasharray: 2 5; opacity: 0.7; }
+.f7-deco .f7d-pillar rect, .f7-deco .f7d-pillar polygon { fill: var(--f7-bg2); stroke: var(--f7-green); stroke-width: 1.2; }
+.f7-deco .f7d-pillar.f7d-refuse rect, .f7-deco .f7d-pillar.f7d-refuse polygon { stroke: var(--f7d-brass); }
+.f7-deco .f7d-inset { fill: none !important; stroke: var(--f7-dim) !important; stroke-width: 0.8 !important; }
+.f7-deco .f7d-vert { font-family: var(--f7-display); font-size: 13px; letter-spacing: 0.28em; fill: var(--f7-green); dominant-baseline: middle; }
+.f7-deco .f7d-vert-refuse { fill: var(--f7d-brass); }
+.f7-deco .f7d-tier { fill: var(--f7-bg2); stroke: var(--f7-green); stroke-width: 1.4; }
+.f7-deco .f7d-tier.f7d-human { stroke: var(--f7d-brass); }
+.f7-deco .f7d-level { font-family: var(--f7-display); font-weight: 600; font-size: 14px; letter-spacing: 0.14em; fill: var(--f7-text); }
+.f7-deco .f7d-q { font-family: var(--f7-body); font-size: 14px; fill: var(--f7-green-soft); }
+.f7-deco .f7d-small { font-family: var(--f7-body); font-size: 11px; fill: var(--f7-text2); }
+.f7-deco .f7d-out { stroke: var(--f7-green); stroke-width: 1.2; }
+.f7-deco .f7d-out-r { stroke: var(--f7d-brass); }
+.f7-deco .f7d-none { stroke: var(--f7-dim); stroke-dasharray: 3 4; }
+.f7-deco .f7d-tip { fill: var(--f7-green); }
+.f7-deco .f7d-tip-r { fill: var(--f7d-brass); }
+.f7-deco .f7d-edge { font-family: var(--f7-mono); font-size: 10.5px; fill: var(--f7-text2); }
+.f7-deco .f7d-dim { fill: var(--f7-dim); }
+.f7-deco .f7d-down { font-family: var(--f7-mono); font-size: 10.5px; fill: var(--f7-green); text-anchor: start !important; }
+.f7-deco .f7d-plinth rect, .f7-deco .f7d-plinth polyline { fill: var(--f7-bg2); stroke: var(--f7d-brass); stroke-width: 1.2; }
+.f7-deco .f7d-plinth-t { font-family: var(--f7-display); font-size: 13px; letter-spacing: 0.3em; fill: var(--f7d-brass); }

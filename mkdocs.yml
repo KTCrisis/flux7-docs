@@ -32,9 +32,11 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
   - attr_list
+  - def_list
 
 nav:
   - Home: index.md
+  - How it works: how-it-works.md
   - Getting Started: getting-started.md
   - flux7-mesh:
     - Overview: mesh7/index.md
