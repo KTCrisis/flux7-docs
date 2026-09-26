@@ -21,7 +21,7 @@ theme:
 
 extra_css:
   - stylesheets/flux7.css
-  - https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap
+  - https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap
 
 markdown_extensions:
   - tables
@@ -50,6 +50,7 @@ nav:
     - Supervisor Protocol: mesh7/supervisor-protocol.md
     - Deployment Modes: mesh7/deployment-modes.md
     - Observability: mesh7/otel.md
+    - Trace Integrity: mesh7/trace-integrity.md
     - Python SDK: mesh7/python-sdk.md
     - Reference: mesh7/reference.md
   - flux7-memory:

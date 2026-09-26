@@ -248,11 +248,17 @@ The data plane (tool calls, `/decide`, `/mcp`, `/health`) is never gated by `adm
 ```yaml
 port: 9090                                   # HTTP port (default 9090)
 storage_path: state.db                       # SQLite durable state (approvals, grants survive restarts)
-trace_file: traces.jsonl                     # JSONL persistence
+trace_file: traces.jsonl                     # JSONL persistence, hash-chained (MESH_TRACE_KEY → HMAC)
 otel_endpoint: /path/to/traces-otel.jsonl    # or "stdout" or "http://localhost:4318"
+otel_headers:                                # sent on every OTLP/HTTP request, ${VAR} expanded
+  Authorization: "Bearer ${OTLP_TOKEN}"
+otel_ca_cert: /etc/mesh7/collector-ca.pem    # PEM appended to the system roots
+otel_insecure_skip_verify: false             # self-signed local collector only
 approval:
   timeout_seconds: 300                       # approval TTL (default 5 min)
   notify_url: https://hooks.slack.com/...    # webhook on new pending approval
 ```
+
+Every line of `trace_file` is chained to the previous one; set `MESH_TRACE_KEY` in the service environment to make it an HMAC chain, and check it with `mesh7 trace verify` or `GET /traces/verify`. See [Trace Integrity](trace-integrity.md) and [Observability](otel.md) for OTLP delivery (batches, retries, trace context).
 
 ---
