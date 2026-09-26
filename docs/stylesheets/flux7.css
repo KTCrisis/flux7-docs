@@ -1,3 +1,22 @@
+/* JetBrains Mono, full font (v2.304, OFL, docs/assets/fonts). Google Fonts
+   serves it only in language subsets, without box drawing, arrows or
+   geometric shapes: those glyphs fell back to another font and ASCII
+   diagrams went out of line. */
+@font-face {
+  font-family: 'JetBrains Mono Full';
+  src: url('../assets/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono Full';
+  src: url('../assets/fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* slate · cyan — palette of flux7-console and the /statut page
      (tokens kept; only the values change) */
@@ -13,9 +32,9 @@
   --f7-text2: #6c7e90;
   --f7-border: #1e2a37;
   --f7-dim: #3b4a59;
-  --f7-display: 'Chakra Petch', 'JetBrains Mono', ui-monospace, monospace;
+  --f7-display: 'Chakra Petch', 'JetBrains Mono Full', ui-monospace, monospace;
   --f7-body: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --f7-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --f7-mono: 'JetBrains Mono Full', ui-monospace, 'Cascadia Mono', Consolas, monospace;
 }
 
 /* --- Slate scheme override --- */

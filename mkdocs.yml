@@ -21,7 +21,7 @@ theme:
 
 extra_css:
   - stylesheets/flux7.css
-  - https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap
+  - https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Outfit:wght@400;500;600&display=swap
 
 markdown_extensions:
   - tables
