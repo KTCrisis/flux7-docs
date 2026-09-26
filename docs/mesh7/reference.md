@@ -9,7 +9,8 @@ Commands, flags, HTTP API and repository layout.
 ```bash
 mesh7 [flags]                           # run proxy (HTTP or MCP mode)
 mesh7 serve [flags]                     # run as persistent daemon
-mesh7 discover [flags]                       # discover tools + generate policy
+mesh7 discover [flags]                  # discover tools + generate policy
+mesh7 trace verify [--json] <file>...   # check the trace hash chain (oldest file first)
 mesh7 --version                         # print version
 ```
 
@@ -26,6 +27,15 @@ mesh7 --version                         # print version
 `serve` flags: `--config <path>`, `--port <port>`. Runs as a persistent HTTP daemon. MCP clients auto-proxy to it via `--mcp`.
 
 `discover` flags: `--openapi <url>`, `--config <path>`, `--generate-policy`, `--backend <url>`.
+
+`trace verify` flags: `--json` (machine-readable report), `--key-env <VAR>` (default `MESH_TRACE_KEY`). Exit 0 when the chain holds, 1 at the first break, 2 on usage or I/O error. See [Trace Integrity](trace-integrity.md).
+
+### Environment
+
+| Variable | Effect |
+|----------|--------|
+| `MESH_ADMIN_TOKEN` | Bearer token for the control plane (overrides `auth.admin_token`) |
+| `MESH_TRACE_KEY` | HMAC key for the trace hash chain; without it the chain is plain SHA-256 |
 
 ## `mesh` (approval CLI)
 
@@ -53,6 +63,8 @@ Set `MESH_URL` to override the default `http://localhost:9090`.
 | `GET` | `/tools` | List all registered tools |
 | `GET` | `/mcp-servers` | List connected MCP servers |
 | `GET` | `/traces` | Query traces (`?agent=...&tool=...`) |
+| `GET` | `/traces/{id}/why` | Chain of authority of a call, oldest first (`?depth=10`, max 50) |
+| `GET` | `/traces/verify` | Verify the trace file's hash chain with the store's key; a break is still a `200` |
 | `GET` | `/sessions` | List sessions (id, agent, event count, timespan) |
 | `GET` | `/sessions/{id}` | Session detail |
 | `GET` | `/otel-traces` | OTLP JSON spans (`?agent=...&tool=...&limit=...`) |

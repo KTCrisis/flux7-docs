@@ -50,6 +50,7 @@ nav:
     - Supervisor Protocol: mesh7/supervisor-protocol.md
     - Deployment Modes: mesh7/deployment-modes.md
     - Observability: mesh7/otel.md
+    - Trace Integrity: mesh7/trace-integrity.md
     - Python SDK: mesh7/python-sdk.md
     - Reference: mesh7/reference.md
   - flux7-memory:
