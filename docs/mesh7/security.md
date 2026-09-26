@@ -44,8 +44,11 @@ question.
 | **Control-plane auth** (admin token / loopback) | tampering with traces, grants, approvals | [Control Plane Auth](control-plane-auth.md) |
 | **Injection detection** before auto-approve | indirect prompt injection | [Memory Integration](mem7-auto-approve.md) |
 | **Rate limiting + loop detection** | runaway agents, resource exhaustion | [Writing Policies](writing-policies.md) |
+| **MCP session binding** | session hijack by a caller holding another agent's `Mcp-Session-Id` | this page |
+| **Dispatcher floor** (`default_action`) | a broad glob handing over undeclared CLI subcommands | [Configuration](configuration.md#cli-tools) |
+| **Harness hook** (`mesh7-hook`) | built-in harness tools (Bash, Write, WebFetch) escaping policy | [Python SDK](python-sdk.md) |
 | **SSRF-guarded egress** | tool/spec poisoning, metadata theft | this page |
-| **Full JSONL trace** | "who approved that?", audit, forensics | [Observability](otel.md) |
+| **Full JSONL trace**, hash-chained (HMAC with `MESH_TRACE_KEY`) | "who approved that?", audit, forensics, silent edits of the trace file | [Trace Integrity](trace-integrity.md), [Observability](otel.md) |
 
 Two principles run through all of them:
 
@@ -92,6 +95,14 @@ spec URLs were fetched without protection, vulnerable to DNS rebinding and cloud
 metadata theft (`169.254.169.254`). Fixed: outbound fetches go through an
 SSRF-guarded client that checks every resolved IP at dial time.
 
+**MCP session riding.** A later review found that on the Streamable HTTP
+transport the `Mcp-Session-Id` was treated as enough: identity was resolved when the session opened, and any
+later request carrying the ID inherited that agent's policy. Fixed: identity is
+resolved on every request and must match the agent (and user) that opened the
+session, otherwise the call gets `403`. Closing a session with `DELETE /mcp`
+requires the same ownership, and session IDs are always minted server-side, never
+adopted from the client on `initialize`.
+
 Every fix followed the same shape, which is the single most useful pattern for
 agent security work:
 
@@ -116,7 +127,9 @@ For any deployment where the mesh is reachable beyond loopback:
 - [ ] **Transport**: terminate TLS at your ingress, or set `tls.cert_file` /
       `tls.key_file` for standalone hosts. Don't expose the port in plaintext.
 - [ ] **Data plane**: set `auth.require_authentication: true` to reject
-      anonymous callers and stop registry enumeration.
+      anonymous callers with `401` on `POST /tool/*`, `POST /decide`,
+      `POST`/`DELETE /mcp`, and to stop registry enumeration (`/tools`,
+      `/mcp-servers`).
 - [ ] **Supervisors**: declare `supervisor.supervisor_agents` explicitly — only
       those agents can mint grants or resolve approvals over MCP.
 - [ ] **Policies**: prefer `strict: true` for CLI tools, write glob policies
@@ -124,6 +137,9 @@ For any deployment where the mesh is reachable beyond loopback:
       `"*" → deny` so nothing slips through.
 - [ ] **Limits**: set per-agent `rate_limit` so a runaway or hostile agent can't
       exhaust shared resources.
+- [ ] **Traces**: set `MESH_TRACE_KEY` in the service environment so the trace
+      chain is an HMAC, and check it with `mesh7 trace verify` or
+      `GET /traces/verify`. See [Trace Integrity](trace-integrity.md).
 
 ## See also
 

@@ -12,6 +12,8 @@ mcp_servers:
     transport: stdio
     command: npx
     args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/me"]
+    env:                     # optional, added to mesh7's own environment
+      NODE_OPTIONS: "--max-old-space-size=512"
 
   - name: remote-service
     transport: sse
@@ -29,6 +31,9 @@ no long-lived stream: each JSON-RPC request is a POST whose response carries
 the answer, either as JSON or as an event stream. Sessions (`Mcp-Session-Id`)
 are handled transparently, and cross-origin redirects are refused so a
 compromised upstream cannot relay your tool calls elsewhere.
+
+`env` applies to `stdio` servers: the child inherits mesh7's environment plus
+these entries. Values are taken literally (no `${VAR}` expansion).
 
 ## OpenAPI specs
 
@@ -75,11 +80,19 @@ cli_tools:
     default_action: allow
     bare:
       allowed_args: ["-r", "--compact-output"]
+
+  - name: make
+    bin: make
+    working_dir: /srv/project   # cwd of the process (default: mesh7's cwd)
+    env:                        # added to a minimal PATH/HOME/LANG environment
+      CI: "true"
 ```
 
 Agents call CLI tools like any MCP tool — `terraform.plan`, `kubectl.get`, `gh.pr`. A `bare` binary registers a single `<name>.run` tool. Every CLI tool accepts an optional `stdin` param, piped to the process as data (never shell-interpreted).
 
-`default_action` is the floor for the dynamic dispatcher (`<name>.__dispatch`), which is where undeclared subcommands land. It can only restrict, never widen, and defaults to `deny` — so a glob such as `terraform.*: allow` cannot hand over `destroy` along with `plan`. See [docs/cli-tools.md](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/cli-tools.md).
+A CLI process does not inherit mesh7's environment: it gets `PATH`, `HOME`, `LANG=en_US.UTF-8` and the entries of `env`, nothing else. Secrets present in the daemon's environment therefore do not leak to wrapped binaries unless you list them.
+
+`default_action` is the floor for the dynamic dispatcher (`<name>.__dispatch`), which is where undeclared subcommands land. It can only restrict, never widen, and defaults to `deny` — so a glob such as `terraform.*: allow` cannot hand over `destroy` along with `plan`. See [CLI Tools](cli-tools.md#dispatcher-floor).
 
 ## Policies
 
@@ -177,15 +190,17 @@ Hot-reload covers policies and rate limits only. Changes to MCP servers, CLI too
 
 ```yaml
 supervisor:
-  enabled: true          # hide approval tools from agents
+  enabled: true          # MCP agents block on human_approval until resolved
   expose_content: false  # redact raw params → structural metadata
-  supervisor_agents:     # agent IDs (glob) allowed to see approval tools
+  supervisor_agents:     # agent IDs (glob) allowed to see approval and grant tools
     - "supervisor-*"
 ```
 
-When enabled, `approval.resolve` and `approval.pending` are hidden from agents — only an external supervisor can resolve approvals. See [docs/supervisor-protocol.md](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/supervisor-protocol.md).
+The operator tools exposed over MCP (`approval.resolve`, `approval.pending`, `grant.create`, `grant.revoke`) are visible and callable only by agents matching `supervisor_agents`, whether or not `enabled` is set. Any other agent gets them neither in `tools/list` nor on call, and resolves approvals through the admin-gated HTTP API or the `mesh` CLI. `grant.list` and `mesh.catalog` stay visible to everyone.
 
-Agents matching `supervisor_agents` globs are whitelisted: they see and can call approval tools even in supervisor mode. This enables a Managed Agent (e.g. Claude via MCP Streamable HTTP) to act as a cloud supervisor — connecting to `POST /mcp` with `Authorization: Bearer agent:supervisor-claude` and resolving approvals with Claude's judgment.
+`enabled` changes what an MCP agent experiences on `human_approval`: instead of receiving an immediate "pending" result, the call blocks until a supervisor (or a human) resolves it, then returns the outcome. See [Supervisor Protocol](supervisor-protocol.md).
+
+This enables a Managed Agent (e.g. Claude via MCP Streamable HTTP) to act as a cloud supervisor, connecting to `POST /mcp` with an identity that matches `supervisor_agents` and resolving approvals with Claude's judgment.
 
 ## Memory integration
 
@@ -239,7 +254,7 @@ auth:
 |---------|--------|------------------------------|
 | `admin_token` | Control plane — a caller here can mint grants and resolve approvals, overriding what policies enforce | Loopback-only |
 | `jwt` | Data-plane identity — cryptographic agent id instead of the spoofable `agent:<id>` header. With `user_claim` set, a delegation-shaped token also carries the human the agent acts for, recorded on every trace (`user_id`) and OTel span (`enduser.id`) | Plaintext identity accepted |
-| `require_authentication` | Anonymous access to `/tools` and `/mcp-servers` enumeration | Anonymous allowed, governed by policy |
+| `require_authentication` | Anonymous data-plane access: `POST /tool/*`, `POST /decide`, `POST`/`DELETE /mcp`, and `/tools`, `/mcp-servers` enumeration all return `401` without a credential | Anonymous allowed, governed by policy (fails closed) |
 
 The data plane (tool calls, `/decide`, `/mcp`, `/health`) is never gated by `admin_token`. Details: [control-plane auth](https://docs.flux7.art/mesh7/control-plane-auth/) and [JWT authentication](https://docs.flux7.art/mesh7/jwt-auth/).
 
@@ -257,7 +272,15 @@ otel_insecure_skip_verify: false             # self-signed local collector only
 approval:
   timeout_seconds: 300                       # approval TTL (default 5 min)
   notify_url: https://hooks.slack.com/...    # webhook on new pending approval
+  channel: tty-fallback                      # queue | tty | tty-fallback (default)
+tls:                                         # optional in-binary TLS, both fields required
+  cert_file: /etc/mesh7/tls.crt
+  key_file: /etc/mesh7/tls.key
 ```
+
+`approval.channel` routes `human_approval` for MCP tool calls: `queue` always enqueues (daemons, supervisor setups), `tty` requires the interactive `/dev/tty` prompt and denies when none is available, `tty-fallback` tries the prompt and falls back to the queue. Any other value is a config error. REST calls (`POST /tool/*`) always use the queue.
+
+`tls` serves HTTPS directly when both `cert_file` and `key_file` are set. Without it mesh7 serves plaintext and logs a warning; the recommended deployment keeps it on loopback or an internal network behind an ingress that terminates TLS.
 
 Every line of `trace_file` is chained to the previous one; set `MESH_TRACE_KEY` in the service environment to make it an HMAC chain, and check it with `mesh7 trace verify` or `GET /traces/verify`. See [Trace Integrity](trace-integrity.md) and [Observability](otel.md) for OTLP delivery (batches, retries, trace context).
 

@@ -1,6 +1,9 @@
 # Claude Code Callback
 
-The most powerful evaluation mode : Claude Code acts as the supervisor's brain, with full codebase context.
+!!! warning "Not functional in the current release"
+    The MCP server that would expose `sup7_pending` and `sup7_verdict` is not started yet. The tools are defined in `mcp_server.py`, but nothing runs the server, there is no `--mcp` flag, and `mcp_server.transport` and `mcp_server.port` are not read. With `provider: claude-code`, every evaluation waits for `callback_timeout` and then escalates to a human. The flow below describes the intended design. Meanwhile, use the `ollama`, `anthropic` or `jev` provider, or a [provider chain](configuration.md#provider-chain).
+
+The intended evaluation mode: Claude Code acts as the supervisor's brain, with full codebase context.
 
 ## Architecture
 
@@ -63,13 +66,13 @@ Register sup7 as an MCP source so Claude Code can see its tools :
 mcp_servers:
   - name: sup7
     command: sup7
-    args: ["start", "--config", "sup7.yaml", "--mcp"]
+    args: ["-c", "sup7.yaml", "start"]   # intended shape; the MCP server is not started yet
     transport: stdio
 ```
 
 ### Policy
 
-Allow the supervisor agent to resolve approvals :
+Supervisor mode in flux7-mesh hides the approval tools from ordinary agents, so that only the listed supervisor agents can see and resolve them :
 
 ```yaml
 supervisor:

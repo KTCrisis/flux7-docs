@@ -137,6 +137,7 @@ You should see 4 entries: the 3 seeded + 1 auto-approval by `supervisor:mem7`.
 | Any rejections in history | Escalate | Normal approval flow |
 | Not enough history | Escalate | Normal approval flow |
 | flux7-memory down or unreachable | Escalate | Normal approval flow |
+| Params look like a prompt injection | Skip check, escalate | Normal approval flow |
 | `auto_approve: false` | Skip check | Normal approval flow |
 
 ## Graceful degradation
@@ -146,9 +147,15 @@ You should see 4 entries: the 3 seeded + 1 auto-approval by `supervisor:mem7`.
 - Search returns no results → escalate
 - All failure modes fall back to the normal approval flow — the auto-approve is additive, never subtractive.
 
+## Injection guard
+
+Auto-approval replays a human's past decision on a routine pattern. A call whose parameters carry a prompt-injection marker is no longer routine, so the flux7-memory lookup is skipped entirely: the call is logged (`injection risk detected, forcing human review`) and goes to the normal approval queue, where an external supervisor or a human resolves it. Three prior approvals of `filesystem.write_file` do not approve a write whose content says "ignore previous instructions".
+
+The guard is a single function shared by every transport (REST, MCP stdio, MCP Streamable HTTP). It is a regex tripwire on known phrasings, not a classifier; see the known limits on the [overview](index.md#known-limits).
+
 ## Metrics
 
-Monitor the flux7-memory write path at `GET /metrics`:
+Monitor the flux7-memory write path at `GET /metrics` (Prometheus text format). It is a control-plane endpoint: scrape it from loopback, or send `Authorization: Bearer <admin_token>` (see [Control Plane Auth](control-plane-auth.md)).
 
 ```
 agent_mesh_mem7_writes_attempted_total

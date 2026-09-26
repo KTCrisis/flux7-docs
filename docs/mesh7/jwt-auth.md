@@ -40,8 +40,9 @@ auth:
 | `audience` | No | — | Validate `aud` claim if set |
 | `agent_claim` | No | `sub` | Which claim is used as agent ID for policies |
 | `user_claim` | No | *(off)* | Which claim names the human the agent acts for. Empty means tokens carry no user and traces record none |
+| `allow_legacy` | No | `false` | Accept the plaintext `Bearer agent:<name>` form alongside JWTs (migration only) |
 
-**No `auth.jwt` block = no validation.** The legacy `Bearer agent:<name>` format still works, backward compatible.
+**No `auth.jwt` block = no validation.** The legacy `Bearer agent:<name>` format still works, backward compatible. **With `auth.jwt` set, it is rejected with `401`** unless `allow_legacy: true`.
 
 ### Delegation: the agent and the user
 
@@ -70,7 +71,8 @@ Authorization header present?
   │
   ├─ No → anonymous
   │
-  ├─ "Bearer agent:<name>" → legacy path (no validation, name used as agent ID)
+  ├─ "Bearer agent:<name>" → allow_legacy on: name used as agent ID (no validation)
+  │                          allow_legacy off: HTTP 401
   │
   └─ "Bearer <jwt>" → validate against JWKS
        ├─ Valid → extract agent_claim → agent ID for policies
@@ -191,3 +193,27 @@ Managed Agent ── POST /mcp ── Authorization: Bearer <jwt> ──► mesh
                                                            extract agent ID
                                                            apply policies
 ```
+
+## Stdio clients under auto-proxy
+
+When a daemon is running, `mesh7 --mcp` does not serve tools itself: it becomes
+a stdio→HTTP shuttle to the daemon's `POST /mcp`. By default the shuttle
+identifies itself with the legacy `Bearer agent:<--mcp-agent>` header, which a
+JWT-strict daemon rejects. Give the client a token instead:
+
+```json
+{
+  "mcpServers": {
+    "mesh7": {
+      "command": "mesh7",
+      "args": ["--mcp", "--config", "config.yaml"],
+      "env": { "MESH_AGENT_TOKEN": "<jwt issued for this agent>" }
+    }
+  }
+}
+```
+
+With `MESH_AGENT_TOKEN` set, the shuttle sends `Authorization: Bearer <token>`
+and the daemon derives the agent (and user) from its claims; `--mcp-agent` is
+then ignored for identity. The token is read once at start, so a short-lived
+token needs the client restarted when it expires.

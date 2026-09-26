@@ -154,6 +154,18 @@ When multiple policies match an agent, more specific agent globs are evaluated f
 
 This means `agent: "claude"` rules are checked before `agent: "*"` rules, regardless of file order.
 
+## Inspecting the active policies
+
+`GET /policies` returns the policies currently in force, in evaluation order (after the specificity sort and any hot-reload). It is a control-plane endpoint: loopback, or `Authorization: Bearer <admin_token>` (see [Control Plane Auth](control-plane-auth.md)).
+
+```bash
+curl -s localhost:9090/policies | jq '.[] | {name, agent, source_file}'
+# → {"name": "claude", "agent": "claude", "source_file": "claude.local.yaml"}
+# → {"name": "default", "agent": "*", "source_file": "default.yaml"}
+```
+
+`source_file` is the file the policy was read from, relative to `policy_dir`, and is absent for policies declared inline in `config.yaml`. The loader sets it; YAML cannot. It exists because a policy's `name` and its file name need not match (`claude.local.yaml` can declare `name: claude`), so a tool that wants to edit a rule can find its file without guessing.
+
 ## Conditions
 
 Rules can include conditions on request parameters:

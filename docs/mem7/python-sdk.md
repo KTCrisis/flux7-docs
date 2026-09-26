@@ -38,11 +38,17 @@ for mem in m.context("deployment approval", limit=5):
 
 ## API
 
-### `Mem7(url, token=None)`
+Every argument after the first positional one is keyword-only.
 
-Create a client connected to a running `mem7 serve` instance.
+### `Mem7(url, token="", timeout=30)`
 
-### `store(key, value, tags=None, agent=None, ttl=0)`
+Create a client connected to a running `mem7 serve` instance. `timeout` is in seconds. Errors raise `Mem7Error`.
+
+### `health()`
+
+`True` when `/healthz` answers 200, `False` otherwise (never raises).
+
+### `store(key, value, *, tags=None, agent="", ttl=0)`
 
 Upsert a memory entry.
 
@@ -50,15 +56,16 @@ Upsert a memory entry.
 m.store("user.prefs", "prefers dark mode", tags=["user", "ui"])
 ```
 
-### `search(query, limit=10, mode="raw", tags=None, agent=None)`
+### `search(query, *, mode="natural", tags=None, agent="", limit=10, include_neighbors=False, neighbor_radius=1, since="", until="")`
 
-Full-text search, returns formatted markdown text.
+Full-text search (BM25), returns formatted markdown text. The SDK defaults to `mode="natural"` (stop words stripped, OR-joined: suited to agent questions); `mode="raw"` keeps FTS5 operators (`foo*`, `AND`, `OR`, `NOT`), and is the default of the MCP tool itself. `include_neighbors` expands hits on sequential keys (`conv.session.t005` brings `t004` and `t006`, `neighbor_radius` on each side). `since` / `until` bound `updated_at` (RFC 3339).
 
 ```python
-results = m.search("dark mode", limit=5, mode="natural")
+results = m.search("dark mode", limit=5)
+results = m.search("deploy*", mode="raw", since="2026-09-01T00:00:00Z")
 ```
 
-### `context(query, limit=10, **kwargs)`
+### `context(query, *, mode="natural", tags=None, agent="", limit=10, ...)`
 
 Same as `search` but returns a list of `Memory` objects with structured fields :
 
@@ -80,7 +87,7 @@ block = m.context_block("user preferences", limit=10)
 # Inject into system prompt or context window
 ```
 
-### `recall(key=None, tags=None, agent=None, limit=10)`
+### `recall(*, key="", tags=None, agent="", limit=10)`
 
 Recall by key, tags, or agent. Bumps access tracking.
 
@@ -89,7 +96,7 @@ m.recall(key="deploy.decision")
 m.recall(tags=["decision"], limit=5)
 ```
 
-### `list(tags=None, agent=None)`
+### `list(*, tags=None, agent="")`
 
 List keys with metadata (without values).
 
@@ -97,7 +104,7 @@ List keys with metadata (without values).
 entries = m.list(tags=["decision"])
 ```
 
-### `get(path, from_line=None, to_line=None)`
+### `get(path, *, from_line=0, to_line=0)`
 
 Read a workspace file.
 
@@ -105,7 +112,7 @@ Read a workspace file.
 content = m.get("memory/2026-05-09.md")
 ```
 
-### `forget(key=None, tags=None, agent=None)`
+### `forget(*, key="", tags=None)`
 
 Delete by key and/or tags. Appends a tombstone to the markdown workspace.
 
