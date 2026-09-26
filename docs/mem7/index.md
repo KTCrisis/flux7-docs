@@ -81,9 +81,9 @@ for mem in m.context("deployment approval", limit=5):
 | **Storage** | Opaque | Markdown files you can read and edit |
 | **Deployment** | SaaS or heavy deps | Single binary, zero CGO |
 
-## Current state (May 2026)
+## Current state (September 2026)
 
-**v0.5.0** — 7 MCP tools, Python SDK, hybrid search + LLM reranking, SSE daemon mode, auto-proxy (stdio detects running daemon).
+**v0.5.1** — 7 MCP tools, Python SDK, hybrid search + LLM reranking, SSE daemon mode with a systemd unit, auto-proxy (stdio detects running daemon), build version in `/healthz`, a Dockerfile for stdio mode.
 
 71% LoCoMo benchmark — competitive with VC-backed solutions without gaming the eval.
 

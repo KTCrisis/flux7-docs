@@ -5,7 +5,7 @@
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MEM7_DIR` | `~/.mem7` | Data directory (hosts `workspace/` and `index.db`) |
-| `MEM7_LISTEN` | `:9070` | HTTP bind address in `serve` mode |
+| `MEM7_LISTEN` | `:9070` | HTTP bind address in `serve` mode. In stdio mode, the address probed for a running daemon to auto-proxy to (`localhost:9070`) |
 | `MEM7_TOKEN` | *(empty)* | Bearer token for `/rpc` and `/memory/*` |
 | `MEM7_MAX_ENTRIES` | `10000` | Soft ceiling on live entries |
 | `MEM7_EMBED_URL` | *(empty)* | Embedding provider base URL. Enables hybrid search |
@@ -20,6 +20,15 @@ Flags on `mem7 serve` mirror `MEM7_LISTEN` and `MEM7_TOKEN` :
 ```bash
 mem7 serve --listen :9070 --token mem7_secret123
 ```
+
+Maintenance commands:
+
+```bash
+mem7 rescan    # rebuild index.db from the markdown workspace
+mem7 prune     # drop TTL-expired entries
+```
+
+A systemd unit for daemon mode ships in `contrib/systemd/mem7.service`.
 
 ## Hybrid search
 
@@ -58,7 +67,7 @@ MEM7_EMBED_PROVIDER=openai \
 
 ## LLM reranking
 
-Opt-in on top of hybrid search. Over-fetches 3x candidates, merges via RRF, then uses an LLM to score relevance before returning the final top-N. Falls back to non-reranked results if the LLM is unavailable.
+Opt-in, with or without embeddings. Over-fetches 3x candidates (merged via RRF when hybrid search is on, BM25 alone otherwise), then uses an LLM to score relevance before returning the final top-N. Falls back to non-reranked results if the LLM is unavailable.
 
 ```bash
 MEM7_EMBED_URL=http://localhost:11434 \
