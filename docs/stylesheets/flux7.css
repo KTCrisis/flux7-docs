@@ -18,22 +18,23 @@
 }
 
 :root {
-  /* slate · cyan — palette of flux7-console and the /statut page
-     (tokens kept; only the values change) */
-  --f7-bg: #0a0e13;          /* ground */
-  --f7-bg2: #10161e;         /* surface */
-  --f7-bg3: #16202b;         /* raised */
-  --f7-green: #62d6e0;       /* primary = cyan (links, active nav, YAML keys) */
-  --f7-green-soft: #9fdfe6;  /* light cyan — h3, table headers */
-  --f7-pink: #e8b35c;        /* amber — keywords */
-  --f7-cyan: #72d9a3;        /* green — inline code, numbers, functions, info */
-  --f7-gold: #a99be0;        /* soft violet — strings, warning admonitions */
-  --f7-text: #c8d4df;
-  --f7-text2: #6c7e90;
-  --f7-border: #1e2a37;
-  --f7-dim: #3b4a59;
-  --f7-display: 'Chakra Petch', 'JetBrains Mono Full', ui-monospace, monospace;
-  --f7-body: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* flux7.art charter (2026-09-26): black ground, grey panels, the
+     cyan-violet-magenta gradient as the only signature */
+  --f7-bg: #09090b;          /* ground */
+  --f7-bg2: #111113;         /* panel */
+  --f7-bg3: #18181b;         /* raised */
+  --f7-green: #2ee6ff;       /* primary = cyan (links, active nav, YAML keys) */
+  --f7-green-soft: #a5f3fc;  /* light cyan: h3, table headers */
+  --f7-pink: #ff5cc8;        /* magenta: keywords */
+  --f7-cyan: #8b7bff;        /* violet: inline code, numbers, functions, info */
+  --f7-gold: #ffd166;        /* gold: strings, warning admonitions */
+  --f7-text: #d4d4d8;
+  --f7-text2: #71717a;
+  --f7-border: #232327;
+  --f7-dim: #3f3f46;
+  --f7-grad: linear-gradient(90deg, #2ee6ff, #8b7bff 55%, #ff5cc8);
+  --f7-display: 'JetBrains Mono Full', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --f7-body: 'Mona Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f7-mono: 'JetBrains Mono Full', ui-monospace, 'Cascadia Mono', Consolas, monospace;
 }
 
@@ -54,7 +55,7 @@
 
   --md-code-bg-color: var(--f7-bg2);
   --md-code-fg-color: var(--f7-text);
-  --md-code-hl-color: rgba(114,217,163,0.12);
+  --md-code-hl-color: rgba(139,123,255,0.12);
 
   --md-typeset-color: var(--f7-text);
 
@@ -65,7 +66,7 @@
   --md-footer-fg-color--lighter: var(--f7-border);
 
   --md-typeset-table-color: var(--f7-border);
-  --md-typeset-table-color--light: rgba(98,214,224,0.04);
+  --md-typeset-table-color--light: rgba(46,230,255,0.04);
 
   --md-admonition-bg-color: var(--f7-bg2);
   --md-admonition-fg-color: var(--f7-text);
@@ -80,19 +81,19 @@
      Without an override it leaks into this scheme unchanged. Mapped to the
      palette so no element can fall back to a light-on-dark or dark-on-dark
      pairing. Roles follow the comments at the top of this file. */
-  --md-default-bg-color--light: rgba(10,14,19,0.7);
-  --md-default-bg-color--lighter: rgba(10,14,19,0.3);
-  --md-default-bg-color--lightest: rgba(10,14,19,0.12);
+  --md-default-bg-color--light: rgba(9,9,11,0.7);
+  --md-default-bg-color--lighter: rgba(9,9,11,0.3);
+  --md-default-bg-color--lightest: rgba(9,9,11,0.12);
   --md-primary-fg-color--light: var(--f7-bg3);
   --md-primary-fg-color--dark: var(--f7-bg);
   --md-primary-bg-color--light: var(--f7-green-soft);
   --md-accent-bg-color: var(--f7-bg);
   --md-accent-bg-color--light: var(--f7-bg2);
-  --md-accent-fg-color--transparent: rgba(98,214,224,0.10);
+  --md-accent-fg-color--transparent: rgba(46,230,255,0.10);
 
-  --md-code-bg-color--light: rgba(16,22,30,0.7);
-  --md-code-bg-color--lighter: rgba(16,22,30,0.3);
-  --md-code-hl-color--light: rgba(114,217,163,0.06);
+  --md-code-bg-color--light: rgba(17,17,19,0.7);
+  --md-code-bg-color--lighter: rgba(17,17,19,0.3);
+  --md-code-hl-color--light: rgba(139,123,255,0.06);
   --md-code-hl-keyword-color: var(--f7-pink);
   --md-code-hl-string-color: var(--f7-gold);
   --md-code-hl-number-color: var(--f7-cyan);
@@ -103,15 +104,15 @@
   --md-code-hl-operator-color: var(--f7-text);
   --md-code-hl-punctuation-color: var(--f7-text);
   --md-code-hl-variable-color: var(--f7-text);
-  --md-code-hl-comment-color: #5f7385;
+  --md-code-hl-comment-color: #63636b;
   --md-code-hl-generic-color: var(--f7-text2);
 
   --md-typeset-kbd-color: var(--f7-bg3);
   --md-typeset-kbd-accent-color: var(--f7-bg2);
   --md-typeset-kbd-border-color: var(--f7-dim);
-  --md-typeset-mark-color: rgba(98,214,224,0.25);
-  --md-typeset-del-color: rgba(232,179,92,0.18);
-  --md-typeset-ins-color: rgba(98,214,224,0.18);
+  --md-typeset-mark-color: rgba(46,230,255,0.25);
+  --md-typeset-del-color: rgba(255,92,200,0.18);
+  --md-typeset-ins-color: rgba(46,230,255,0.18);
 
   --md-warning-bg-color: var(--f7-bg3);
   --md-warning-fg-color: var(--f7-gold);
@@ -124,7 +125,7 @@
 }
 
 [data-md-color-scheme="flux7"] .md-header {
-  background: linear-gradient(180deg, var(--f7-bg) 0%, rgba(10,14,19,0.95) 100%);
+  background: linear-gradient(180deg, var(--f7-bg) 0%, rgba(9,9,11,0.95) 100%);
   border-bottom: 1px solid var(--f7-border);
   backdrop-filter: blur(8px);
 }
@@ -202,12 +203,13 @@
 
 [data-md-color-scheme="flux7"] .md-typeset h1 {
   color: #fff;
-  border-bottom: 1px solid var(--f7-border);
+  border-bottom: 1px solid transparent;
+  border-image: var(--f7-grad) 1;
   padding-bottom: 0.6rem;
 }
 
 [data-md-color-scheme="flux7"] .md-typeset h2 {
-  color: #e6edf3;
+  color: #f4f4f5;
   border-bottom: 1px solid var(--f7-border);
   padding-bottom: 0.4rem;
 }
@@ -246,7 +248,7 @@
 }
 
 [data-md-color-scheme="flux7"] .md-typeset table:not([class]) tr:hover td {
-  background: rgba(98,214,224,0.04);
+  background: rgba(46,230,255,0.04);
 }
 
 /* Nav logo styling */
@@ -315,7 +317,7 @@
   opacity: 0.8;
 }
 
-/* Typography — Outfit for prose, Chakra Petch for titles, JetBrains Mono for code */
+/* Typography — Mona Sans for prose, JetBrains Mono for titles and code (flux7.art charter) */
 body, .md-typeset {
   font-family: var(--f7-body);
   font-size: 0.78rem;
@@ -383,7 +385,7 @@ body, .md-typeset {
 [data-md-color-scheme="flux7"] .highlight .ch,
 [data-md-color-scheme="flux7"] .highlight .cp,
 [data-md-color-scheme="flux7"] .highlight .cpf {
-  color: #5f7385;
+  color: #63636b;
   font-style: italic;
 }
 
@@ -464,4 +466,12 @@ body, .md-typeset {
 .md-typeset .f7-diagram pre code, .md-typeset pre.f7-diagram code, .md-typeset .f7-diagram code {
   line-height: 1.3;
   letter-spacing: 0;
+}
+
+/* Signature: the site name in the header carries the gradient */
+[data-md-color-scheme="flux7"] .md-header__topic:first-child .md-ellipsis {
+  background: var(--f7-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

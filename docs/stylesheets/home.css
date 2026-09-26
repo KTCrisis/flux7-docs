@@ -21,6 +21,7 @@
 }
 
 .f7-hero-title {
+  font-family: var(--f7-display);
   font-size: clamp(4rem, 12vw, 7rem);
   font-weight: 700;
   line-height: 0.95;
@@ -33,7 +34,10 @@
 }
 
 .f7-t2 {
-  color: var(--f7-green);
+  background: var(--f7-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .f7-hero-sub {
@@ -68,8 +72,8 @@
 }
 
 .f7-btn-primary:hover {
-  background: #8fe4eb;
-  box-shadow: 0 0 20px rgba(98,214,224, 0.2);
+  background: #7cf0ff;
+  box-shadow: 0 0 20px rgba(46,230,255, 0.2);
 }
 
 .f7-btn-ghost {
@@ -198,9 +202,9 @@
   flex-shrink: 0;
 }
 
-.f7-qs-dot.f7-accent-green { background: var(--f7-green); box-shadow: 0 0 6px rgba(98,214,224,0.4); }
-.f7-qs-dot.f7-accent-gold { background: var(--f7-gold); box-shadow: 0 0 6px rgba(169,155,224,0.4); }
-.f7-qs-dot.f7-accent-pink { background: var(--f7-pink); box-shadow: 0 0 6px rgba(232,179,92,0.4); }
+.f7-qs-dot.f7-accent-green { background: var(--f7-green); box-shadow: 0 0 6px rgba(46,230,255,0.4); }
+.f7-qs-dot.f7-accent-gold { background: var(--f7-gold); box-shadow: 0 0 6px rgba(255,209,102,0.4); }
+.f7-qs-dot.f7-accent-pink { background: var(--f7-pink); box-shadow: 0 0 6px rgba(255,92,200,0.4); }
 
 .f7-qs-label {
   font-family: var(--f7-mono);
@@ -231,7 +235,7 @@
 }
 
 .f7-qs-comment {
-  color: #5f7385;
+  color: #63636b;
   font-style: italic;
 }
 
@@ -371,10 +375,10 @@
   border-radius: 50%;
 }
 
-.f7-timeline-marker.f7-accent-green { background: var(--f7-green); box-shadow: 0 0 8px rgba(98,214,224, 0.3); }
-.f7-timeline-marker.f7-accent-gold { background: var(--f7-gold); box-shadow: 0 0 8px rgba(169,155,224, 0.3); }
-.f7-timeline-marker.f7-accent-pink { background: var(--f7-pink); box-shadow: 0 0 8px rgba(232,179,92, 0.3); }
-.f7-timeline-marker.f7-accent-cyan { background: var(--f7-cyan); box-shadow: 0 0 8px rgba(114,217,163, 0.3); }
+.f7-timeline-marker.f7-accent-green { background: var(--f7-green); box-shadow: 0 0 8px rgba(46,230,255, 0.3); }
+.f7-timeline-marker.f7-accent-gold { background: var(--f7-gold); box-shadow: 0 0 8px rgba(255,209,102, 0.3); }
+.f7-timeline-marker.f7-accent-pink { background: var(--f7-pink); box-shadow: 0 0 8px rgba(255,92,200, 0.3); }
+.f7-timeline-marker.f7-accent-cyan { background: var(--f7-cyan); box-shadow: 0 0 8px rgba(139,123,255, 0.3); }
 
 .f7-timeline-when {
   font-family: var(--f7-mono);
