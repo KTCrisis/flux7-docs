@@ -9,8 +9,10 @@ Policy enforcement in 5 minutes. No other component required.
 ### Install
 
 ```bash
-go install github.com/KTCrisis/flux7-mesh/cmd/mesh7@latest
+curl -fsSL https://raw.githubusercontent.com/KTCrisis/flux7-mesh/main/install.sh | sh
 ```
+
+Installs `mesh7` (the proxy) and `mesh` (the approval CLI) in `~/.local/bin`. With Go: `go install github.com/KTCrisis/flux7-mesh/cmd/mesh7@latest` (and `.../cmd/mesh@latest`). Other options and running it as a service: [flux7-mesh getting started](mesh7/getting-started.md).
 
 ### Write a policy
 

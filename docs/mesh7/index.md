@@ -124,8 +124,8 @@ flux7-mesh and flux7-memory cover every Claude surface with a native integration
 ## Get started
 
 ```bash
-# Install
-go install github.com/KTCrisis/flux7-mesh/cmd/mesh7@latest
+# Install (mesh7 and the mesh approval CLI)
+curl -fsSL https://raw.githubusercontent.com/KTCrisis/flux7-mesh/main/install.sh | sh
 
 # Add to Claude Code
 claude mcp add mesh7 -- mesh7 --mcp --config config.yaml
