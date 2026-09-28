@@ -26,7 +26,7 @@ mesh7 --version                         # print version
 
 `serve` flags: `--config <path>`, `--port <port>`. Runs as a persistent HTTP daemon. MCP clients auto-proxy to it via `--mcp`.
 
-`discover` flags: `--openapi <url>`, `--config <path>`, `--generate-policy`, `--backend <url>`.
+`discover` flags: `--openapi <url>`, `--config <path>`, `--generate-policy`, `--backend <url>`. The draft allows named reads and asks for everything else, each tool commented with its classification: see [Tool Classification](tool-classification.md).
 
 `trace verify` flags: `--json` (machine-readable report), `--key-env <VAR>` (default `MESH_TRACE_KEY`). Exit 0 when the chain holds, 1 at the first break, 2 on usage or I/O error. See [Trace Integrity](trace-integrity.md).
 
@@ -70,7 +70,7 @@ The `mesh` CLI sends no `Authorization` header, so it reaches the control plane 
 | `POST` | `/tool/{name}` | Proxy a tool call through policy |
 | `POST` | `/mcp` | MCP Streamable HTTP transport (JSON-RPC) |
 | `DELETE` | `/mcp` | Terminate MCP HTTP session |
-| `GET` | `/tools` | List all registered tools |
+| `GET` | `/tools` | List all registered tools, each with its `classification` (family, access, reasons) |
 | `GET` | `/mcp-servers` | List connected MCP servers |
 | `GET` | `/traces` | Query traces (`?agent=...&tool=...`) |
 | `GET` | `/traces/{id}/why` | Chain of authority of a call, oldest first (`?depth=10`, max 50) |
@@ -83,6 +83,8 @@ The `mesh` CLI sends no `Authorization` header, so it reaches the control plane 
 | `POST` | `/approvals/{id}/approve` | Approve (optional: reasoning, confidence) |
 | `POST` | `/approvals/{id}/deny` | Deny (optional: reasoning, confidence) |
 | `GET` | `/policies` | List all policies (sorted by specificity) |
+| `PUT` | `/policies/{agent}/tools/{tool}` | Set one tool's action for one agent in its policy file (`allow`, `deny`, `human_approval`, `inherit`); see [Tool Classification](tool-classification.md#changing-one-tools-action) |
+| `GET` | `/tools/decisions` | What the policy decides for every tool, for `?agent=<id>`, before any call |
 | `GET` | `/grants` | List active grants |
 | `POST` | `/grants` | Create a grant |
 | `DELETE` | `/grants/{id}` | Revoke a grant |

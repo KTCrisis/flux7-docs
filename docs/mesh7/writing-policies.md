@@ -327,6 +327,7 @@ policies:
 
 ## Next steps
 
+- [Tool Classification](tool-classification.md): a draft policy from `discover`, per-agent decisions, changing one tool's action
 - [Approval Flow](approval-flow.md) — what happens when a tool call hits `human_approval`
 - [CLI Tools](cli-tools.md) — governing git, docker, terraform as tools
 - [Memory Integration](mem7-auto-approve.md) — auto-approve from past decisions

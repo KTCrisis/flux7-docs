@@ -22,6 +22,7 @@ flux7-console (management plane — L2 visibility + human control)
 ├── Memory Viewer     — reads flux7-memory, displays decisions + facts
 ├── Approval UI       — shows pending approvals, human clicks approve/reject
 ├── OTEL spans        — spans from the OTLP export, per agent and tool
+├── Tools             — catalogue, classification, per-agent decisions, editable
 └── (planned) Governance Engine, Agent Catalog, Dependency Graph
 ```
 
@@ -78,12 +79,15 @@ Anthropic Console is great for Managed Agents visibility. flux7-console compleme
 
 ## Current state (September 2026)
 
-- **Dashboard** — Next.js 16, routes grouped as in the sidebar:
-    - Observe: `/mesh` overview, `/mesh/agents`, `/mesh/traces`, `/mesh/sessions`, `/mesh/otel`
-    - Govern: `/mesh/policies`, `/mesh/approvals`, `/mesh/supervisor`, `/mesh/grants`, `/mesh/tools`
-    - Storage: `/mesh/memory` (flux7-memory browser)
+- **Dashboard**: Next.js 16. The sidebar follows the mesh's decision chain:
+    - `/mesh` overview and `/mesh/approvals`, on top (the one queue that waits for a human, L2)
+    - Catalog: `/mesh/agents`, `/mesh/tools`
+    - Rules: `/mesh/policies`, `/mesh/grants` (L0 and its temporary exceptions)
+    - Delegation: `/mesh/memory` (flux7-memory, past decisions), `/mesh/supervisor` (L1), who decides when no rule does
+    - Observe: `/mesh/traces` (tabs *Calls* and *Spans (OTLP)*, the latter at `/mesh/otel`), `/mesh/sessions`
+- **Tools**: every tool of every upstream (MCP servers and CLI tools, one card each, clickable as a filter), with its [classification](../mesh7/tool-classification.md) and what the policy decides for a chosen agent. The decision is a selector: changing it rewrites that agent's policy file through mesh7, which validates, applies at once and records the edit in the trace. A *To review* filter lists tools the policy allows without being a plain named read.
 - **Traces** — a call let through by a grant shows its chain of authority: the approval behind the grant (who, when, the reasoning), the grant, then the call, from `GET /traces/{id}/why`. A badge reports the state of mesh7's trace hash chain (`GET /traces/verify`): intact with its sequence range, or the first broken line. The key stays in mesh7.
-- **OTEL** — spans from the OTLP export, per agent and tool; a true waterfall (parent spans, time axis) is still to come.
+- **Spans (OTLP)**: the same calls as OTLP spans, per agent and tool; a true waterfall (parent spans, time axis) is still to come.
 - **Supervisor** — migrated to [flux7-supervisor (sup7)](https://github.com/KTCrisis/flux7-supervisor) as a standalone L1 agent (rules + pluggable LLM: Ollama, Anthropic, Claude Code MCP callback)
 - **Next** — governance engine (scoring, lifecycle), flux7-memory SDK integration, dependency graph
 

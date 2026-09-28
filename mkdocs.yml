@@ -44,6 +44,7 @@ nav:
     - Configuration: mesh7/configuration.md
     - Agent Security: mesh7/security.md
     - Writing Policies: mesh7/writing-policies.md
+    - Tool Classification: mesh7/tool-classification.md
     - JWT Authentication: mesh7/jwt-auth.md
     - Control Plane Auth: mesh7/control-plane-auth.md
     - Approval Flow: mesh7/approval-flow.md
