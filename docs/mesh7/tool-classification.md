@@ -1,8 +1,8 @@
 # Tool Classification
 
-Writing a policy means judging every tool an upstream declares, for every agent. mesh7 helps with that judgment: it reads what each tool declares about itself, suggests a starting point, shows what the policy decides for each agent, and lets you change one tool's action without touching the rest of the file.
+Writing a policy means judging every tool an upstream declares, for every agent. mesh7 helps with that judgment: it reads what each tool declares about itself, suggests a starting point, shows what the policy decides for each agent, lets you change one tool's action without touching the rest of the file, and can hold the catalogue to the version you reviewed.
 
-None of this changes how a call is decided. The policy alone decides; the classification is advice for the person writing it.
+The classification is advice for the person writing the policy; it never decides a call. Two opt-in settings act on the catalogue: [pinning](#pinning-the-catalogue) holds back upstream tools that appeared or changed since they were accepted, and [hiding](#hiding-what-can-only-be-denied) keeps tools the policy can only deny out of the model's context.
 
 ## Two families of tools
 
@@ -102,6 +102,30 @@ The file is edited as text, not re-serialized: comments and blank lines stay as 
 `by` is recorded as given: the admin token proves the right to edit, not an identity.
 
 flux7-console drives both endpoints from its Tools page: a family filter, an agent selector, a *To review* filter for tools the policy allows without being a plain named read, and a selector on each decision.
+
+## Pinning the catalogue
+
+An MCP server can change its tools after they were reviewed: a new tool appears, a description gains instructions for the model (the "rug pull"). With `pin_tools: true`, mesh7 keeps a fingerprint of each upstream MCP tool (description, parameter schemas sorted by name, annotations) in `storage_path`:
+
+| Status | When | Floor, whatever the policy says |
+|---|---|---|
+| `pinned` | matches the accepted version | none |
+| `new` | the server added it after its catalogue was pinned | `deny` |
+| `changed` | its fingerprint differs from the accepted one | `human_approval` |
+
+A server seen for the first time is pinned whole (trust on first use). The floor joins the CLI dispatcher floor: the stricter one wins, and the policy cannot relax it. `GET /tools/decisions` reports each tool's `pin` status.
+
+```bash
+curl localhost:9090/tools/pins                          # held-back tools, pinned and current descriptions
+curl -X POST localhost:9090/tools/pins/accept \
+     -d '{"server": "github", "by": "marc"}'            # or {"tools": ["github.create_issue"]}
+```
+
+Both are control plane. Each accepted tool is recorded in the trace chain as `mesh.pin_accept`, with both descriptions and the new fingerprint. Upstream catalogues are read when mesh7 connects to a server, so a change shows up at the next start or reconnect.
+
+## Hiding what can only be denied
+
+With `hide_denied_tools: true`, an MCP client's `tools/list` leaves out every tool whose every path through the policy ends in `deny` for that agent (fallthrough action and each conditional rule, after floors). Grants lift `human_approval` only, never `deny`, so such a tool could never be called: hiding it keeps it out of the model's context and loses nothing. Calls to it are still evaluated and refused.
 
 ## Next steps
 

@@ -85,6 +85,8 @@ The `mesh` CLI sends no `Authorization` header, so it reaches the control plane 
 | `GET` | `/policies` | List all policies (sorted by specificity) |
 | `PUT` | `/policies/{agent}/tools/{tool}` | Set one tool's action for one agent in its policy file (`allow`, `deny`, `human_approval`, `inherit`); see [Tool Classification](tool-classification.md#changing-one-tools-action) |
 | `GET` | `/tools/decisions` | What the policy decides for every tool, for `?agent=<id>`, before any call |
+| `GET` | `/tools/pins` | Upstream tools held back by `pin_tools` (new or changed), with both descriptions |
+| `POST` | `/tools/pins/accept` | Pin the current version of `{"tools": [...]}` or of every pending tool of `{"server": "..."}` |
 | `GET` | `/grants` | List active grants |
 | `POST` | `/grants` | Create a grant |
 | `DELETE` | `/grants/{id}` | Revoke a grant |

@@ -258,6 +258,21 @@ auth:
 
 The data plane (tool calls, `/decide`, `/mcp`, `/health`) is never gated by `admin_token`. Details: [control-plane auth](https://docs.flux7.art/mesh7/control-plane-auth/) and [JWT authentication](https://docs.flux7.art/mesh7/jwt-auth/).
 
+## Tool catalogue
+
+```yaml
+pin_tools: true             # fingerprint upstream MCP tools; hold back new and changed ones
+hide_denied_tools: true     # leave out of tools/list what the policy can only deny
+```
+
+Both are off by default: on a machine where the operator is also the user, the full list and no pinning is usually what is wanted.
+
+`pin_tools` keeps a fingerprint of every upstream MCP tool (description, parameter schemas, annotations) in `storage_path`. A server seen for the first time is trusted and pinned as is; afterwards a tool it adds is denied and a tool that changed asks for approval, whatever the policy says, until it is accepted. Without `storage_path` the pins live in memory and are re-trusted at every start.
+
+`hide_denied_tools` removes from an MCP client's `tools/list` every tool whose every path through the policy ends in `deny` for that agent, so the model never sees it. A tool with an approval or a conditional allow stays listed, and calls are enforced either way.
+
+Details: [Tool Classification](tool-classification.md#pinning-the-catalogue).
+
 ## Other settings
 
 ```yaml
