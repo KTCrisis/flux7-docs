@@ -112,11 +112,12 @@ Delete memories by key and/or tags. A tombstone section is appended to the markd
 |--------|------|-------------|
 | `GET`  | `/healthz` | Liveness probe, returns `{"status":"ok","version":"…"}` (always public, no auth) |
 | `POST` | `/rpc` | JSON-RPC 2.0 — same tool surface as stdio |
-| `GET`  | `/sse` | MCP SSE transport (for flux7-mesh daemon mode) |
-| `POST` | `/messages` | MCP SSE message endpoint |
+| `POST` | `/mcp` | MCP Streamable HTTP (for flux7-mesh daemon mode). No session, JSON answers, notifications get `202`; `GET` and `DELETE` return `405` |
+| `GET`  | `/sse` | MCP HTTP+SSE transport, deprecated by the MCP spec (2026-07-28); kept for existing clients, use `/mcp` |
+| `POST` | `/messages` | Message endpoint of the deprecated HTTP+SSE transport |
 | `POST` | `/memory/snapshot_reminder` | Instructional payload for pre-compaction context injection |
 
-Bearer auth is applied to every route except `/healthz` (`/rpc`, `/sse`, `/messages`, `/memory/*`) when `MEM7_TOKEN` is set.
+Bearer auth is applied to every route except `/healthz` (`/rpc`, `/mcp`, `/sse`, `/messages`, `/memory/*`) when `MEM7_TOKEN` is set.
 
 ### Example : JSON-RPC call
 

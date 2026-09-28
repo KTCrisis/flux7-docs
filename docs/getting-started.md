@@ -79,8 +79,8 @@ memory:
 
 mcp_servers:
   - name: memory                      # optional: memory tools for the agents too
-    transport: sse
-    url: http://localhost:9070/sse
+    transport: streamable-http
+    url: http://localhost:9070/mcp
     headers:
       Authorization: "Bearer mem7_secret123"
 ```
