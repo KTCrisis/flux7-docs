@@ -51,9 +51,20 @@ The HTTP proxy path (`POST /tool/{name}`) always uses the queue regardless of th
 
 ## Resolving approvals
 
-### In Claude Code (MCP mode)
+### In Claude Code (MCP mode): approve, then retry
 
-Claude Code shows a permission prompt inline. The developer says yes or no. This is the default for solo dev use.
+When no terminal prompt is available (Claude Code runs mesh7 without one), the call returns at once:
+
+```
+Approval required (id: d9a80d29) for filesystem.write_file, valid 299s.
+Ask the user to approve it, with one of:
+  mesh approve d9a80d29        (terminal)
+  the Approvals page of flux7-console
+  POST /approvals/d9a80d29/approve on the mesh HTTP port
+Once approved, call filesystem.write_file again with the same arguments: the approved call runs once.
+```
+
+The agent relays this to its user. Once a human approves, the agent's retry of **the same tool with the same arguments**, by the same agent, within the approval's validity, runs, and uses up the approval: a second retry asks again, and a call with other arguments gets its own approval. The agent itself cannot approve (see below). Since v0.17.0; earlier versions pointed the agent at `approval.resolve`, which a regular agent cannot call.
 
 ### Via MCP virtual tools
 

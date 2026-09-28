@@ -8,15 +8,17 @@ Install flux7-mesh, write your first policy, and make a governed tool call. Five
 
     ```bash
     go install github.com/KTCrisis/flux7-mesh/cmd/mesh7@latest
+    go install github.com/KTCrisis/flux7-mesh/cmd/mesh@latest   # approval CLI
     ```
 
 === "Binary (Linux amd64)"
 
     ```bash
-    curl -L $(curl -s https://api.github.com/repos/KTCrisis/flux7-mesh/releases/latest \
-      | grep browser_download_url | grep linux_amd64 | cut -d '"' -f 4) \
-      -o mesh7 && chmod +x mesh7 && sudo mv mesh7 /usr/local/bin/
+    curl -L https://github.com/KTCrisis/flux7-mesh/releases/latest/download/mesh7_linux_amd64.tar.gz | tar xz
+    sudo mv mesh7 mesh /usr/local/bin/
     ```
+
+    The archive holds `mesh7` (the proxy) and `mesh` (the approval CLI). Other targets: `mesh7_{linux,darwin}_{amd64,arm64}.tar.gz`, `mesh7_windows_{amd64,arm64}.zip`. Archives are named without a version since v0.17.0, so `releases/latest/download/` always resolves.
 
 Verify:
 
