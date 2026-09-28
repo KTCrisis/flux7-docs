@@ -370,3 +370,16 @@ This settles Config 2's limitation (the mesh dies with Claude) and makes Config 
 | `supervisor.enabled` (block until resolved) + `supervisor_agents` (operator tools gated) | Done |
 | `mesh7 serve` (daemon) | Done (v0.9.4) |
 | `mesh7 --mcp` (auto-proxy to daemon) | Done (v0.9.3) |
+
+## Running mesh7 as a service
+
+Without a daemon, Claude Code starts `mesh7 --mcp` itself and the proxy lives as long as the session: enough for one client. A daemon serves several clients (Claude Code, the Agent SDK, sup7, scripts) and survives them.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/KTCrisis/flux7-mesh/main/install.sh | sh -s -- --service
+```
+
+`--service` writes `~/.config/systemd/user/mesh7.service`, running `mesh7 serve --config ~/.config/mesh7/config.yaml` (a starter config that denies everything is written if none exists; `--config PATH` picks another), and starts it. Run `loginctl enable-linger $USER` to keep it up after logout. Where the systemd user manager is unavailable, as on some WSL setups, `--system` writes `/etc/systemd/system/mesh7.service` with `User=` set to you, through sudo. The unit is also in the repository and release archives: `contrib/systemd/mesh7.service`.
+
+A service has no terminal: keep `approval.channel: queue` (the starter config sets it) and answer approvals with `mesh approve <id>` or the console. Clients relay to the daemon with `mesh7 --mcp --config <same file>`; a client with another config on the same port is refused.
+

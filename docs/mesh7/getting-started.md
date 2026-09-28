@@ -11,6 +11,14 @@ Install flux7-mesh, write your first policy, and make a governed tool call. Five
     go install github.com/KTCrisis/flux7-mesh/cmd/mesh@latest   # approval CLI
     ```
 
+=== "Script (Linux, macOS)"
+
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/KTCrisis/flux7-mesh/main/install.sh | sh
+    ```
+
+    Installs `mesh7` and `mesh` in `~/.local/bin` (`/usr/local/bin` as root). Options: `--prefix DIR`, `--version vX.Y.Z`, and on Linux `--service` or `--system` to run mesh7 as a daemon (see [Deployment modes](deployment-modes.md#running-mesh7-as-a-service)). Pass options after `sh -s --`.
+
 === "Binary (Linux amd64)"
 
     ```bash
