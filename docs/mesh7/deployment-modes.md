@@ -353,6 +353,8 @@ Two subcommands:
 - **`mesh7 serve`** — run as a persistent daemon (HTTP + manages upstream MCP servers)
 - **`mesh7 --mcp`** — auto-detects a running daemon and proxies to it (MCP stdio for Claude Code)
 
+The auto-proxy relays only to a daemon serving **the same config file**: the daemon reports an identifier of its config in `/health` (a hash of the file's absolute path, not the path), and `mesh7 --mcp --config other.yaml` facing a daemon of another config on the same port exits with an error instead of handing that project's agent the daemon's tools and policy. Give each config its own `port:`. A daemon older than v0.17.1 reports no identifier: the proxy relays as before and logs a warning.
+
 The auto-proxy identifies itself to the daemon as `Bearer agent:<--mcp-agent>`. If the daemon validates JWTs (`auth.jwt` set, `allow_legacy` off), that form is rejected: set `MESH_AGENT_TOKEN` to a JWT in the MCP client's environment and the proxy sends it instead. See [JWT Authentication](jwt-auth.md#stdio-clients-under-auto-proxy).
 
 This settles Config 2's limitation (the mesh dies with Claude) and makes Config 7 durable rather than merely working. Every client uses the auto-proxy instead of spawning its own mesh7, and the daemon outlives all of them.

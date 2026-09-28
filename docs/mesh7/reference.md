@@ -20,7 +20,7 @@ mesh7 --version                         # print version
 | `--openapi` | | OpenAPI spec URL (ephemeral, for quick tests) |
 | `--backend` | | Backend base URL override |
 | `--port` | from config or `9090` | Port override |
-| `--mcp` | `false` | MCP mode (stdio JSON-RPC — auto-proxies to daemon if running) |
+| `--mcp` | `false` | MCP mode (stdio JSON-RPC); relays to a daemon on the config's port if it serves the same config file, refuses one serving another |
 | `--mcp-agent` | `claude` | Agent ID for MCP-mode policy evaluation |
 | `--mcp-session-id` | auto-generated | Session ID for MCP traces |
 
