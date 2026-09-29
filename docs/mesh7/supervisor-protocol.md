@@ -429,11 +429,11 @@ The reference implementation is [flux7-supervisor (sup7)](../sup7/index.md). It 
 
 ### Features
 
-- **Rule engine** — first-match-wins rules with a simple DSL (`starts_with`, `equals`, `contains`). Fast path for known patterns (0ms).
-- **Decision model** — when no rule matches, asks narrow typed questions to a chain of providers (Jev, then a local Ollama model if it is down) and decides in code from the probabilities (a few hundred milliseconds). Thresholds are measured on a bench, see [Measuring](../sup7/measuring.md).
-- **Process manager** — auto-spawns flux7-mesh when it's down, monitors health, restarts on crash.
-- **Memory integration** — stores decisions in memory-mcp (via flux7-mesh), recalls them on startup for context continuity across sessions.
-- **JSONL audit trail** — every decision logged with reasoning, confidence, rule matched, and evaluation time.
+- **Rule engine** — first-match-wins rules with a simple DSL (`starts_with`, `equals`, `contains`, `in`). Fast path for known patterns (0ms).
+- **Decision model** — when no rule matches, asks narrow typed questions to a chain of providers (Jev, then a local Ollama model if it is down) and decides in code from the probabilities (a few hundred milliseconds). Thresholds are measured on a bench.
+- **Memory integration** — stores each decision in flux7-memory through the mem7 SDK, and reads past decisions as precedents.
+- **JSONL audit trail** — every decision logged with reasoning, confidence, rule matched, provider provenance and evaluation time.
+- **Admin API** — status, pause and resume, edits of rules and question sets, `POST /evaluate` for enforcement points outside the mesh.
 
 ### Quick start
 
