@@ -65,6 +65,8 @@ nav:
   - flux7-supervisor:
     - Overview: sup7/index.md
     - Configuration: sup7/configuration.md
+    - Jev and question sets: sup7/jev.md
+    - Measuring: sup7/measuring.md
     - Claude Code Callback: sup7/claude-code-callback.md
   - flux7-console:
     - Overview: console/index.md

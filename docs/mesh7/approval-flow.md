@@ -12,12 +12,14 @@ Agent calls filesystem.write_file
   ├── Check 1: Temporal grant active?
   │   yes → bypass approval, proceed
   │
-  ├── Check 2: flux7-memory auto-approve? (3+ past approvals)
+  ├── Check 2: flux7-memory precedents? (read tools only,
+  │   enough human approvals of this tool + agent, no refusal)
   │   yes → proceed, traced as supervisor:mem7
   │
   └── Submit to approval queue
       │
-      ├── MCP mode: routed per approval.channel (TTY prompt or queue)
+      ├── MCP mode: routed per approval.channel (TTY prompt or queue);
+      │   with approval.wait_seconds, waits that long for a supervisor
       ├── HTTP mode: always the queue — blocks until resolved
       │
       └── Human/supervisor resolves
@@ -48,6 +50,39 @@ approval:
 Without an explicit channel, routing depends on how the process was launched: a daemon started from a terminal keeps a usable `/dev/tty` and will prompt in a window nobody watches. Set `channel: queue` for any unattended deployment (systemd, container, supervisor loop).
 
 The HTTP proxy path (`POST /tool/{name}`) always uses the queue regardless of this setting.
+
+## Waiting for an automatic decision: `approval.wait_seconds`
+
+In MCP mode a `human_approval` call is non-blocking: the agent gets the approval id at once and retries the same call once it is approved. When a supervisor such as [sup7](../sup7/index.md) decides in about half a second, that retry is friction, and an LLM that rewrites its arguments on retry opens a new approval.
+
+```yaml
+approval:
+  channel: queue
+  wait_seconds: 3       # 0 (default): answer at once
+```
+
+With a wait, the call holds for up to `wait_seconds`. Decided in time, it runs (or is refused) **in the same request**, and the approval is used up, so a retry of the same call does not run it again. Not decided in time (a human, a slow supervisor), the agent gets the approval id as before. Keep it short: a stdio session is blocked while it waits, and a human never answers within it. Pair it with a supervisor that polls faster than the wait (sup7 `poll.interval: 500ms`).
+
+Measured in production: a write sent to approval, approved by a sup7 rule in 447 ms, ran in the same request, without a retry.
+
+## Changing approval settings at runtime
+
+`GET /approvals/settings` and `PUT /approvals/settings` (control plane) read and change `approval.timeout_seconds`, `approval.wait_seconds`, `supervisor.auto_approve`, `supervisor.min_approvals` and `supervisor.auto_approve_writes` without a restart.
+
+```bash
+curl -s -X PUT http://localhost:9090/approvals/settings -H "Content-Type: application/json" \
+  -d '{"timeout_seconds":300,"wait_seconds":3,"auto_approve":true,"min_approvals":3,"auto_approve_writes":false,"by":"alice"}'
+```
+
+A change is:
+
+- validated: timeout 30 to 3600 s, wait 0 to 10 s, human approvals needed 1 to 100;
+- written back to the config file line by line, through the YAML tree: comments, key order and file mode are kept, and the previous version is saved as `<config>.bak-<timestamp>` (never overwriting an earlier backup);
+- read back to check the file says what was asked (otherwise the file is restored);
+- applied at once to every session;
+- traced as `mesh.approval_settings_edit`, with the values before and after.
+
+flux7-console edits them from the Approvals page.
 
 ## Resolving approvals
 

@@ -82,6 +82,10 @@ The `mesh` CLI sends no `Authorization` header, so it reaches the control plane 
 | `GET` | `/approvals/{id}` | Approval detail with context |
 | `POST` | `/approvals/{id}/approve` | Approve (optional: reasoning, confidence) |
 | `POST` | `/approvals/{id}/deny` | Deny (optional: reasoning, confidence) |
+| `GET` | `/approvals/settings` | Approval settings in force (timeout, wait, auto-approval from precedents) |
+| `PUT` | `/approvals/settings` | Change them at runtime: validated, written to the config file, applied at once, traced as `mesh.approval_settings_edit` |
+| `GET` | `/approvals/precedents` | mem7 precedents per tool and agent, and whether the next call would pass on them |
+| `POST` | `/approvals/precedents/forget` | Drop one tool + agent's decisions from mem7 (`{"tool", "agent"}`) |
 | `GET` | `/policies` | List all policies (sorted by specificity) |
 | `PUT` | `/policies/{agent}/tools/{tool}` | Set one tool's action for one agent in its policy file (`allow`, `deny`, `human_approval`, `inherit`); see [Tool Classification](tool-classification.md#changing-one-tools-action) |
 | `GET` | `/tools/decisions` | What the policy decides for every tool, for `?agent=<id>`, before any call |

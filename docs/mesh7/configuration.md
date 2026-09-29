@@ -212,17 +212,18 @@ memory:
   token: ""                     # optional Bearer token
 ```
 
-When configured, every approval resolve (approve, deny, timeout) is written to mem7 as a fact with tags `[decision, approved|denied, <tool>, agent:<id>]`.
+When configured, every approval resolve (approve, deny, timeout) is written to mem7 as a fact with tags `[decision, approved|denied|timeout, <tool>, by:<human|supervisor|mem7|system>, agent:<id>]`.
 
-**Auto-approve from past decisions** — when `memory.url` is set, mesh7 queries mem7 before submitting to the approval queue. If a tool+agent pattern has 3+ consistent approvals with 0 rejections, it is auto-approved (traced as `supervisor:mem7`). Governance gets less intrusive over time without getting less safe.
+**Auto-approve from past decisions** — when `memory.url` is set, mesh7 asks mem7 before submitting to the approval queue. A tool that **reads**, with at least `min_approvals` **human** approvals of exactly this tool and agent and no refusal, is approved at once (traced as `supervisor:mem7`). Approvals by a supervisor or by auto-approval itself never count, and writes are never approved from precedents unless `auto_approve_writes` is set.
 
 ```yaml
 supervisor:
-  auto_approve: true     # default true when memory.url is set
-  min_approvals: 3       # threshold for auto-approve (default 3)
+  auto_approve: true          # default true when memory.url is set
+  min_approvals: 3            # human approvals needed (default 3)
+  auto_approve_writes: false  # default: precedents approve reads only
 ```
 
-The auto-approve is a pre-filter (Level 1). If it can't resolve, the request proceeds to the external supervisor (if running) or human. If mem7 is down, the request is escalated — never blocked. See [docs/mem7-auto-approve.md](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/mem7-auto-approve.md) for a step-by-step example.
+The auto-approve is a pre-filter (Level 1). If it can't resolve, the request proceeds to the external supervisor (if running) or human. If mem7 is down, the request is escalated — never blocked. See [Auto-approve from flux7-memory](mem7-auto-approve.md) for why these limits exist and a step-by-step example. These settings can be changed at runtime: [Approval flow](approval-flow.md#changing-approval-settings-at-runtime).
 
 ## Authentication
 
@@ -288,6 +289,7 @@ approval:
   timeout_seconds: 300                       # approval TTL (default 5 min)
   notify_url: https://hooks.slack.com/...    # webhook on new pending approval
   channel: tty-fallback                      # queue | tty | tty-fallback (default)
+  wait_seconds: 0                            # MCP: wait for a supervisor's decision before answering (0 = none, max 10)
 tls:                                         # optional in-binary TLS, both fields required
   cert_file: /etc/mesh7/tls.crt
   key_file: /etc/mesh7/tls.key

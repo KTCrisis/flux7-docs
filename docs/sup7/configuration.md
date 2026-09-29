@@ -28,7 +28,7 @@ memory:
 
 # LLM evaluation provider
 evaluator:
-  provider: ollama             # ollama | anthropic | claude-code | jev
+  provider: ollama             # ollama | anthropic | claude-code | jev | none (rules only)
   model: qwen3:14b            # model name (ignored for claude-code and jev)
   url: http://localhost:11434  # Ollama URL (ignored for anthropic/claude-code/jev)
   timeout: 30                  # LLM call timeout in seconds
@@ -45,7 +45,8 @@ admin:
   enabled: false               # off by default
   host: 127.0.0.1              # loopback; set a token before binding elsewhere
   port: 9096
-  token: ""                    # when set: "Authorization: Bearer <token>" on all routes but /health
+  token: ""                    # when set: "Authorization: Bearer <token>" on all routes but /health;
+                               # required to edit files and start evaluation runs
   recent_decisions: 200        # decisions kept in memory for GET /decisions
 
 # MCP server for Claude Code callback (not started in the current release)
@@ -56,13 +57,14 @@ mcp_server:
 
 # Poll loop
 poll:
-  interval: 2s                 # supports: ms, s, m, h
+  interval: 2s                 # supports: ms, s, m, h; 500ms with mesh7's approval.wait_seconds
   tool_scopes: []              # tool glob filters, empty = all tools
 
 # Evaluation rules (first-match-wins)
 rules:
   - name: safe-reads
-    condition: "tool contains read"
+    # exact names: "tool contains read" would also approve gmail_mark_as_read, which writes
+    condition: "tool in filesystem.read_file, filesystem.read_text_file, filesystem.list_directory"
     action: approve
     confidence: 0.95
     description: routine read   # optional, appended to the decision reasoning
@@ -83,6 +85,10 @@ project_dirs:
 
 # Decision log file (JSONL)
 decision_log: sup7-decisions.jsonl
+
+# Evaluation runs (see Measuring)
+bench:
+  dir: ~/.sup7/bench            # sets/*.jsonl (labelled cases), runs/<id>/ (results)
 ```
 
 ## Rule conditions
@@ -91,12 +97,13 @@ Conditions follow the format `<field> <operator> <value>` :
 
 | Operator | Example | Meaning |
 |----------|---------|---------|
-| `contains` | `tool contains read` | tool name includes "read" |
+| `in` | `tool in filesystem.read_file, filesystem.list_directory` | one of these exact names (comma-separated) |
+| `contains` | `tool contains read` | substring: also matches `gmail_mark_as_read`, avoid it for approvals |
 | `equals` / `==` | `tool == filesystem.write_file` | exact match |
 | `not_equals` / `!=` | `tool != filesystem.delete` | not equal |
 | `starts_with` | `params.path starts_with /home` | string prefix |
 
-Special value `project_dir` checks against all entries in `project_dirs` :
+Special value `project_dir` checks against all entries in `project_dirs`. The path is normalised first (`..` resolved, `~` expanded) and must be a project dir or continue with a separator: `<project>/../.bashrc` and a sibling `<project>-backup/x` do not match, and a relative path never does.
 
 ```yaml
 - name: project-writes
@@ -153,30 +160,26 @@ Requires `ANTHROPIC_API_KEY` environment variable. Install with `pip install "fl
 ```yaml
 evaluator:
   provider: jev
-  confidence_threshold: 0.8
+  confidence_threshold: 0.6            # Jev's confidence is 1 - the highest danger (see below)
   jev:
     backend: cloudflare                # cloudflare (Workers AI, model typesafe/jev) | typesafe (model jev-latest)
     model: ""                          # empty: the backend's default model
-    url: ""                            # empty: the backend's public endpoint
+    url: ""                            # empty: the backend's public endpoint; a local /v1/systemone runtime works too
     api_key_env: CLOUDFLARE_API_TOKEN  # TYPESAFE_API_KEY with backend: typesafe
     account_id_env: CLOUDFLARE_ACCOUNT_ID  # cloudflare only
-    injection_max: 0.5                 # above: escalate
-    destructive_max: 0.2               # above: never auto-approve
+    questions: []                      # question set files (globs allowed); empty = the shipped socle
+    destructive_max: 0.2               # a danger above this blocks approval (default for danger questions)
     in_scope_min: 0.7                  # below: never auto-approve
-    deny_min: 0.9                      # deny only when this probable
+    deny_min: 0.9                      # deny only when a danger is this probable...
+    deny_in_scope_max: 0.7             # ...and the call is this far out of the agent's activity
+    injection_max: 0.5                 # above: escalate (default for manipulation questions)
+    project_min: 0.7                   # P(target_zone = project) above which an overwrite is the agent's job
     redact_params: [content]           # parameter names never sent to the model
 ```
 
-`api_key_env` and `account_id_env` name environment variables; the secrets themselves stay out of the file. Jev answers four typed questions about the pending call, each with a probability:
+`api_key_env` and `account_id_env` name environment variables; the secrets themselves stay out of the file. The code defaults above are conservative, for a new installation without measurements; the values used in production were measured, see [Measuring](measuring.md). The questions, their families and how sup7 decides from them: [Jev and question sets](jev.md).
 
-| Question | Type | Asks |
-|----------|------|------|
-| `decision` | choice | approve, escalate or deny |
-| `destructive` | noul | deletes, overwrites or exfiltrates data, or changes permissions or secrets |
-| `in_scope` | noul | consistent with the agent's recent activity |
-| `injection` | noul | parameters carry instructions aimed at a model |
-
-sup7 combines them in code, fail-closed: escalate when `injection` exceeds `injection_max`; deny only when deny is chosen with a probability of at least `deny_min`; approve only when approve is chosen, `destructive` is at most `destructive_max` and `in_scope` at least `in_scope_min` (then `confidence_threshold` applies); escalate everything else. A missing environment variable, a network or HTTP error, or an unreadable answer counts as a failure, which escalates (or moves to the next provider in a chain). The probabilities are written into the reasoning.
+A missing environment variable, a network or HTTP error, or an unreadable answer counts as a failure, which escalates (or moves to the next provider in a chain). The probabilities are written into the reasoning, headed by the model and the question fingerprint (`Jev jev-1.13.0 q=9bf9f0bc317f: approve (…)`).
 
 ### Claude Code
 
@@ -206,7 +209,7 @@ evaluator:
       model: qwen3:14b
 ```
 
-Each chain entry is a full `evaluator` block; `confidence_threshold`, `breaker_failures` and `breaker_cooldown` are read from the top level. When `chain` is non-empty it replaces the single `provider`.
+Each chain entry is a full `evaluator` block; `breaker_failures` and `breaker_cooldown` are read from the top level. A chain entry may set its own `confidence_threshold`, which then applies to that provider's verdicts: confidences are not comparable across models (Jev's is computed, an LLM's is self-reported). Unset, the top-level threshold applies. When `chain` is non-empty it replaces the single `provider`.
 
 Providers are tried in order and the first one that answers gives the verdict; an `escalate` verdict is an answer, not a failure. The next provider is tried only when the previous one fails (network error, HTTP error such as 402, timeout, unreadable answer). After `breaker_failures` consecutive failures a provider is skipped for `breaker_cooldown` seconds. If every provider fails, sup7 escalates to a human. The reasoning is prefixed with the provider that answered and those skipped or failed, e.g. `[ollama, jev skipped] ...`, and `GET /status` on the admin API reports each provider as `ok`, `failing` or `skipped`.
 
@@ -220,4 +223,4 @@ admin:
   token: ""
 ```
 
-Off by default. Routes: `GET /health` (no token), `GET /status`, `GET /config` (never secrets), `GET /decisions?limit=50` (1 to 500), `POST /pause`, `POST /resume`. See [the overview](index.md#admin-api).
+Off by default. Routes: `GET /health` (no token), `GET /status`, `GET /config` (never secrets; shows each provider's effective threshold, the poll scope and the question sets), `GET /decisions?limit=50` (1 to 500), `POST /pause`, `POST /resume`, the file routes (`/files`) and the evaluation routes (`/bench/...`). Editing and starting a run need `token`. See [the overview](index.md#admin-api).

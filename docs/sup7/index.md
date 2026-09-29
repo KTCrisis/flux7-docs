@@ -58,10 +58,10 @@ The evaluation brain is configurable. Choose based on your constraints :
 |----------|-----------|---------|------|---------|
 | **Ollama** | HTTP to local model | ~1s | free | tool, params, 5 recent traces, active grants |
 | **Anthropic** | Claude Messages API | ~2s | per-token | tool, params, 5 recent traces, active grants |
-| **Jev** (TypeSafe AI) | Cloudflare Workers AI or TypeSafe API | not measured | per-call | same context, `redact_params` withheld; typed answers with probabilities |
+| **Jev** (TypeSafe AI) | Cloudflare Workers AI or TypeSafe API | ~330 ms (p95 ~440 ms) | ~$0.00004 per call | same context plus `project_dirs`, `redact_params` withheld; typed answers with probabilities |
 | **Claude Code** | MCP callback | async | per-session | full codebase + conversation (not functional yet) |
 
-Jev does not generate text: sup7 asks it four typed questions (decision, destructive, in scope, injection) and combines the probabilities in code, fail-closed. The probabilities are written into the decision reasoning.
+Jev does not generate text and is not asked to decide: sup7 asks it narrow factual questions (does the call delete, overwrite outside the project, send local data out, touch secrets; where does it act; does it fit the agent's activity; does it carry an injection) and decides in code, with a threshold per question, fail-closed. The questions are YAML, extensible with business packs; each decision records the model, a fingerprint of the questions and the thresholds. See [Jev and question sets](jev.md), and [Measuring](measuring.md) for how the thresholds were chosen.
 
 The Claude Code provider is designed so that, instead of calling an API, the supervisor queues the evaluation and exposes it as an MCP tool for Claude Code to review with full codebase context. In the current release the MCP server is not started, so this provider times out and escalates; see [Claude Code Callback](claude-code-callback.md).
 
@@ -81,8 +81,16 @@ When `admin.enabled` is set (off by default), sup7 serves a small HTTP API in-pr
 | `GET /decisions?limit=50` | most recent decisions with their reasoning (kept in memory, 200 by default) |
 | `POST /pause` | stop evaluating: approvals stay pending in the mesh, for a human |
 | `POST /resume` | evaluate again |
+| `GET /files`, `GET /files/{id}` | the editable files (sup7.yaml, question sets) as text, token values masked |
+| `PUT /files/{id}` | replace one: validated whole, backed up, applied without restart where possible |
+| `GET /bench/sets`, `/bench/runs`, `/bench/estimate` | labelled case sets, evaluation runs, cost of a replay |
+| `POST /bench/runs` | measure the live configuration on a case set (free recompute or paid replay) |
 
-When `admin.token` is set, every route except `/health` requires `Authorization: Bearer <token>`. Set a token before binding to anything other than loopback.
+When `admin.token` is set, every route except `/health` requires `Authorization: Bearer <token>`. Editing a file and starting a run always require it, even on loopback. Set a token before binding to anything other than loopback.
+
+### Editing from the console
+
+`PUT /files/{id}` takes the text of `sup7.yaml` or of a question set, with `If-Match: <fingerprint>` (`new` to create a question set). A file changed on disk since it was read is not overwritten (409). The whole resulting configuration is validated first (schema, rule conditions, every question set with the edit in place): a bad edit answers 400 with the reason and nothing is written. The previous version is backed up next to the file (never overwriting an earlier backup, file mode kept), the write is atomic, and rules, evaluator, thresholds, questions, project dirs and poll interval apply at once; sections read only at start (`mesh`, `memory`, `admin`) are reported as `restart_required`. Each change is a `config_change` event in the decision log.
 
 ## Run as a service
 
@@ -113,16 +121,19 @@ Adapt `User=` and the paths in `ExecStart=` first. sup7 waits for the mesh on it
 1. **Poll** — `GET /approvals?status=pending` via mesh7 SDK, deduplicated across tool scopes
 2. **Fetch context** — `GET /approvals/{id}` returns params, recent traces, active grants, injection risk
 3. **Evaluate rules** — YAML conditions, first-match-wins, with confidence scores
-4. **LLM fallback** — if no rule matches and an LLM provider is configured, delegate evaluation
-5. **Confidence gate** — if LLM confidence is below threshold, escalate to human
+4. **Evaluator** — if no rule matches, the provider (or chain) evaluates; `provider: none` keeps sup7 to its rules
+5. **Confidence gate** — below the threshold of the provider that answered (a chain entry may set its own), escalate to human
 6. **Resolve** — `POST /approvals/{id}/approve` or `/deny` with reasoning and confidence
-7. **Log** — JSONL file, plus a flux7-memory store (tagged `supervisor`, `decision`) when memory is enabled
+7. **Log** — JSONL file with the evaluator's provenance (model, question fingerprint, thresholds), plus a flux7-memory store (tagged `supervisor`, `decision`) when memory is enabled
+
+Paired with mesh7's [`approval.wait_seconds`](../mesh7/approval-flow.md#waiting-for-an-automatic-decision-approvalwait_seconds) and a fast `poll.interval` (500 ms), a call sup7 decides runs in the same request: the agent never retries.
 
 While paused through the admin API, the loop does not poll: approvals stay pending in the mesh for a human.
 
 ## Current state (September 2026)
 
-- **v0.1.0** — 4 providers (Ollama, Anthropic, Jev, Claude Code) and a provider chain with circuit breaker, rule engine, HTTP admin API, systemd unit, 85 tests
+- **v0.1.0** — 4 providers (Ollama, Anthropic, Jev, Claude Code) and a provider chain with circuit breaker, rule engine, HTTP admin API with file editing and evaluation runs, question sets in YAML, `sup7 bench replay`, systemd unit, 176 tests
+- **Jev in production** since 2026-09-29, first in the chain, Ollama as fallback
 - **Claude Code callback**: MCP tools defined but the MCP server is not started yet
 - **Install**: from the GitHub repository, not on PyPI
 - **SDKs** — consumes `mesh7` (AgentMesh) and `mem7` (Mem7) Python SDKs
