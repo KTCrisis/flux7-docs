@@ -60,11 +60,11 @@ L0  flux7-mesh          Policy engine             allow / deny / escalate    &lt
      │
      │  pending approval
      ▼
-L1  flux7-mesh          Memory lookup             3+ past approvals → allow  ~100ms
+L1  flux7-mesh          Memory lookup             read, 3+ human yes → allow ~100ms
      │
      │  novel case
      ▼
-L1+ flux7-supervisor    Rules + LLM evaluation    approve / deny / escalate  ~2-20s
+L1+ flux7-supervisor    Rules + decision model    approve / deny / escalate  ~350ms
      │
      │  uncertain
      ▼
@@ -119,7 +119,7 @@ L2  Human               Console UI / Claude Code  final decision             min
           <span class="f7-card-badge">Python</span>
         </div>
         <div class="f7-card-role">L1+ — Automated evaluation</div>
-        <p class="f7-card-desc">Evaluates what's ambiguous. Polls pending approvals, applies rules, evaluates via pluggable LLM (Ollama, Anthropic, Jev), chained with a circuit breaker, auto-resolves the routine.</p>
+        <p class="f7-card-desc">Evaluates what's ambiguous. Polls pending approvals, applies rules, then asks a decision model narrow typed questions (Jev, with Ollama or Anthropic as fallback, behind a circuit breaker) and decides in code from the probabilities. Thresholds are measured on a bench.</p>
         <div class="f7-card-tags">
           <span>rule engine</span><span>provider chain</span><span>confidence threshold</span>
         </div>
@@ -162,7 +162,7 @@ L2  Human               Console UI / Claude Code  final decision             min
         <div class="f7-timeline-content">
           <div class="f7-timeline-when">Day 30</div>
           <div class="f7-timeline-what">+ flux7-memory</div>
-          <div class="f7-timeline-detail">Persistent memory, decision history, auto-approve patterns seen 3+ times.</div>
+          <div class="f7-timeline-detail">Persistent memory, decision history; reads a human approved 3 times are approved on their own, writes always ask.</div>
         </div>
       </div>
       <div class="f7-timeline-item">
@@ -170,7 +170,7 @@ L2  Human               Console UI / Claude Code  final decision             min
         <div class="f7-timeline-content">
           <div class="f7-timeline-when">Day 45</div>
           <div class="f7-timeline-what">+ flux7-supervisor</div>
-          <div class="f7-timeline-detail">Automated L1 evaluation, reduced approval fatigue, LLM-driven judgment for novel cases.</div>
+          <div class="f7-timeline-detail">Automated evaluation in a few hundred milliseconds, reduced approval fatigue, measured judgment for novel cases.</div>
         </div>
       </div>
       <div class="f7-timeline-item">
@@ -197,51 +197,66 @@ L2  Human               Console UI / Claude Code  final decision             min
         <thead>
           <tr>
             <th></th>
-            <th>Anthropic Console</th>
-            <th>LangSmith</th>
-            <th>Agent Gateways</th>
+            <th>Cloud agent platforms</th>
+            <th>MCP / AI gateways</th>
+            <th>In-process middleware</th>
             <th>flux7</th>
           </tr>
         </thead>
         <tbody>
           <tr>
+            <td>Examples</td>
+            <td>AWS AgentCore, Gemini Enterprise, Microsoft Agent 365</td>
+            <td>Kong AI Gateway, agentgateway</td>
+            <td>Microsoft AGT, LangSmith</td>
+            <td>mesh7, mem7, sup7, console</td>
+          </tr>
+          <tr>
             <td>Scope</td>
-            <td>Anthropic agents</td>
-            <td>LangChain ecosystem</td>
-            <td>HTTP/API routing</td>
-            <td>Any agent, any SDK</td>
+            <td>Agents in that cloud</td>
+            <td>Any MCP client over HTTP</td>
+            <td>Agents in that process or framework</td>
+            <td>Any MCP client, stdio and HTTP, plus REST</td>
           </tr>
           <tr>
-            <td>Governance</td>
-            <td>Permission policies</td>
-            <td>None</td>
-            <td>Rate limiting</td>
-            <td>Policy + rules + LLM + human</td>
+            <td>Tool policy</td>
+            <td>Deterministic, in their perimeter</td>
+            <td>Per tool, from token identity and scopes</td>
+            <td>In the agent's code</td>
+            <td>Per agent and per tool, on the arguments</td>
           </tr>
           <tr>
-            <td>Memory</td>
-            <td>None</td>
-            <td>Trace replay</td>
-            <td>None</td>
-            <td>Decisions as facts</td>
+            <td>Human approval</td>
+            <td>Built in the application</td>
+            <td>Not at the gateway</td>
+            <td>Escalate verdict, wired by you</td>
+            <td>Approval queue outside the agent, stdio included</td>
           </tr>
           <tr>
-            <td>Approvals</td>
-            <td>Inline in SDK</td>
+            <td>Past decisions</td>
+            <td>Current session</td>
             <td>None</td>
             <td>None</td>
-            <td>Web UI + API + supervisor</td>
+            <td>Human precedents kept as facts, across sessions</td>
+          </tr>
+          <tr>
+            <td>Automated judgment</td>
+            <td>Guardrails on model traffic</td>
+            <td>Guardrail plugins on LLM routes</td>
+            <td>Policy and trust scoring</td>
+            <td>Rules, then a decision model with measured thresholds</td>
           </tr>
           <tr>
             <td>Self-hosted</td>
             <td>No</td>
-            <td>Partial</td>
+            <td>Yes (enterprise licence for some)</td>
             <td>Yes</td>
-            <td>Yes, fully</td>
+            <td>Yes, Apache 2.0, single binary</td>
           </tr>
         </tbody>
       </table>
     </div>
+    <p class="f7-timeline-note">Snapshot of September 2026; this field moves every week. Gateways and flux7 compose rather than compete: a gateway checks who calls which tool, flux7 judges the call itself. The <a href="mesh7/example-keycloak-kong/">Keycloak and Kong example</a> runs mesh7 behind a Kong node.</p>
   </section>
 
   <!-- Source -->
@@ -255,7 +270,7 @@ L2  Human               Console UI / Claude Code  final decision             min
       <a href="https://github.com/KTCrisis/flux7-mesh" class="f7-source-link">flux7-mesh<span>Apache 2.0</span></a>
       <a href="https://github.com/KTCrisis/flux7-memory" class="f7-source-link">flux7-memory<span>Apache 2.0</span></a>
       <a href="https://github.com/KTCrisis/flux7-supervisor" class="f7-source-link">flux7-supervisor<span>Apache 2.0</span></a>
-      <a href="https://github.com/KTCrisis/flux7-console" class="f7-source-link">flux7-console</a>
+      <a href="https://github.com/KTCrisis/flux7-console" class="f7-source-link">flux7-console<span>Apache 2.0</span></a>
     </div>
   </section>
 
