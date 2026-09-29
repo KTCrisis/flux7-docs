@@ -85,7 +85,7 @@ mcp_servers:
       Authorization: "Bearer mem7_secret123"
 ```
 
-With a `memory:` block, the mesh writes every approval decision to mem7, and auto-approves a call that has already been approved 3 times (`supervisor.min_approvals`; `supervisor.auto_approve: false` turns it off). Arguments that look like prompt injection are never auto-approved.
+With a `memory:` block, the mesh writes every approval decision to mem7, and auto-approves a tool that reads once a human has approved it 3 times for this agent, with no refusal (`supervisor.min_approvals`; `supervisor.auto_approve: false` turns it off; writes always ask again unless `supervisor.auto_approve_writes` is set). Arguments that look like prompt injection are never auto-approved.
 
 ### Use memory from Python
 
@@ -173,6 +173,6 @@ Each layer reduces the load on the next. Most tool calls resolve at L0 (policy) 
 | Layer | Component | Latency | What it does |
 |-------|-----------|---------|--------------|
 | L0 | flux7-mesh | <1ms | Policy match — allow, deny, or escalate |
-| L1 | flux7-memory | ~100ms | Check decision history — 3+ past approvals → allow |
-| L1+ | flux7-supervisor | 2-20s | Rules + LLM evaluation — approve, deny, or escalate |
+| L1 | flux7-memory | ~100ms | Check decision history — a read approved 3+ times by a human, never refused → allow |
+| L1+ | flux7-supervisor | ~0-500ms | Rules, then a decision model — approve, deny, or escalate |
 | L2 | flux7-console | minutes | Human reviews in web UI |

@@ -45,7 +45,7 @@ It polls flux7-mesh for pending approvals, evaluates each one, and resolves. Dec
 | Level | Component | Speed | Judgment | Example |
 |-------|-----------|-------|----------|---------|
 | **L0** | flux7-mesh policy | instant | none — static rules | `allow` reads, `deny` deletes |
-| **L1** | flux7-supervisor | seconds | bounded — rules + LLM | project writes → approve, unknown tool → escalate |
+| **L1** | flux7-supervisor | 0 ms (rules) to ~500 ms (decision model) | bounded — rules, then typed questions | project writes → approve, unknown tool → escalate |
 | **L2** | Human (terminal or UI) | minutes | full | external email, ambiguous intent |
 
 The supervisor reduces L2 load by handling the predictable cases. Over time, as decisions accumulate in flux7-memory, patterns emerge and the supervisor gets more confident.

@@ -1,0 +1,51 @@
+# flux7
+
+> Governance for AI agents: a sidecar between agents and their tools that decides what an agent may do. flux7-mesh (L0, policy in under a millisecond), flux7-memory (L1, past human approvals of reads), flux7-supervisor (L1+, rules then a decision model, a few hundred milliseconds), a human in flux7-console or the mesh CLI (L2). Every decision is traced in a hash-chained log. mesh7, mem7, sup7 and the console are Apache 2.0.
+
+Start with "How it works", then "Getting Started". Configuration lives in one YAML file for the mesh (`config.yaml` plus policy files) and one for the supervisor (`sup7.yaml`).
+
+## Start
+
+- [How it works](https://docs.flux7.art/how-it-works/): the four layers, what each one asks, and the path of one tool call
+- [Getting Started](https://docs.flux7.art/getting-started/): install the stack, first policy, memory and supervisor
+
+## flux7-mesh (mesh7)
+
+- [Overview](https://docs.flux7.art/mesh7/): what the sidecar does, MCP over stdio and HTTP, REST
+- [Getting Started](https://docs.flux7.art/mesh7/getting-started/): install the binary, put it in front of Claude Code or another MCP client
+- [Configuration](https://docs.flux7.art/mesh7/configuration/): every key of config.yaml (upstreams, auth, approval, supervisor, memory, traces)
+- [Writing Policies](https://docs.flux7.art/mesh7/writing-policies/): rules per agent and per tool, conditions on arguments, allow / deny / human_approval
+- [Tool Classification](https://docs.flux7.art/mesh7/tool-classification/): read / write / generic families, catalogue pinning
+- [Approval Flow](https://docs.flux7.art/mesh7/approval-flow/): the queue, grants, the wait window, settings editable at runtime
+- [Memory Integration](https://docs.flux7.art/mesh7/mem7-auto-approve/): when past human approvals approve a read, and why writes always ask
+- [Supervisor Protocol](https://docs.flux7.art/mesh7/supervisor-protocol/): the HTTP contract a supervisor uses to resolve approvals
+- [JWT Authentication](https://docs.flux7.art/mesh7/jwt-auth/): agent and human identity from OIDC tokens (JWKS, issuer, audience, claims)
+- [Control Plane Auth](https://docs.flux7.art/mesh7/control-plane-auth/): how data-plane and control-plane endpoints are authorized differently
+- [Example: Keycloak and Kong](https://docs.flux7.art/mesh7/example-keycloak-kong/): mesh7 behind an API gateway with delegated identity
+- [Deployment Modes](https://docs.flux7.art/mesh7/deployment-modes/): local sidecar, shared instance, with or without supervisor
+- [Observability](https://docs.flux7.art/mesh7/otel/): OpenTelemetry export and trace context over MCP
+- [Trace Integrity](https://docs.flux7.art/mesh7/trace-integrity/): the hash-chained trace log and how to verify it
+- [Agent Security](https://docs.flux7.art/mesh7/security/): why agents with tools need governance, and what the mesh enforces
+- [CLI Tools](https://docs.flux7.art/mesh7/cli-tools/): govern CLI tools (terraform, kubectl, docker, gh, cloud CLIs) through the mesh
+- [Python SDK](https://docs.flux7.art/mesh7/python-sdk/): `pip install flux7-mesh`, govern tool calls from any Python code (Claude API, Agent SDK, LangChain)
+- [Reference](https://docs.flux7.art/mesh7/reference/): commands, flags, HTTP API and repository layout
+
+## flux7-memory (mem7)
+
+- [Overview](https://docs.flux7.art/mem7/): decisions kept as queryable facts
+- [Configuration](https://docs.flux7.art/mem7/configuration/): environment variables and server settings
+- [API Reference](https://docs.flux7.art/mem7/api-reference/): MCP tools and HTTP endpoints
+- [Python SDK](https://docs.flux7.art/mem7/python-sdk/): `from mem7 import Mem7` (PyPI package: flux7-memory)
+
+## flux7-supervisor (sup7)
+
+- [Overview](https://docs.flux7.art/sup7/): the L1 supervisor, rules then a chain of decision providers, admin API, POST /evaluate
+- [Configuration](https://docs.flux7.art/sup7/configuration/): every key of sup7.yaml
+- [Jev and question sets](https://docs.flux7.art/sup7/jev/): narrow typed questions, the decision taken in code from probabilities
+- [Measuring](https://docs.flux7.art/sup7/measuring/): the bench of labelled cases and how thresholds are chosen
+- [Claude Code Callback](https://docs.flux7.art/sup7/claude-code-callback/): Claude Code as a provider (marked not functional)
+
+## flux7-console
+
+- [Overview](https://docs.flux7.art/console/): the operator UI (approvals, traces, policies, supervisor)
+- [System Design](https://docs.flux7.art/console/system-design/): the design of the whole stack

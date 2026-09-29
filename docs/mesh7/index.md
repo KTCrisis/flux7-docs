@@ -35,11 +35,11 @@ Agents don't know the proxy exists. They call tools, get results. The governance
 Policies start strict. Over time, the system learns.
 
 ```
-Day 1:  human_approval for all writes
-        ↓ human approves filesystem.write 3 times
-Day 7:  flux7-mesh queries flux7-memory → 3 approvals, 0 rejections → auto-approve
-        ↓ novel tool call, no history
-        ↓ external supervisor (rules + LLM) evaluates → approve
+Day 1:  human_approval for reads of a new tool and for all writes
+        ↓ a human approves a read 3 times
+Day 7:  flux7-mesh queries flux7-memory → 3 human approvals, 0 refusals → auto-approve (reads only)
+        ↓ a write, or a novel call with no history
+        ↓ external supervisor (rules, then a decision model) evaluates → approve
 Day 30: routine patterns auto-resolve in ~100ms
         humans only see genuinely new or ambiguous requests
 ```
@@ -49,8 +49,8 @@ Three layers:
 | Level | Who | Speed | What it handles |
 |-------|-----|-------|-----------------|
 | 0 | Policy engine | 0ms | Static rules (allow, deny, human_approval) |
-| 1 | Built-in flux7-memory lookup | ~100ms | Routine patterns (3+ past approvals) |
-| 1+ | External supervisor | ~20s | Novel cases (rule engine + LLM) |
+| 1 | Built-in flux7-memory lookup | ~100ms | Routine reads (3+ human approvals, no refusal) |
+| 1+ | External supervisor | ~0-500ms | Novel cases and writes (rule engine, then a decision model) |
 | 2 | Human | minutes | Unknowns, high-stakes decisions |
 
 Every decision is stored as a fact in [flux7-memory](https://github.com/KTCrisis/flux7-memory). Every tool call is a trace. Both are queryable.

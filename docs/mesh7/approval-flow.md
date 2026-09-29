@@ -326,7 +326,7 @@ curl "http://localhost:9090/traces?tool=filesystem.write_file" | python3 -m json
 
 When [flux7-memory](mem7-auto-approve.md) is configured, every approval resolution (approve, deny, timeout) is stored as a queryable fact. This enables:
 
-- **Auto-approve** — routine patterns resolve without human intervention
+- **Auto-approve** — reads a human approved before resolve without asking again (writes always ask)
 - **Audit trail** — "who approved what, when, why" is queryable
 - **Cross-session memory** — decisions survive process restarts
 

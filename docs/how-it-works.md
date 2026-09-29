@@ -16,11 +16,11 @@ human.
     │                                                     │
     │    ┌─────────────────────▼─────────────────────┐    │
     ◄────┤  L1   flux7-memory     approved before?   │ · · ·
-    │ ok │       same agent + tool · 3 yes, 0 no     │    │
+    │ ok │       reads · 3 human yes, 0 no           │    │
     │    └─────────────────────┬─────────────────────┘    │
     │                      otherwise                      │
     │    ┌─────────────────────▼─────────────────────┐    │
-    ◄────┤  L1+  flux7-supervisor rules, then LLM    ├────►
+    ◄────┤  L1+  flux7-supervisor rules, then judge  ├────►
     │ ok │       low confidence → escalate           │ no │
     │    └─────────────────────┬─────────────────────┘    │
     │                      escalate                       │
@@ -40,7 +40,7 @@ human.
 |-------|-----------|---------------------|--------------|
 | L0 | [flux7-mesh](mesh7/index.md) | Does a policy rule decide? | allow, deny, or ask for approval |
 | L1 | [flux7-memory](mem7/index.md) | Has this agent been approved for this tool before, and never refused? | approve, or pass |
-| L1+ | [flux7-supervisor](sup7/index.md) | Do its rules, then an LLM, settle it with enough confidence? | approve, deny, or escalate |
+| L1+ | [flux7-supervisor](sup7/index.md) | Do its rules, then a decision model, settle it with enough confidence? | approve, deny, or escalate |
 | L2 | a human, in [flux7-console](console/index.md) or the `mesh` CLI | Everything else | approve (optionally with a grant), deny |
 
 Only flux7-mesh is required. Each other layer is optional: without flux7-memory
@@ -56,12 +56,16 @@ for a human, and an approval nobody answers expires and the call is refused.
    queue, unless an active grant covers this agent and tool, in which case it is
    forwarded.
 3. **L1.** If the mesh is connected to flux7-memory, it asks for past decisions on
-   this agent and tool. Three approvals and no refusal: approved. Any refusal, or
-   arguments that look like prompt injection: the history is not trusted, the call
-   stays pending.
+   this agent and tool. For a tool that reads, three approvals by a human and no
+   refusal: approved. Writes are never approved from history (unless
+   `auto_approve_writes` is set), and approvals by a supervisor never count. Any
+   refusal, or arguments that look like prompt injection: the history is not
+   trusted, the call stays pending.
 4. **L1+.** flux7-supervisor polls the queue. Its rules come first; what no rule
-   settles goes to an LLM. Below the confidence threshold it escalates: the
-   approval stays pending for a human.
+   settles goes to a decision model that answers narrow questions with
+   probabilities (Jev in production, a local model if it is down), a few hundred
+   milliseconds. Below the confidence threshold it escalates: the approval stays
+   pending for a human.
 5. **L2.** A human approves or denies in the console, the `mesh` CLI or a
    terminal prompt. Approving can open a grant, so the same call does not ask
    again for a while; the grant records this approval as its origin.

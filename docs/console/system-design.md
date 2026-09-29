@@ -221,11 +221,12 @@ Level 0: Policy engine (flux7-mesh)
 
 Level 1: Built-in supervisor (in flux7-mesh, Go)
          flux7-memory lookup. ~100ms. Pattern matching only.
-         Checks past decisions: 3+ approvals, 0 rejections → auto-approve.
+         Checks past decisions: a read with 3+ human approvals, 0 refusals → auto-approve.
+         Writes and supervisor approvals never count (since 29/09/2026).
          Escalates unknowns to Level 1+.
 
 Level 1+: External supervisor (flux7-supervisor / sup7)
-          Rule engine + pluggable LLM (Ollama/Anthropic/Jev, chainable). ~2s rules, ~20s LLM.
+          Rule engine + pluggable providers (Jev, Ollama, Anthropic; chainable). Rules in 0 ms, Jev ~350 ms.
           Handles novel cases, complex conditions, injection detection.
           Escalates unknowns to Level 2.
 
@@ -379,14 +380,14 @@ When an approval resolves in flux7-mesh, the decision is stored in flux7-memory 
 
 flux7-mesh queries flux7-memory before submitting to the approval queue. This is the built-in Level 1 supervisor — a pre-filter that handles routine patterns.
 
-- `MemoryReader` queries flux7-memory `memory_search` with tool name + agent + tags=["decision"]
-- Counts past approvals/rejections from search results
+- `MemoryReader` lists flux7-memory facts on exact tags (approved, `by:human`, tool, agent); a refusal by anyone blocks
+- Only tools that read are eligible, unless `auto_approve_writes` is set
 - Auto-approve if >= `min_approvals` (default 3) with 0 rejections
 - Escalate if ambiguous, rejected, or flux7-memory is down
 - Auto-approved decisions traced as `supervisor:mem7` and written back to flux7-memory
 - Config: `supervisor.auto_approve` (default true), `supervisor.min_approvals` (default 3)
 
-**Complements the external Python supervisor** ([flux7-supervisor](../sup7/index.md), formerly in flux7-console): the built-in handles routine patterns (~100ms); the external supervisor handles novel cases with rule engine + LLM evaluation (~20s). Both escalate unknowns to humans.
+**Complements the external Python supervisor** ([flux7-supervisor](../sup7/index.md), formerly in flux7-console): the built-in handles routine reads (~100ms); the external supervisor handles novel cases and writes with a rule engine, then a decision model (~350ms). Both escalate unknowns to humans.
 
 ### Phase 3: flux7-console reads flux7-memory ✓
 

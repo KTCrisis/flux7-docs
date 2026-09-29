@@ -63,7 +63,7 @@ Supervisor evaluation (L1) lives in [flux7-supervisor (sup7)](https://github.com
 
 **For the team :** approval UI lets any team member resolve pending approvals from a browser. Governance scoring flags risky agents before they hit production. Audit trail answers "who approved that email send at 3am."
 
-**For compliance :** every decision is a fact in flux7-memory. Every tool call is a trace. flux7-console joins them : "this agent called this tool, it was auto-approved because of these 3 past decisions, here's the full chain." Query, don't grep.
+**For compliance :** every decision is a fact in flux7-memory. Every tool call is a trace. flux7-console joins them : "this agent called this tool, it was auto-approved because a human approved this read 3 times before, here's the full chain." Query, don't grep.
 
 ## What makes it different
 
