@@ -46,9 +46,11 @@ Span kind is `SERVER` (3). Status code is `OK` (1) for allowed calls, `ERROR` (2
 
 ## Trace context
 
-An incoming W3C `traceparent` is honoured: the mesh span joins the caller's
-trace, with the caller's span as its `parentSpanId`, so behind Kong, an
-instrumented SDK or another mesh the tree stays whole. Its span ID is random,
+An incoming W3C `traceparent` is honoured, on the REST data plane and on MCP
+Streamable HTTP (`POST /mcp`): the mesh span joins the caller's trace, with the
+caller's span as its `parentSpanId`, so behind Kong, an instrumented SDK or
+another mesh the tree stays whole. (On `/mcp`, since the release after
+v0.17.2: before, every MCP call opened a trace of its own.) Its span ID is random,
 since several calls may share one caller trace. Without a `traceparent` (or
 with `X-Trace-Id` only), the trace is the mesh's own and the span ID is derived
 from the trace ID (its first 16 hex chars). A malformed or all-zero

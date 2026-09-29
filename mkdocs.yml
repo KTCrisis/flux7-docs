@@ -52,6 +52,7 @@ nav:
     - Memory Integration: mesh7/mem7-auto-approve.md
     - Supervisor Protocol: mesh7/supervisor-protocol.md
     - Deployment Modes: mesh7/deployment-modes.md
+    - 'Example: Keycloak and Kong': mesh7/example-keycloak-kong.md
     - Observability: mesh7/otel.md
     - Trace Integrity: mesh7/trace-integrity.md
     - Python SDK: mesh7/python-sdk.md

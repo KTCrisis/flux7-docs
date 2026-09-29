@@ -66,6 +66,13 @@ Once approved, call filesystem.write_file again with the same arguments: the app
 
 The agent relays this to its user. Once a human approves, the agent's retry of **the same tool with the same arguments**, by the same agent, within the approval's validity, runs, and uses up the approval: a second retry asks again, and a call with other arguments gets its own approval. The agent itself cannot approve (see below). Since v0.17.0; earlier versions pointed the agent at `approval.resolve`, which a regular agent cannot call.
 
+An agent can also **wait** for the decision by retrying the same call on a timer:
+
+- **While the approval is pending**, each retry meets the approval already open: same id, no new request in the queue, no new trace line.
+- **Once a human denies it**, the next retry learns the refusal, once, as an error: `Approval denied by <who> for <tool> (id: …): do not retry this call.` The agent can stop waiting; a later call is a new request for a human.
+
+Both since the release after v0.17.2 (on `main`). Before, every retry while pending opened another approval (five retries, six requests), and after a denial the agent could only keep asking until its patience ran out.
+
 ### Via MCP virtual tools
 
 The `approval.*` virtual tools are **operator-only**: only a declared supervisor
