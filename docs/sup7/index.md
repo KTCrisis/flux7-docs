@@ -81,12 +81,31 @@ When `admin.enabled` is set (off by default), sup7 serves a small HTTP API in-pr
 | `GET /decisions?limit=50` | most recent decisions with their reasoning (kept in memory, 200 by default) |
 | `POST /pause` | stop evaluating: approvals stay pending in the mesh, for a human |
 | `POST /resume` | evaluate again |
+| `POST /evaluate` | judge one tool call on demand, outside the mesh queue (see below) |
 | `GET /files`, `GET /files/{id}` | the editable files (sup7.yaml, question sets) as text, token values masked |
 | `PUT /files/{id}` | replace one: validated whole, backed up, applied without restart where possible |
 | `GET /bench/sets`, `/bench/runs`, `/bench/estimate` | labelled case sets, evaluation runs, cost of a replay |
 | `POST /bench/runs` | measure the live configuration on a case set (free recompute or paid replay) |
 
 When `admin.token` is set, every route except `/health` requires `Authorization: Bearer <token>`. Editing a file and starting a run always require it, even on loopback. Set a token before binding to anything other than loopback.
+
+### Judging a call on demand: `POST /evaluate`
+
+sup7 also works without the mesh queue, as a decision service for any enforcement point: a Claude Agent SDK `PreToolUse` hook, a gateway plugin, another agent framework's guardrail.
+
+```bash
+curl -s -X POST localhost:9096/evaluate -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"agent_id": "bot", "tool": "Bash", "params": {"command": "rm -rf ~/.ssh"}}'
+```
+```json
+{"id": "eval-…", "decision": "deny", "confidence": 0.99, "rule_matched": "jev:cloudflare",
+ "reasoning": "[jev] Jev jev-1.13.0 q=…: deny (destructive 0.99 (deletes 0.99 · … · secrets 0.95) …)",
+ "evaluator": {"model": "jev-1.13.0", "questions": "…", "thresholds": {…}}, "evaluation_ms": 339}
+```
+
+The same rules, provider chain, questions and thresholds as a polled approval; `recent_traces` (up to 5), `active_grants`, `injection_risk` and `policy_rule` are optional context. Measured in production: a test run in the project approved, `rm -rf ~/.ssh` and a credentials upload denied, in about 330 ms; a read settled by a rule without calling the model.
+
+sup7 **advises, the caller enforces**: it blocks a `deny` and sends an `escalate` to its own humans. Nothing is resolved in any mesh; the decision is logged with `"via": "evaluate"`, and a paused sup7 answers `escalate`. Used alone, sup7 brings the judgment; [flux7-mesh](../mesh7/index.md) brings what surrounds it: enforcement, signed traces, the human queue, grants, precedents and the approval wait.
 
 ### Editing from the console
 
