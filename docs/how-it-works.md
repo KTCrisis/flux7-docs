@@ -62,7 +62,7 @@ for a human, and an approval nobody answers expires and the call is refused.
    [Precedents](mesh7/mem7-auto-approve.md).
 4. **L1+.** flux7-supervisor polls the queue. Its rules come first; what no rule
    settles goes to a decision model that answers narrow questions with
-   probabilities (Jev in production, a local model if it is down), a few hundred
+   probabilities (Jev in production; the same questions on a local model, nimble through Ollama, if it is down), a few hundred
    milliseconds. Below the confidence threshold it escalates: the approval stays
    pending for a human.
 5. **L2.** A human approves or denies in the console, the `mesh` CLI or a

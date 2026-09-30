@@ -59,6 +59,7 @@ The evaluation brain is configurable. Choose based on your constraints :
 | **Ollama** | HTTP to local model | ~1s | free | tool, params, 5 recent traces, active grants |
 | **Anthropic** | Claude Messages API | ~2s | per-token | tool, params, 5 recent traces, active grants |
 | **Jev** (TypeSafe AI) | Cloudflare Workers AI or TypeSafe API | ~330 ms (p95 ~440 ms) | ~$0.00004 per call | same context plus `project_dirs`, `redact_params` withheld; typed answers with probabilities |
+| **Jev on a local model** | Ollama System One API (`/v1/systemone`, Ollama 0.35+), model `nimble` | ~1.1 s | free, offline | same questions and decision code as Jev; its own measured thresholds |
 | **Claude Code** | MCP callback | async | per-session | full codebase + conversation (not functional yet) |
 
 Jev does not generate text and is not asked to decide: sup7 asks it narrow factual questions (does the call delete, overwrite outside the project, send local data out, touch secrets; where does it act; does it fit the agent's activity; does it carry an injection) and decides in code, with a threshold per question, fail-closed. The questions are YAML, extensible with business packs; each decision records the model, a fingerprint of the questions and the thresholds. See [Jev and question sets](jev.md), and [Measuring](measuring.md) for how the thresholds were chosen.
@@ -152,7 +153,7 @@ While paused through the admin API, the loop does not poll: approvals stay pendi
 ## Current state (September 2026)
 
 - **v0.1.0** — 4 providers (Ollama, Anthropic, Jev, Claude Code) and a provider chain with circuit breaker, rule engine, HTTP admin API with file editing and evaluation runs, question sets in YAML, `sup7 bench replay`, systemd unit, 176 tests
-- **Jev in production** since 2026-09-29, first in the chain, Ollama as fallback
+- **Jev in production** since 2026-09-29, first in the chain; since 2026-09-30 the fallback asks the same questions to `nimble` on a local Ollama (System One API) instead of free text, so a Jev outage loses the provider, not the method
 - **Claude Code callback**: MCP tools defined but the MCP server is not started yet
 - **Install**: from the GitHub repository, not on PyPI
 - **SDKs** — consumes `mesh7` (AgentMesh) and `mem7` (Mem7) Python SDKs

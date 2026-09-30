@@ -54,6 +54,7 @@ v0.1.0 · Python · [overview](../sup7/index.md) · install from GitHub, not on 
 | Rules before any model call | Stable | [Configuration](../sup7/configuration.md) |
 | Decision model asked typed questions, decision taken in code | Early | in production since 2026-09-29, [Jev and question sets](../sup7/jev.md) |
 | Provider chain with circuit breaker (Jev, Ollama, Anthropic) | Early | |
+| Jev's questions on a local model (Ollama System One, `nimble`), offline | Early | [Measuring](../sup7/measuring.md) |
 | Question sets in YAML, extensible per business | Early | |
 | Bench: case sets, free recompute, paid replay | Early | [Measuring](../sup7/measuring.md) |
 | Judge one call on demand (`POST /evaluate`), without the mesh | Early | |

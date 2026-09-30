@@ -165,7 +165,7 @@ evaluator:
     backend: cloudflare                # cloudflare (Workers AI, model typesafe/jev) | typesafe (model jev-latest)
     model: ""                          # empty: the backend's default model
     url: ""                            # empty: the backend's public endpoint; a local /v1/systemone runtime works too
-    api_key_env: CLOUDFLARE_API_TOKEN  # TYPESAFE_API_KEY with backend: typesafe
+    api_key_env: CLOUDFLARE_API_TOKEN  # TYPESAFE_API_KEY with backend: typesafe; "" = no key (local server)
     account_id_env: CLOUDFLARE_ACCOUNT_ID  # cloudflare only
     questions: []                      # question set files (globs allowed); empty = the shipped socle
     destructive_max: 0.2               # a danger above this blocks approval (default for danger questions)
@@ -179,7 +179,20 @@ evaluator:
 
 `api_key_env` and `account_id_env` name environment variables; the secrets themselves stay out of the file. The code defaults above are conservative, for a new installation without measurements; the values used in production were measured, see [Measuring](measuring.md). The questions, their families and how sup7 decides from them: [Jev and question sets](jev.md).
 
-A missing environment variable, a network or HTTP error, or an unreadable answer counts as a failure, which escalates (or moves to the next provider in a chain). The probabilities are written into the reasoning, headed by the model and the question fingerprint (`Jev jev-1.13.0 q=9bf9f0bc317f: approve (…)`).
+**Local model.** Ollama 0.35 and later serve the same System One API. Point the `typesafe` backend at it and leave the key name empty: no variable is required and no `Authorization` header is sent.
+
+```yaml
+  jev:
+    backend: typesafe
+    url: http://localhost:11434/v1/systemone
+    model: nimble                      # ollama pull nimble
+    api_key_env: ""
+    in_scope_min: 0.05                 # measured for nimble, see Measuring
+```
+
+Thresholds do not transfer from one model to another: measure each one on your bench before trusting it.
+
+A missing environment variable (other than an empty `api_key_env`), a network or HTTP error, or an unreadable answer counts as a failure, which escalates (or moves to the next provider in a chain). The probabilities are written into the reasoning, headed by the model and the question fingerprint (`Jev jev-1.13.0 q=9bf9f0bc317f: approve (…)`).
 
 ### Claude Code
 
@@ -205,8 +218,14 @@ evaluator:
   chain:
     - provider: jev         # fast typed decisions when available
       jev: { backend: cloudflare, api_key_env: CLOUDFLARE_WORKERS_AI_TOKEN }
-    - provider: ollama      # local, free, works offline
-      model: qwen3:14b
+    - provider: jev         # same questions on a local model: free, offline
+      confidence_threshold: 0.6
+      jev:
+        backend: typesafe
+        url: http://localhost:11434/v1/systemone
+        model: nimble
+        api_key_env: ""
+        in_scope_min: 0.05
 ```
 
 Each chain entry is a full `evaluator` block; `breaker_failures` and `breaker_cooldown` are read from the top level. A chain entry may set its own `confidence_threshold`, which then applies to that provider's verdicts: confidences are not comparable across models (Jev's is computed, an LLM's is self-reported). Unset, the top-level threshold applies. When `chain` is non-empty it replaces the single `provider`.
