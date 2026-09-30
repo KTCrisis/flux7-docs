@@ -30,30 +30,16 @@ Agents don't know the proxy exists. They call tools, get results. The governance
 
 **Transports:** MCP stdio (Claude Code, Cursor) · MCP Streamable HTTP at `POST /mcp` (Anthropic Managed Agents, remote clients) · HTTP REST (`POST /tool/{name}`)
 
-## Adaptive governance
+## Where it sits
 
-Policies start strict. Over time, the system learns.
+flux7-mesh is the first of up to four layers a call can meet: a rule decides
+most calls on the spot; what a rule sends to approval can be settled by
+precedents in [flux7-memory](../mem7/index.md), then by
+[flux7-supervisor](../sup7/index.md), and only then by a human. Only the mesh
+is required. See [How it works](../how-it-works.md).
 
-```
-Day 1:  human_approval for reads of a new tool and for all writes
-        ↓ a human approves a read 3 times
-Day 7:  flux7-mesh queries flux7-memory → 3 human approvals, 0 refusals → auto-approve (reads only)
-        ↓ a write, or a novel call with no history
-        ↓ external supervisor (rules, then a decision model) evaluates → approve
-Day 30: routine patterns auto-resolve in ~100ms
-        humans only see genuinely new or ambiguous requests
-```
-
-Three layers:
-
-| Level | Who | Speed | What it handles |
-|-------|-----|-------|-----------------|
-| 0 | Policy engine | 0ms | Static rules (allow, deny, human_approval) |
-| 1 | Built-in flux7-memory lookup | ~100ms | Routine reads (3+ human approvals, no refusal) |
-| 1+ | External supervisor | ~0-500ms | Novel cases and writes (rule engine, then a decision model) |
-| 2 | Human | minutes | Unknowns, high-stakes decisions |
-
-Every decision is stored as a fact in [flux7-memory](https://github.com/KTCrisis/flux7-memory). Every tool call is a trace. Both are queryable.
+Every tool call is a trace, and every decision can be kept as a fact in
+flux7-memory. Both are queryable.
 
 ## What makes it different
 
@@ -78,7 +64,7 @@ Closest comparable: Microsoft Agent Governance Toolkit. But middleware vs sideca
 
 ## Current state (September 2026)
 
-- **v0.16.0** — 412 Go test functions across 17 packages, race clean, plus 77 Python SDK tests
+- **v0.17.2** — 454 Go test functions across 18 packages, plus 80 Python SDK tests
 - **Import** — MCP servers over stdio, SSE and Streamable HTTP (`transport: streamable-http` for hosted upstreams); OpenAPI specs (URL or file); CLI binaries whose `default_action` acts as a tightening-only floor under the dispatcher
 - **Export** — MCP stdio + MCP Streamable HTTP + HTTP REST
 - **Governance** — YAML policies, glob patterns, numeric conditions and string operators (`contains`, `not_contains`, `starts_with`, `not_starts_with`) on arguments, per-agent policy files, specificity sort, hot-reload
@@ -91,7 +77,7 @@ Closest comparable: Microsoft Agent Governance Toolkit. But middleware vs sideca
 - **Durable state** — approvals and grants persisted in SQLite, survive restarts (`storage_path: state.db`)
 - **Auto-proxy** — in MCP mode, detects a running instance and becomes a thin stdio→HTTP shuttle (zero config change, removes the port conflict between clients)
 - **Daemon mode** — `mesh7 serve` runs as a persistent daemon, MCP clients auto-proxy to it
-- **Python SDK** — `pip install flux7-mesh` v0.6.0 — `AgentMesh(token=...)` for JWT identity, GovernedToolkit (namespace-qualified tool names), MeshHooks (Anthropic Agent SDK), and `mesh7-hook` for the Claude Code CLI
+- **Python SDK** — `pip install flux7-mesh` v0.6.1 — `AgentMesh(token=...)` for JWT identity, GovernedToolkit (namespace-qualified tool names), MeshHooks (Anthropic Agent SDK), and `mesh7-hook` for the Claude Code CLI
 - **Integrations** — [flux7-memory](https://github.com/KTCrisis/flux7-memory) (decision persistence + auto-approve), [flux7-console](https://github.com/KTCrisis/flux7-console) (dashboard + governance UI), [flux7-supervisor](https://github.com/KTCrisis/flux7-supervisor) (L1 evaluation agent)
 - **Next** — claim-based policy conditions, semantic conditions beyond text matching
 

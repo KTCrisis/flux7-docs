@@ -1,6 +1,6 @@
 # Configuration
 
-Every feature is declared in a single YAML file. This page is the complete reference; [Getting Started](getting-started.md) shows the minimal config, [Writing Policies](writing-policies.md) goes deep on rules.
+Every feature is declared in a single YAML file. This page is the complete reference; [Getting Started](../getting-started.md) shows the minimal config, [Writing Policies](writing-policies.md) goes deep on rules.
 
 All features are declared in a single YAML config.
 
