@@ -7,6 +7,22 @@ authority to decide has decided.
 
 No code change in the agent: it sees the same tools, through a proxy.
 
+## Four products, one core
+
+flux7 is a family of four products. flux7-mesh is the core; the other three
+are separate products you add when you need them, and two of them are useful
+without the mesh at all.
+
+| Product | What it is | On its own |
+|---|---|---|
+| [**flux7-mesh**](../mesh7/index.md) · `mesh7` | the policy proxy: rules, approvals, traces | yes, it is the core; one Go binary, one YAML file |
+| [**flux7-memory**](../mem7/index.md) · `mem7` | persistent, searchable memory for agents | yes, as a memory server for any MCP client; with the mesh, it also keeps human decisions as precedents |
+| [**flux7-supervisor**](../sup7/index.md) · `sup7` | automated evaluation of tool calls | yes, as a decision service (`POST /evaluate`) for any hook or gateway; with the mesh, it settles the approval queue |
+| [**flux7-console**](../console/index.md) | dashboard and approval UI | no, it is a window onto the mesh, and onto memory and supervisor when present |
+
+Each has its own repository, its own releases and the same licence, Apache
+2.0. Nothing is sold separately, and nothing requires the whole family.
+
 ## The question it answers
 
 An agent with access to files, mail, a database or a cloud API can do
@@ -67,17 +83,10 @@ SDK, LangChain, a plain script over HTTP.
 
 ## How it is deployed
 
-Four components, each optional except the first:
-
-| Component | Role | Form |
-|---|---|---|
-| [flux7-mesh](../mesh7/index.md) | policy, approvals, traces | one Go binary, one YAML file |
-| [flux7-memory](../mem7/index.md) | precedents and agent memory | one Go binary, Markdown files on disk |
-| [flux7-supervisor](../sup7/index.md) | automated evaluation | Python service |
-| [flux7-console](../console/index.md) | dashboard and approval UI | Next.js web app |
-
-Everything is self-hosted and Apache 2.0. Nothing leaves your network unless
-you configure it to: the supervisor's model can be local (Ollama) or remote.
+Self-hosted, on a laptop, a VM or in containers: two Go binaries (mesh7,
+mem7), a Python service (sup7), a Next.js app (console). Nothing leaves your
+network unless you configure it to: the supervisor's model can be local
+(Ollama) or remote.
 
 **Next:** the [feature list](features.md), [how a call flows through the
 layers](../how-it-works.md), or [install it](../getting-started.md).

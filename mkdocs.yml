@@ -43,7 +43,6 @@ nav:
   - Getting Started: getting-started.md
   - flux7-mesh:
     - Overview: mesh7/index.md
-    - Getting Started: mesh7/getting-started.md
     - Configuration: mesh7/configuration.md
     - Agent Security: mesh7/security.md
     - Writing Policies: mesh7/writing-policies.md
