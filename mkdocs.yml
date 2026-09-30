@@ -41,6 +41,10 @@ nav:
     - Features: evaluate/features.md
   - How it works: how-it-works.md
   - Getting Started: getting-started.md
+  - Guides:
+    - Govern Claude Code: guides/claude-code.md
+    - Hold risky calls for a human: guides/risky-calls.md
+    - Behind Keycloak and Kong: guides/keycloak-kong.md
   - flux7-mesh:
     - Overview: mesh7/index.md
     - Configuration: mesh7/configuration.md
@@ -54,7 +58,6 @@ nav:
     - Memory Integration: mesh7/mem7-auto-approve.md
     - Supervisor Protocol: mesh7/supervisor-protocol.md
     - Deployment Modes: mesh7/deployment-modes.md
-    - 'Example: Keycloak and Kong': mesh7/example-keycloak-kong.md
     - Observability: mesh7/otel.md
     - Trace Integrity: mesh7/trace-integrity.md
     - Python SDK: mesh7/python-sdk.md

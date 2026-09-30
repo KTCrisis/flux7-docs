@@ -65,7 +65,7 @@ auth:
     user_claim: preferred_username    # the human it acts for, on every trace
 ```
 
-The trace then reads *scout7 for bob*, and the OTel span carries `enduser.id`. See [JWT Authentication](jwt-auth.md).
+The trace then reads *scout7 for bob*, and the OTel span carries `enduser.id`. See [JWT Authentication](../mesh7/jwt-auth.md).
 
 The policy judges what a scope cannot express: the arguments, and what needs a person.
 
@@ -97,7 +97,7 @@ rules:
     action: deny
 ```
 
-An agent that waits for the human retries the same call; mesh7 answers with the same pending approval, then runs the call once approved, or tells the agent once that it was refused. See [Approval Flow](approval-flow.md).
+An agent that waits for the human retries the same call; mesh7 answers with the same pending approval, then runs the call once approved, or tells the agent once that it was refused. See [Approval Flow](../mesh7/approval-flow.md).
 
 ## Part 2: adding Kong
 
@@ -152,7 +152,7 @@ services:
     propagation: { default_format: w3c }
 ```
 
-Tracing is off by default on the node: set `KONG_TRACING_INSTRUMENTATIONS=all` (and a sampling rate). On mesh7, `otel_endpoint: http://localhost:4318`. Kong propagates a `traceparent`; mesh7 joins it, so one call is one trace: Kong's router and MCP plugin spans, then the mesh7 span for the tool, under Kong's balancer span. See [Observability](otel.md).
+Tracing is off by default on the node: set `KONG_TRACING_INSTRUMENTATIONS=all` (and a sampling rate). On mesh7, `otel_endpoint: http://localhost:4318`. Kong propagates a `traceparent`; mesh7 joins it, so one call is one trace: Kong's router and MCP plugin spans, then the mesh7 span for the tool, under Kong's balancer span. See [Observability](../mesh7/otel.md).
 
 ## Who catches what
 
@@ -166,7 +166,7 @@ Played end to end with the stack above:
 | MCP header names one tool, body calls another | | **403** (the plugin reads the body) | would judge the body |
 | `fetch` to an `http://` address (cloud metadata, an internal service) | scope `web:read` present | lets it through (200) | **refused** on the argument |
 | bob's scout7 draws a diagram | scope present | lets it through | **held for a human**, approved or refused in the console |
-| The upstream server changes a tool's description | | | **held back** ([`pin_tools`](configuration.md)) |
+| The upstream server changes a tool's description | | | **held back** ([`pin_tools`](../mesh7/configuration.md)) |
 
 Kong decides on the identity and the tool name; mesh7 decides on the act.
 
