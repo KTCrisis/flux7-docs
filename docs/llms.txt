@@ -6,6 +6,8 @@ Start with "How it works", then "Getting Started". Configuration lives in one YA
 
 ## Start
 
+- [What flux7 does](https://docs.flux7.art/evaluate/): for evaluators, what is governed, what you get, what it does not do, how it is deployed
+- [Features](https://docs.flux7.art/evaluate/features/): every capability per component with its maturity (stable, early, planned)
 - [How it works](https://docs.flux7.art/how-it-works/): the four layers, what each one asks, and the path of one tool call
 - [Getting Started](https://docs.flux7.art/getting-started/): install the stack, first policy, memory and supervisor
 

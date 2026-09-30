@@ -36,6 +36,9 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Evaluate:
+    - What flux7 does: evaluate/index.md
+    - Features: evaluate/features.md
   - How it works: how-it-works.md
   - Getting Started: getting-started.md
   - flux7-mesh:
