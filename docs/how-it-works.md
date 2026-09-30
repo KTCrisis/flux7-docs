@@ -57,10 +57,9 @@ for a human, and an approval nobody answers expires and the call is refused.
    forwarded.
 3. **L1.** If the mesh is connected to flux7-memory, it asks for past decisions on
    this agent and tool. For a tool that reads, three approvals by a human and no
-   refusal: approved. Writes are never approved from history (unless
-   `auto_approve_writes` is set), and approvals by a supervisor never count. Any
-   refusal, or arguments that look like prompt injection: the history is not
-   trusted, the call stays pending.
+   refusal: approved. Writes, a refusal in the history, or suspicious arguments:
+   the call stays pending. Exact conditions and settings:
+   [Precedents](mesh7/mem7-auto-approve.md).
 4. **L1+.** flux7-supervisor polls the queue. Its rules come first; what no rule
    settles goes to a decision model that answers narrow questions with
    probabilities (Jev in production, a local model if it is down), a few hundred

@@ -380,12 +380,7 @@ When an approval resolves in flux7-mesh, the decision is stored in flux7-memory 
 
 flux7-mesh queries flux7-memory before submitting to the approval queue. This is the built-in Level 1 supervisor — a pre-filter that handles routine patterns.
 
-- `MemoryReader` lists flux7-memory facts on exact tags (approved, `by:human`, tool, agent); a refusal by anyone blocks
-- Only tools that read are eligible, unless `auto_approve_writes` is set
-- Auto-approve if >= `min_approvals` (default 3) with 0 rejections
-- Escalate if ambiguous, rejected, or flux7-memory is down
-- Auto-approved decisions traced as `supervisor:mem7` and written back to flux7-memory
-- Config: `supervisor.auto_approve` (default true), `supervisor.min_approvals` (default 3)
+Eligibility, thresholds and settings: [Precedents](../mesh7/mem7-auto-approve.md). Auto-approved decisions are traced as `supervisor:mem7`.
 
 **Complements the external Python supervisor** ([flux7-supervisor](../sup7/index.md), formerly in flux7-console): the built-in handles routine reads (~100ms); the external supervisor handles novel cases and writes with a rule engine, then a decision model (~350ms). Both escalate unknowns to humans.
 

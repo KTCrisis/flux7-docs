@@ -54,8 +54,9 @@ SDK, LangChain, a plain script over HTTP.
   outside this directory", "may it set `credit_limit` above 10 000".
 - **Human approval outside the agent.** Pending calls wait in a queue,
   answered from a terminal or a browser, by whoever is on duty.
-- **Precedents.** A read a human approved three times, never refused, is
-  approved on its own the next time. Writes are always asked again.
+- **[Precedents](../mesh7/mem7-auto-approve.md).** A read a human approved
+  three times, never refused, is approved on its own the next time. Writes
+  are always asked again.
 - **An automated evaluator** for the calls no rule and no precedent settles.
   It asks a small model narrow factual questions (does this delete, does it
   send local data out, does it touch secrets) and decides in code from the
