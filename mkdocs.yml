@@ -54,6 +54,7 @@ nav:
     - JWT Authentication: mesh7/jwt-auth.md
     - Control Plane Auth: mesh7/control-plane-auth.md
     - Approval Flow: mesh7/approval-flow.md
+    - Emergency Stop: mesh7/emergency-stop.md
     - CLI Tools: mesh7/cli-tools.md
     - Memory Integration: mesh7/mem7-auto-approve.md
     - Supervisor Protocol: mesh7/supervisor-protocol.md

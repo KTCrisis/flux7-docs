@@ -48,6 +48,9 @@ mesh approve <id> --grant 1h    # approve and open a temporal grant on the same 
 mesh approve <id> --grant 30m --tools "filesystem.*"   # widen the grant explicitly
 mesh deny <id>                  # deny
 mesh watch                      # interactive poll + prompt: [a]pprove / [g]rant / [d]eny / [s]kip
+mesh halt --agent scout7 --reason "loops"   # emergency stop: --all, --agent <id> or --session <id>
+mesh halts                      # the stops in force
+mesh resume <id>                # lift a stop, restore the grants it revoked
 ```
 
 `--grant <duration>` opens a grant that records the approval as its origin, so later calls it authorises trace back to this decision (`GET /traces/{id}/why`). Without `--tools` the grant covers the exact tool approved, never a glob. In `watch`, `[g]` approves and grants for `MESH_GRANT_DURATION`.
@@ -56,8 +59,9 @@ mesh watch                      # interactive poll + prompt: [a]pprove / [g]rant
 |----------|---------|--------|
 | `MESH_URL` | `http://localhost:9090` | Mesh to talk to |
 | `MESH_GRANT_DURATION` | `1h` | Grant length used by `[g]` in `watch` |
+| `MESH_ADMIN_TOKEN` | | Sent by `halt`, `halts` and `resume` as `Authorization: Bearer` |
 
-The `mesh` CLI sends no `Authorization` header, so it reaches the control plane only on loopback with no `admin_token` set. Against a token-protected mesh, use the HTTP API with `Authorization: Bearer $MESH_ADMIN_TOKEN`.
+The approval commands (`pending`, `show`, `approve`, `deny`, `watch`) send no `Authorization` header, so they reach the control plane only on loopback with no `admin_token` set; `halt`, `halts` and `resume` send `MESH_ADMIN_TOKEN` when it is set. Against a token-protected mesh, use the HTTP API with `Authorization: Bearer $MESH_ADMIN_TOKEN`.
 
 ---
 
@@ -94,6 +98,9 @@ The `mesh` CLI sends no `Authorization` header, so it reaches the control plane 
 | `GET` | `/grants` | List active grants |
 | `POST` | `/grants` | Create a grant |
 | `DELETE` | `/grants/{id}` | Revoke a grant |
+| `GET` | `/halts` | Emergency stops in force |
+| `POST` | `/halts` | Stop `{"scope": "all" \| "agent" \| "session", "target", "reason", "by"}`; see [Emergency stop](emergency-stop.md) |
+| `POST` | `/halts/{id}/resume` | Lift a stop and restore the grants it revoked |
 | `GET` | `/metrics` | Prometheus counters (mem7 decision writes) |
 | `GET` | `/health` | Health check and stats |
 | `GET` | `/version` | Version info |
@@ -118,7 +125,8 @@ flux7-mesh/
 ├── mcp/                   # MCP client/server/transport (stdio + SSE + streamable HTTP)
 ├── approval/              # Channel-based approval store with timeout
 ├── grant/                 # Temporal grants (TTL-based sudo)
-├── storage/               # SQLite durable state (approvals, grants survive restarts)
+├── halt/                  # Emergency stop (shared through SQLite, reloaded every second)
+├── storage/               # SQLite durable state (approvals, grants, halts survive restarts)
 ├── ratelimit/             # Sliding window + loop detection
 ├── supervisor/            # Content isolation + injection detection
 ├── exec/                  # Secure CLI execution (no shell, arg validation)

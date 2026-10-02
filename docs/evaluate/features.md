@@ -19,6 +19,7 @@ v0.17.2 · Go · [overview](../mesh7/index.md)
 | Claude Code hook covering built-in tools | Stable | [Python SDK](../mesh7/python-sdk.md) |
 | Approval queue, answered from CLI, console or API | Stable | [Approval flow](../mesh7/approval-flow.md) |
 | Temporary grants ("sudo for agents") | Stable | [Approval flow](../mesh7/approval-flow.md) |
+| Emergency stop of one agent, one session or everything, from CLI, console or API | Early | since v0.18.0, [Emergency stop](../mesh7/emergency-stop.md) |
 | Approvals and grants survive restarts | Stable | |
 | Rate limiting and loop detection | Stable | in-memory, reset on restart |
 | JWT identity from an external IdP, end user recorded | Stable | [JWT authentication](../mesh7/jwt-auth.md) |

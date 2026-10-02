@@ -80,7 +80,7 @@ Anthropic Console is great for Managed Agents visibility. flux7-console compleme
 ## Current state (September 2026)
 
 - **Dashboard**: Next.js 16. The sidebar follows the mesh's decision chain:
-    - `/mesh` overview and `/mesh/approvals`, on top (the one queue that waits for a human, L2)
+    - `/mesh` overview, `/mesh/approvals` (the one queue that waits for a human, L2) and `/mesh/halts`, on top
     - Catalog: `/mesh/agents`, `/mesh/tools`
     - Rules: `/mesh/policies`, `/mesh/grants` (L0 and its temporary exceptions)
     - Delegation: `/mesh/memory` (flux7-memory, past decisions), `/mesh/supervisor` (L1), who decides when no rule does
@@ -89,6 +89,7 @@ Anthropic Console is great for Managed Agents visibility. flux7-console compleme
 - **Traces** — a call let through by a grant shows its chain of authority: the approval behind the grant (who, when, the reasoning), the grant, then the call, from `GET /traces/{id}/why`. A badge reports the state of mesh7's trace hash chain (`GET /traces/verify`): intact with its sequence range, or the first broken line. The key stays in mesh7.
 - **Spans (OTLP)**: the same calls as OTLP spans, per agent and tool; a true waterfall (parent spans, time axis) is still to come.
 - **Approvals** — the pending queue, then who settled each past approval (sup7, a human, flux7-memory precedents, expiry) with how long it took and why, as four counters that filter the history; the [precedents](../mesh7/mem7-auto-approve.md) flux7-memory holds per tool and agent (human approvals, other approvals, refusals) with what the next call would do and a Forget button; and mesh7's approval settings (wait for the supervisor, timeout, approval from precedents, approvals needed, writes), edited at runtime.
+- **Emergency stop** — stop every agent (two clicks within five seconds), one agent or one session, and resume; a red banner shows on every page while a stop is in force, and the agents table has a Stop / Resume button per agent. See [Emergency stop](../mesh7/emergency-stop.md).
 - **Supervisor** — [flux7-supervisor (sup7)](../sup7/index.md), the standalone L1 agent, in three tabs. *Overview*: state, provider chain, rules, the threshold of each provider, the calls sup7 takes, the project dirs, and every question asked to [Jev](../sup7/jev.md) by family with its criteria. *Edit YAML*: sup7.yaml and the question sets, validated and applied by sup7 without restart, and a new question pack. *Evaluate*: pick a case set, recompute for free or replay with its cost shown first, and read [dangers approved](../sup7/measuring.md) first, then normal calls approved, correct denies and the cases to review with their signals.
 - **Next** — governance engine (scoring, lifecycle), flux7-memory SDK integration, dependency graph
 

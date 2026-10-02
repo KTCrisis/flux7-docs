@@ -20,6 +20,7 @@ Start with "How it works", then "Getting Started". Configuration lives in one YA
 - [Writing Policies](https://docs.flux7.art/mesh7/writing-policies/): rules per agent and per tool, conditions on arguments, allow / deny / human_approval
 - [Tool Classification](https://docs.flux7.art/mesh7/tool-classification/): read / write / generic families, catalogue pinning
 - [Approval Flow](https://docs.flux7.art/mesh7/approval-flow/): the queue, grants, the wait window, settings editable at runtime
+- [Emergency Stop](https://docs.flux7.art/mesh7/emergency-stop/): stop one agent, one session or everything at once; grants revoked and restored on resume
 - [Memory Integration](https://docs.flux7.art/mesh7/mem7-auto-approve/): when past human approvals approve a read, and why writes always ask
 - [Supervisor Protocol](https://docs.flux7.art/mesh7/supervisor-protocol/): the HTTP contract a supervisor uses to resolve approvals
 - [JWT Authentication](https://docs.flux7.art/mesh7/jwt-auth/): agent and human identity from OIDC tokens (JWKS, issuer, audience, claims)
