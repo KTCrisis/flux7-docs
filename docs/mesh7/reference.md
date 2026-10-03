@@ -76,7 +76,7 @@ The approval commands (`pending`, `show`, `approve`, `deny`, `watch`) send no `A
 | `DELETE` | `/mcp` | Terminate MCP HTTP session |
 | `GET` | `/tools` | List all registered tools, each with its `classification` (family, access, reasons) |
 | `GET` | `/mcp-servers` | List connected MCP servers |
-| `GET` | `/traces` | Query traces (`?agent=...&tool=...`) |
+| `GET` | `/traces` | Recent calls, most recent first (`?agent=...&tool=...&limit=100`, at most 1000); `?trace=<id>` returns every entry of one trace among the last 10,000 calls |
 | `GET` | `/traces/{id}/why` | Chain of authority of a call, oldest first (`?depth=10`, max 50) |
 | `GET` | `/traces/verify` | Verify the trace file's hash chain with the store's key; a break is still a `200` |
 | `GET` | `/sessions` | List sessions (id, agent, event count, timespan) |
