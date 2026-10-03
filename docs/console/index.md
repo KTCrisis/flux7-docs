@@ -19,7 +19,7 @@ A web-based governance platform for AI agents. Dashboard, approval UI, audit tra
 flux7-console (management plane — L2 visibility + human control)
 ├── Trace Viewer      — reads flux7-mesh traces, chain of authority, integrity badge
 ├── Session Browser   — session list and drill-down
-├── Memory Viewer     — reads flux7-memory, displays decisions + facts
+├── Memory Viewer     — reads flux7-memory: decisions + facts, the trace behind each, its history, the hash chain status
 ├── Approval UI       — shows pending approvals, human clicks approve/reject
 ├── OTEL spans        — spans from the OTLP export, per agent and tool
 ├── Tools             — catalogue, classification, per-agent decisions, editable

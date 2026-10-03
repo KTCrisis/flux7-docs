@@ -125,6 +125,7 @@ The life of one key, oldest first, read from the markdown workspace (the index o
 | `GET`  | `/sse` | MCP HTTP+SSE transport, deprecated by the MCP spec (2026-07-28); kept for existing clients, use `/mcp` |
 | `POST` | `/messages` | Message endpoint of the deprecated HTTP+SSE transport |
 | `POST` | `/memory/snapshot_reminder` | Instructional payload for pre-compaction context injection |
+| `GET` | `/memory/chain` | The workspace's hash chain report, as `mem7 verify` prints it: `{"holds", "report": {entries, sealed, legacy, keyed, break}}` (bearer auth) |
 
 Bearer auth is applied to every route except `/healthz` (`/rpc`, `/mcp`, `/sse`, `/messages`, `/memory/*`) when `MEM7_TOKEN` is set.
 
