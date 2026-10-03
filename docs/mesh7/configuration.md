@@ -18,8 +18,15 @@ mcp_servers:
   - name: remote-service
     transport: sse
     url: "https://mcp-server.example.com/sse"
+    headers:                 # ${VAR} expanded from mesh7's environment
+      Authorization: "Bearer ${REMOTE_TOKEN}"
+
+  - name: memory
+    transport: streamable-http
+    url: "http://localhost:9070/mcp"
+    forward_identity: true   # send the calling agent in tools/call _meta
     headers:
-      Authorization: "Bearer <token>"
+      Authorization: "Bearer ${MEM7_TOKEN}"
 
   - name: huggingface
     transport: streamable-http
@@ -34,6 +41,17 @@ compromised upstream cannot relay your tool calls elsewhere.
 
 `env` applies to `stdio` servers: the child inherits mesh7's environment plus
 these entries. Values are taken literally (no `${VAR}` expansion).
+
+`headers` values go through `${VAR}` expansion, so a bearer token stays in the
+service's environment file instead of this YAML. `memory.token` is expanded the
+same way.
+
+Every `tools/call` sent to an MCP upstream carries the W3C `traceparent` of the
+governed call in its `_meta`, the field the MCP specification reserves for
+request metadata. With `forward_identity: true`, it also carries the agent the
+mesh authenticated (`art.flux7/agent`). Leave it off for remote servers: they
+have no use for your agent names. mem7 uses both to sign what it stores and to
+scope what each agent reads (see [mem7 provenance and scopes](../mem7/provenance-scopes.md)).
 
 ## OpenAPI specs
 
