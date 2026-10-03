@@ -42,6 +42,12 @@ compromised upstream cannot relay your tool calls elsewhere.
 `env` applies to `stdio` servers: the child inherits mesh7's environment plus
 these entries. Values are taken literally (no `${VAR}` expansion).
 
+An upstream that cannot be reached when mesh7 starts is retried in the
+background (after 5 s, then twice as long each time, up to 5 min) until it
+answers; meanwhile `GET /mcp-servers` lists it as `retrying` with its last
+error, and its tools appear as soon as it connects. Clients connected to the
+mesh over MCP see them on their next `tools/list`.
+
 `headers` values go through `${VAR}` expansion, so a bearer token stays in the
 service's environment file instead of this YAML. `memory.token` is expanded the
 same way.
