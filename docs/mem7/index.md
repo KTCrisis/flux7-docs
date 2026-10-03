@@ -76,14 +76,16 @@ for mem in m.context("deployment approval", limit=5):
 |---|---|---|
 | **Scope** | Single agent | Multi-agent, multi-role |
 | **Human decisions** | Not modeled | First-class facts |
-| **Provenance** | None | Agent + timestamp on every fact |
+| **Provenance** | None | The trace of the governed call behind every write, the agent the mesh vouches for, a hash chain over the workspace |
+| **Time** | Latest value (Zep: validity windows) | Bi-temporal: what held at a date (`valid_at`), what mem7 believed at a date (`as_of`) |
+| **Access** | Per user or none | Per agent, from identities the mesh vouches for |
 | **Vendor lock-in** | Tied to specific providers | Go binary + HTTP, works with anything |
 | **Storage** | Opaque | Markdown files you can read and edit |
 | **Deployment** | SaaS or heavy deps | Single binary, zero CGO |
 
-## Current state (September 2026)
+## Current state (October 2026)
 
-**v0.5.1** — 7 MCP tools, Python SDK, hybrid search + LLM reranking, SSE daemon mode with a systemd unit, auto-proxy (stdio detects running daemon), build version in `/healthz`, a Dockerfile for stdio mode.
+**v0.8.0** — 8 MCP tools, Python SDK, hybrid search + LLM reranking, Streamable HTTP daemon mode with a systemd unit, auto-proxy (stdio detects running daemon), build version in `/healthz`, a Dockerfile for stdio mode. Since 03/10/2026: [provenance, hash chain and agent scopes](provenance-scopes.md) (0.6, 0.7) and [bi-temporal memories](time.md) (0.8).
 
 71% LoCoMo benchmark — competitive with VC-backed solutions without gaming the eval.
 
