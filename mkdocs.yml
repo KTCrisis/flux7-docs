@@ -66,7 +66,7 @@ nav:
   - flux7-memory:
     - Overview: mem7/index.md
     - Configuration: mem7/configuration.md
-    - Provenance and scopes: mem7/provenance-scopes.md
+    - Provenance, chain and scopes: mem7/provenance-scopes.md
     - API Reference: mem7/api-reference.md
     - Python SDK: mem7/python-sdk.md
   - flux7-supervisor:

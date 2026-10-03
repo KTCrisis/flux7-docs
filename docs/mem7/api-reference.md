@@ -104,6 +104,15 @@ Delete memories by key and/or tags. A tombstone section is appended to the markd
 | `tags` | string[] | no | Delete all entries matching these tags (AND logic) |
 | `agent` | string | no | Recorded on the tombstone |
 
+
+### memory_history
+
+The life of one key, oldest first, read from the markdown workspace (the index only knows the current state): every store, update and deletion, by key or by tags, with its author, the trace id of the governed call behind it, and its seal in the hash chain. Entries written before the chain show as unsealed. Scoped like a read.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `key` | string | yes | Exact key |
+
 ## HTTP endpoints
 
 `mem7 serve` exposes these routes :

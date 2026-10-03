@@ -38,7 +38,7 @@ Start with "How it works", then "Getting Started". Configuration lives in one YA
 
 - [Overview](https://docs.flux7.art/mem7/): decisions kept as queryable facts
 - [Configuration](https://docs.flux7.art/mem7/configuration/): environment variables and server settings
-- [Provenance and scopes](https://docs.flux7.art/mem7/provenance-scopes/): the trace id of the governed call on every memory; what each agent may read, from identities the mesh vouches for
+- [Provenance and scopes](https://docs.flux7.art/mem7/provenance-scopes/): the trace id of the governed call on every memory, a hash chain over the workspace (`mem7 verify`, `memory_history`), and what each agent may read, from identities the mesh vouches for
 - [API Reference](https://docs.flux7.art/mem7/api-reference/): MCP tools and HTTP endpoints
 - [Python SDK](https://docs.flux7.art/mem7/python-sdk/): `from mem7 import Mem7` (PyPI package: flux7-memory)
 

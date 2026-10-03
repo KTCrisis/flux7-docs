@@ -1,7 +1,8 @@
-# Provenance and agent scopes
+# Provenance, tamper evidence and agent scopes
 
-Since 03/10/2026, mem7 records which governed call wrote each memory, and can
-restrict what each agent reads, from identities that flux7-mesh vouches for.
+Since 03/10/2026, mem7 records which governed call wrote each memory, seals
+every entry in a hash chain, and can restrict what each agent reads, from
+identities that flux7-mesh vouches for.
 
 ## What the mesh sends
 
@@ -20,6 +21,19 @@ workspace (`trace:` in the entry's envelope), which stays the source of truth,
 and in the index, rebuilt with it by `mem7 rescan`. `memory_recall` and
 `memory_search` print it, `memory_context` returns it as `trace_id`. A memory
 points back to the decision that produced it in the mesh's traces.
+
+## Hash chain (tamper evidence)
+
+Every entry mem7 writes to the workspace (store, deletion, deletion by tags) carries the seal of the entry before it (`prev:`) and its own (`hash:`), computed over its parsed fields. Edit an entry, drop one or reorder them, and `mem7 verify` names the first place the chain no longer holds:
+
+```
+$ MEM7_CHAIN_KEY=... mem7 verify
+211 entries: 78 sealed, 133 written before the chain
+seals: HMAC-SHA256 with MEM7_CHAIN_KEY
+chain holds
+```
+
+With `MEM7_CHAIN_KEY` the seal is an HMAC-SHA256: editing the workspace without the key leaves a break no one can reseal. Without it, a plain SHA-256 catches accidents and careless edits, not a forger. Keep the key stable: entries sealed with one key do not verify with another. Entries written before the chain existed are counted, not checked; the chain starts at the first sealed entry. The workspace stays plain markdown you can read and edit by hand; an edit now shows.
 
 ## Identity
 
