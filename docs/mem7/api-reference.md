@@ -10,6 +10,8 @@ Upsert a memory entry by key. The markdown workspace receives an append-only sec
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
+| `valid_from` | string | no | When the fact starts to hold (date or RFC3339); default now; in the past, it corrects history |
+| `valid_to` | string | no | When it stops holding; default open |
 | `key` | string | yes | Unique key for this memory |
 | `value` | string | yes | Content to remember (free-form markdown) |
 | `tags` | string[] | no | Tags for filtering and grouping |
@@ -22,6 +24,8 @@ Recall memories by key, tags, or agent. Most recently updated first. Bumps `acce
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
+| `valid_at` | string | no | What held at that moment (date or RFC3339); default now |
+| `as_of` | string | no | What mem7 believed at that moment; default now |
 | `key` | string | no | Exact key to recall |
 | `tags` | string[] | no | Filter by tags (AND logic) |
 | `agent` | string | no | Filter by agent |
@@ -35,6 +39,8 @@ Supports FTS5 operators in raw mode : `foo*` prefix, `AND` / `OR` / `NOT`, quote
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
+| `valid_at` | string | no | What held at that moment (date or RFC3339); default now |
+| `as_of` | string | no | What mem7 believed at that moment; default now |
 | `query` | string | yes | Search query |
 | `mode` | string | no | `raw` (default, FTS5 syntax) or `natural` (plain language, auto-stemmed) |
 | `tags` | string[] | no | Post-filter by tags |
@@ -51,6 +57,8 @@ Same search as `memory_search` but returns a JSON array of structured objects in
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
+| `valid_at` | string | no | What held at that moment (date or RFC3339); default now |
+| `as_of` | string | no | What mem7 believed at that moment; default now |
 | `query` | string | yes | Search query |
 | `mode` | string | no | `raw` (default) or `natural` |
 | `tags` | string[] | no | Post-filter by tags |
@@ -91,6 +99,8 @@ List memory keys with metadata (without values).
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
+| `valid_at` | string | no | What held at that moment (date or RFC3339); default now |
+| `as_of` | string | no | What mem7 believed at that moment; default now |
 | `tags` | string[] | no | Filter by tags |
 | `agent` | string | no | Filter by agent |
 
