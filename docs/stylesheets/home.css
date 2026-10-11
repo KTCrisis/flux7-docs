@@ -1,6 +1,8 @@
 /* Home page — full-width content */
 .f7-home {
-  max-width: 960px;
+  max-width: min(960px, 100%);
+  min-width: 0; /* sans quoi le schema d'architecture elargit la page sur mobile */
+  box-sizing: border-box;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -50,6 +52,7 @@
 
 .f7-hero-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
 }
@@ -143,7 +146,8 @@
 
 /* Architecture diagram */
 .f7-arch {
-  max-width: 720px;
+  max-width: min(720px, 100%);
+  min-width: 0;
 }
 
 .f7-diagram {
