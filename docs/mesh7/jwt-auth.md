@@ -1,6 +1,6 @@
 # JWT Authentication
 
-Since v0.13.0, flux7-mesh validates JWT tokens from external identity providers. mesh7 enforces — the IdP issues tokens.
+Since v0.13.0, flux7-mesh validates JWT tokens from external identity providers. The IdP issues the tokens, and mesh7 enforces them.
 
 ## How it works
 
@@ -42,11 +42,11 @@ auth:
 | `user_claim` | No | *(off)* | Which claim names the human the agent acts for. Empty means tokens carry no user and traces record none |
 | `allow_legacy` | No | `false` | Accept the plaintext `Bearer agent:<name>` form alongside JWTs (migration only) |
 
-**No `auth.jwt` block = no validation.** The legacy `Bearer agent:<name>` format still works, backward compatible. **With `auth.jwt` set, it is rejected with `401`** unless `allow_legacy: true`.
+**No `auth.jwt` block = no validation.** The legacy `Bearer agent:<name>` format still works, for backward compatibility. **With `auth.jwt` set, it is rejected with `401`** unless `allow_legacy: true`.
 
 ### Delegation: the agent and the user
 
-A token can carry two identities at once — the agent making the call, and the
+A token can carry two identities at once: the agent making the call, and the
 human it acts for. With `user_claim` set, every trace entry records `user_id`
 and the OTel export carries `enduser.id`, so a call answers *on whose behalf*
 it happened, not only *by which agent*.
@@ -61,8 +61,8 @@ cannot be reused by another agent or across users.
 
 !!! note "Data plane only"
     JWT governs *agent identity* on the data plane. Operator endpoints
-    (traces, grants, approvals, policies) are guarded separately — see
-    [Control Plane Auth](control-plane-auth.md).
+    (traces, grants, approvals, policies) are guarded separately (see
+    [Control Plane Auth](control-plane-auth.md)).
 
 ## Auth flow
 
@@ -79,18 +79,18 @@ Authorization header present?
        └─ Invalid → HTTP 401 Unauthorized
 ```
 
-Key distinction: **401** (not authenticated — bad token) vs **403** (authenticated but policy denied).
+Key distinction: **401** (not authenticated, bad token) vs **403** (authenticated but policy denied).
 
 ## JWKS caching
 
 mesh7 fetches the JWKS at startup and caches it in memory. A background goroutine refreshes the cache every 5 minutes. No per-request fetch.
 
-If the initial JWKS fetch fails, mesh7 does not start — fail-closed.
+If the initial JWKS fetch fails, mesh7 does not start (fail-closed).
 
 ## Supported algorithms
 
-- **RSA** — RS256, RS384, RS512
-- **ECDSA** — ES256 (P-256), ES384 (P-384), ES512 (P-521)
+- **RSA**: RS256, RS384, RS512
+- **ECDSA**: ES256 (P-256), ES384 (P-384), ES512 (P-521)
 
 Tokens must include a `kid` header matching a key in the JWKS response.
 
@@ -184,7 +184,7 @@ See [`examples/jwt-auth/`](https://github.com/KTCrisis/flux7-mesh/tree/main/exam
 
 ## MCP Streamable HTTP
 
-JWT validation also applies to MCP Streamable HTTP connections (`POST /mcp`). Managed Agents or remote MCP clients presenting a valid JWT are identified by their claim value — same policies apply.
+JWT validation also applies to MCP Streamable HTTP connections (`POST /mcp`). Managed Agents or remote MCP clients presenting a valid JWT are identified by their claim value, and the same policies apply.
 
 ```
 Managed Agent ── POST /mcp ── Authorization: Bearer <jwt> ──► mesh7

@@ -61,7 +61,7 @@ scope what each agent reads (see [mem7 provenance and scopes](../mem7/provenance
 
 ## OpenAPI specs
 
-Import REST APIs as governed tools — persisted across restarts.
+Import REST APIs as governed tools, persisted across restarts.
 
 ```yaml
 openapi:
@@ -73,7 +73,7 @@ openapi:
     backend_url: http://localhost:3001
 ```
 
-Each endpoint becomes a tool (e.g. `get_public_holidays`). Same policy, same traces as MCP tools.
+Each endpoint becomes a tool (e.g. `get_public_holidays`). They get the same policy and the same traces as MCP tools.
 
 ## CLI tools
 
@@ -112,15 +112,15 @@ cli_tools:
       CI: "true"
 ```
 
-Agents call CLI tools like any MCP tool — `terraform.plan`, `kubectl.get`, `gh.pr`. A `bare` binary registers a single `<name>.run` tool. Every CLI tool accepts an optional `stdin` param, piped to the process as data (never shell-interpreted).
+Agents call CLI tools like any MCP tool (`terraform.plan`, `kubectl.get`, `gh.pr`). A `bare` binary registers a single `<name>.run` tool. Every CLI tool accepts an optional `stdin` param, piped to the process as data (never shell-interpreted).
 
 A CLI process does not inherit mesh7's environment: it gets `PATH`, `HOME`, `LANG=en_US.UTF-8` and the entries of `env`, nothing else. Secrets present in the daemon's environment therefore do not leak to wrapped binaries unless you list them.
 
-`default_action` is the floor for the dynamic dispatcher (`<name>.__dispatch`), which is where undeclared subcommands land. It can only restrict, never widen, and defaults to `deny` — so a glob such as `terraform.*: allow` cannot hand over `destroy` along with `plan`. See [CLI Tools](cli-tools.md#dispatcher-floor).
+`default_action` is the floor for the dynamic dispatcher (`<name>.__dispatch`), which is where undeclared subcommands land. It can only restrict, never widen, and defaults to `deny`. Therefore a glob such as `terraform.*: allow` cannot hand over `destroy` along with `plan`. See [CLI Tools](cli-tools.md#dispatcher-floor).
 
 ## Policies
 
-YAML-based, first-match-wins, glob patterns for agents and tools.
+Policies are YAML-based and first-match-wins, with glob patterns for agents and tools.
 
 ```yaml
 policies:
@@ -152,8 +152,8 @@ policies:
 
 Operators: `<` `<=` `>` `>=` `==` `!=` on numbers, `==` `!=` `contains`
 `not_contains` `starts_with` `not_starts_with` on strings. String matching is
-literal and case-sensitive: it raises the floor against accidents, it is not a
-sandbox. See [writing-policies.md](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/writing-policies.md).
+literal and case-sensitive: it raises the floor against accidents but does not
+make a sandbox. See [writing-policies.md](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/writing-policies.md).
 
 | Action | Behavior |
 |--------|----------|
@@ -189,7 +189,7 @@ Files are loaded alphabetically after inline `policies:`. Duplicate names produc
 
 ## Policy hot-reload
 
-Policies are reloaded automatically when files change — no restart required. The daemon watches:
+Policies are reloaded automatically when files change, without a restart. The daemon watches:
 
 - `config.yaml` (inline `policies:` section)
 - `policy_dir/` (all `*.yaml` files)
@@ -228,7 +228,7 @@ This enables a Managed Agent (e.g. Claude via MCP Streamable HTTP) to act as a c
 
 ## Memory integration
 
-Persist approval decisions as queryable facts in [mem7](https://github.com/KTCrisis/flux7-memory). Fire-and-forget — a failing mem7 never blocks approvals.
+Persist approval decisions as queryable facts in [mem7](https://github.com/KTCrisis/flux7-memory). The write is fire-and-forget, so a failing mem7 never blocks approvals.
 
 ```yaml
 memory:
@@ -238,7 +238,7 @@ memory:
 
 When configured, every approval resolve (approve, deny, timeout) is written to mem7 as a fact with tags `[decision, approved|denied|timeout, <tool>, by:<human|supervisor|mem7|system>, agent:<id>]`.
 
-**Auto-approve from past decisions** — when `memory.url` is set, mesh7 asks mem7 before submitting to the approval queue. A tool that **reads**, with at least `min_approvals` **human** approvals of exactly this tool and agent and no refusal, is approved at once (traced as `supervisor:mem7`). Approvals by a supervisor or by auto-approval itself never count, and writes are never approved from precedents unless `auto_approve_writes` is set.
+**Auto-approve from past decisions**: when `memory.url` is set, mesh7 asks mem7 before submitting to the approval queue. A tool that **reads**, with at least `min_approvals` **human** approvals of exactly this tool and agent and no refusal, is approved at once (traced as `supervisor:mem7`). Approvals by a supervisor or by auto-approval itself never count, and writes are never approved from precedents unless `auto_approve_writes` is set.
 
 ```yaml
 supervisor:
@@ -247,11 +247,11 @@ supervisor:
   auto_approve_writes: false  # default: precedents approve reads only
 ```
 
-The auto-approve is a pre-filter (Level 1). If it can't resolve, the request proceeds to the external supervisor (if running) or human. If mem7 is down, the request is escalated — never blocked. See [Auto-approve from flux7-memory](mem7-auto-approve.md) for why these limits exist and a step-by-step example. These settings can be changed at runtime: [Approval flow](approval-flow.md#changing-approval-settings-at-runtime).
+The auto-approve is a pre-filter (Level 1). If it can't resolve, the request proceeds to the external supervisor (if running) or human. If mem7 is down, the request is escalated rather than blocked. See [Auto-approve from flux7-memory](mem7-auto-approve.md) for why these limits exist and a step-by-step example. These settings can be changed at runtime: [Approval flow](approval-flow.md#changing-approval-settings-at-runtime).
 
 ## Authentication
 
-Two planes, two guards:
+The `auth` block guards two planes:
 
 ```yaml
 auth:
@@ -277,8 +277,8 @@ auth:
 
 | Setting | Guards | Default behavior when unset |
 |---------|--------|------------------------------|
-| `admin_token` | Control plane — a caller here can mint grants and resolve approvals, overriding what policies enforce | Loopback-only |
-| `jwt` | Data-plane identity — cryptographic agent id instead of the spoofable `agent:<id>` header. With `user_claim` set, a delegation-shaped token also carries the human the agent acts for, recorded on every trace (`user_id`) and OTel span (`enduser.id`) | Plaintext identity accepted |
+| `admin_token` | Control plane: a caller here can mint grants and resolve approvals, overriding what policies enforce | Loopback-only |
+| `jwt` | Data-plane identity: cryptographic agent id instead of the spoofable `agent:<id>` header. With `user_claim` set, a delegation-shaped token also carries the human the agent acts for, recorded on every trace (`user_id`) and OTel span (`enduser.id`) | Plaintext identity accepted |
 | `require_authentication` | Anonymous data-plane access: `POST /tool/*`, `POST /decide`, `POST`/`DELETE /mcp`, and `/tools`, `/mcp-servers` enumeration all return `401` without a credential | Anonymous allowed, governed by policy (fails closed) |
 
 The data plane (tool calls, `/decide`, `/mcp`, `/health`) is never gated by `admin_token`. Details: [control-plane auth](https://docs.flux7.art/mesh7/control-plane-auth/) and [JWT authentication](https://docs.flux7.art/mesh7/jwt-auth/).

@@ -24,7 +24,7 @@ For anything beyond one developer at one terminal, run `mesh7 serve` under syste
 
 ## Config 1: Solo dev + Claude (most common)
 
-The default. 90% of users. Zero setup.
+The default mode, used by 90% of users, needs no setup.
 
 ```
 Claude Code ──stdio──> flux7-mesh ──> filesystem, gmail, ollama...
@@ -32,7 +32,7 @@ Claude Code ──stdio──> flux7-mesh ──> filesystem, gmail, ollama...
                       :9090 HTTP (background, for mesh CLI / traces)
 ```
 
-Claude launches mesh7 as an MCP subprocess. mesh7 launches upstream MCP servers, applies policies, records traces. When Claude quits, everything stops cleanly.
+Claude launches mesh7 as an MCP subprocess. mesh7 launches upstream MCP servers, then applies policies and records traces. When Claude quits, everything stops cleanly.
 
 **Setup:** Just add flux7-mesh as an MCP server in Claude Code:
 
@@ -56,7 +56,7 @@ Claude Code ──stdio──> flux7-mesh :9090 ──> tools
                     └── decision model → evaluate (~350ms; local model as fallback)
 ```
 
-The built-in auto-approve (Level 1) fires before the approval queue — routine patterns never block. If it can't resolve, the external supervisor (Level 1+) evaluates with rules, then a decision model. If both escalate, the human decides.
+The built-in auto-approve (Level 1) fires before the approval queue, so routine patterns never block. If it can't resolve, the external supervisor (Level 1+) evaluates with rules, then a decision model. If both escalate, the human decides.
 
 **Setup:**
 
@@ -96,7 +96,7 @@ sup7 never starts flux7-mesh. It attaches to one that is already listening, so t
 
 ## Config 3: Supervisor standalone (no Claude)
 
-For pipelines, overnight runs, CI/CD, batch jobs. No human at the keyboard: the supervisor resolves what it can and only genuine unknowns wait.
+This mode suits pipelines, overnight runs, CI/CD and batch jobs. With no human at the keyboard, the supervisor resolves what it can and only the cases it cannot resolve wait.
 
 ```
 mesh7 serve (daemon, systemd)  ──> tools
@@ -128,7 +128,7 @@ curl -X POST http://localhost:9090/tool/filesystem.write_file \
 
 ## Config 4: External agent only
 
-Standard HTTP proxy mode. No MCP, no supervisor.
+Standard HTTP proxy mode, without MCP or a supervisor.
 
 ```
 flux7-mesh :9090 ──> tools
@@ -142,11 +142,11 @@ Agent (HTTP) ──────┘
 mesh7 --config config.yaml
 ```
 
-Any HTTP client can call `POST /tool/{name}`, query traces, manage approvals. Works with LangChain, CrewAI, custom scripts, cron jobs.
+Any HTTP client can call `POST /tool/{name}`, query traces and manage approvals. Works with LangChain, CrewAI, custom scripts, cron jobs.
 
 ## Config 5: Claude + external agent (the real mesh)
 
-Claude and external agents share the same flux7-mesh instance. One set of policies, one trace store, one approval queue.
+Claude and external agents share the same flux7-mesh instance, with one set of policies, one trace store and one approval queue.
 
 ```
 Claude Code ──stdio──> flux7-mesh :9090 ──> tools
@@ -154,9 +154,9 @@ Claude Code ──stdio──> flux7-mesh :9090 ──> tools
 Agent B ─────────HTTP──────┘
 ```
 
-**This works today.** Claude spawns flux7-mesh, the external agent connects via HTTP to `:9090`. Both are governed by the same policies.
+This setup already works: Claude spawns flux7-mesh, and the external agent connects via HTTP to `:9090`. Both are governed by the same policies.
 
-Add a supervisor and you get Config 2 with extra agents — everything goes through one mesh.
+Adding a supervisor gives Config 2 with extra agents, and everything still goes through one mesh.
 
 ---
 
@@ -232,11 +232,11 @@ flux7-mesh extracts the agent ID from `Authorization: Bearer agent:<id>` and app
 - Set `auth.require_authentication: true` so calls without a credential get `401` instead of running as `anonymous`.
 - See [Agent Security](security.md#production-hardening-checklist) for the full list.
 
-**Permission policies:** Set `always_allow` on the Managed Agent side — let flux7-mesh handle governance. Double-layer approval (Managed Agents `always_ask` + flux7-mesh `human_approval`) works but adds friction.
+**Permission policies:** Set `always_allow` on the Managed Agent side and let flux7-mesh handle governance. Double-layer approval (Managed Agents `always_ask` + flux7-mesh `human_approval`) works but adds friction.
 
 ## Config 9: Anthropic Agent SDK + hooks
 
-Agent SDK agents governed by mesh7 via `MeshHooks`. No MCP — hooks call `/decide` directly.
+Agent SDK agents governed by mesh7 via `MeshHooks`. The hooks call `/decide` directly, without MCP.
 
 ```
 Agent SDK agent
@@ -268,13 +268,13 @@ See `examples/agent-sdk-hooks/` and `sdk/python/README.md`.
 
 ## Contention over who owns the mesh
 
-### Config 6: Claude + supervisor (active spawn) — no longer possible
+### Config 6: Claude + supervisor (active spawn), no longer possible
 
 This described both Claude and the supervisor spawning flux7-mesh on `:9090`, the second losing the bind, and the supervisor's restart loop turning that into an infinite crash loop.
 
-It cannot happen any more. sup7 has no process-spawning capability at all: it attaches to a mesh that is already listening and gives up if none is. There is no `mesh_process` setting to disable, because there is nothing left to disable. Documented here only because older notes still reference the workaround.
+It cannot happen any more. sup7 has no process-spawning capability at all: it attaches to a mesh that is already listening and gives up if none is. There is no `mesh_process` setting to disable, because there is nothing left to disable. It is documented here only because older notes still reference the workaround.
 
-The general rule survives the scenario that produced it: **give the mesh an owner that is neither of its clients.** `mesh7 serve` under systemd, with Claude auto-proxying and sup7 polling.
+The general rule survives the scenario that produced it: **give the mesh an owner that is neither of its clients.** In practice, that means `mesh7 serve` under systemd, with Claude auto-proxying and sup7 polling.
 
 ### Config 7: Two Claude sessions
 
@@ -287,9 +287,9 @@ Claude session 1 ──stdio──> flux7-mesh :9090  ← owns the mesh
 Claude session 2 ──stdio──> shuttle ──POST /mcp──> :9090  ← same instance
 ```
 
-Note that this works even with no `mesh7 serve` daemon: an embedded MCP-mode instance wires the Streamable HTTP handler too, so session 1's mesh already serves `POST /mcp` for session 2 to attach to. One registry, one trace store, one approval queue.
+Note that this works even with no `mesh7 serve` daemon: an embedded MCP-mode instance wires the Streamable HTTP handler too, so session 1's mesh already serves `POST /mcp` for session 2 to attach to. Both sessions therefore share one registry, one trace store and one approval queue.
 
-Two things to know:
+Keep the following in mind:
 
 - **Lifetime still belongs to session 1.** Quit it and session 2's shuttle reports `proxy: daemon unreachable`. Run `mesh7 serve` when you want the mesh to outlive every client.
 - **Both sessions default to the same identity.** `--mcp-agent` defaults to `claude`, so unless you give each session a distinct value, policies and traces cannot tell them apart.
@@ -348,10 +348,10 @@ Agent C ───HTTP───> │  trace · grants · rate limiting     │
                             supervisor (poll)
 ```
 
-Two subcommands:
+The relevant subcommands are:
 
-- **`mesh7 serve`** — run as a persistent daemon (HTTP + manages upstream MCP servers)
-- **`mesh7 --mcp`** — auto-detects a running daemon and proxies to it (MCP stdio for Claude Code)
+- **`mesh7 serve`**: run as a persistent daemon (HTTP + manages upstream MCP servers)
+- **`mesh7 --mcp`**: auto-detects a running daemon and proxies to it (MCP stdio for Claude Code)
 
 The auto-proxy relays only to a daemon serving **the same config file**: the daemon reports an identifier of its config in `/health` (a hash of the file's absolute path, not the path), and `mesh7 --mcp --config other.yaml` facing a daemon of another config on the same port exits with an error instead of handing that project's agent the daemon's tools and policy. Give each config its own `port:`. A daemon older than v0.17.1 reports no identifier: the proxy relays as before and logs a warning.
 

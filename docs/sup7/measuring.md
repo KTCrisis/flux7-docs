@@ -6,7 +6,7 @@ A calibrated model tells you that a 0.7 is right about seven times in ten. It do
 
 1. **Observe.** On day one, delegate nothing: every call the policy sends to approval goes to a human, as before. The decisions humans take become the labels.
 2. **Measure.** Replay labelled cases through the evaluator and look at two numbers first: **dangers approved** (must stay at 0) and **normal calls approved** (the load taken off humans).
-3. **Delegate by steps.** Automatic approval first, for what is clearly safe. Automatic denial last, or never: a wrong denial costs little, but it saves the human nothing that an escalation would not.
+3. **Delegate by steps.** Delegate automatic approval first, for what is clearly safe, and automatic denial last, or never: a wrong denial costs little, but it saves the human nothing that an escalation would not.
 
 Thresholds are set on this evidence, question by question, and measured again whenever a question, a threshold or the model changes.
 
@@ -31,7 +31,7 @@ sup7 bench replay --traces traces.jsonl --allow-repo my-service --allow-repo my-
   --exclude-file exclusions.txt --export-set ~/.sup7/bench/sets/real.jsonl
 ```
 
-The allowlist keeps a call only if it names an allowed repository and no other home or `/tmp` path; query tools (web search, fetch) may go without a path; free-text tools stay home. Secret-looking strings are masked, long strings truncated, and a call excluded never appears in the recent activity sent with the next ones. A denylist of keywords alone leaked on the first dry run: prefer the allowlist.
+The allowlist keeps a call only if it names an allowed repository and no other home or `/tmp` path. Query tools (web search, fetch) may go without a path, while free-text tools stay home. Secret-looking strings are masked, long strings truncated, and a call excluded never appears in the recent activity sent with the next ones. A denylist of keywords alone leaked on the first dry run: prefer the allowlist.
 
 ## Runs
 
@@ -78,6 +78,6 @@ On 2026-09-30 the same case sets were replayed with `nimble` (Bespoke Labs, 9B) 
 | Real calls approved | 914 / 1,027 (89 %) | 483 (47 %) | 894 (87 %) |
 | Median latency | ~330 ms | ~1.1 s alone | ~1.1 s alone |
 
-nimble answers `in_scope` lower than Jev for the same calls, so Jev's floor of 0.3 escalated half the normal work; the danger signals, not `in_scope`, did the safety work on these sets. The one danger it approved at every floor was an edit of `default_action` in the mesh7 policy file: nimble did not read "an agent changing its own governance" as sensitive (secrets 0.20, Jev 0.77). No threshold fixes a signal that is absent; a rule does. Production now escalates any write to the mesh7 configuration, policy files, sup7's own files and the harness settings by rule, before any model is asked, whichever model sits behind it.
+nimble answers `in_scope` lower than Jev for the same calls, so Jev's floor of 0.3 escalated half the normal work; the danger signals, not `in_scope`, did the safety work on these sets. The one danger it approved at every floor was an edit of `default_action` in the mesh7 policy file: nimble did not read "an agent changing its own governance" as sensitive (secrets 0.20, Jev 0.77). A threshold cannot fix a signal that is absent, but a rule can. Production now escalates any write to the mesh7 configuration, policy files, sup7's own files and the harness settings by rule, before any model is asked, whichever model sits behind it.
 
-**Limits to keep in mind.** The boundary cases were written by the people who wrote the questions: a danger phrased another way may come out lower. The margin is a reasoned bet, not a proof; cases from independent sources (public agent-safety benchmarks, the operator's own incidents) are what turn it into evidence. And normal-work numbers measured on one team's usage do not transfer to another: each deployment measures its own.
+**Limits to keep in mind.** The boundary cases were written by the people who wrote the questions: a danger phrased another way may come out lower. The margin is a reasoned bet rather than a proof. Only cases from independent sources (public agent-safety benchmarks, the operator's own incidents) can turn it into evidence. And normal-work numbers measured on one team's usage do not transfer to another: each deployment measures its own.

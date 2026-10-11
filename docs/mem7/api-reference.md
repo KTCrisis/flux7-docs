@@ -117,7 +117,7 @@ Delete memories by key and/or tags. A tombstone section is appended to the markd
 
 ### memory_history
 
-The life of one key, oldest first, read from the markdown workspace (the index only knows the current state): every store, update and deletion, by key or by tags, with its author, the trace id of the governed call behind it, and its seal in the hash chain. Entries written before the chain show as unsealed. Scoped like a read.
+Returns the life of one key, oldest first, read from the markdown workspace (the index only knows the current state). The history lists every store, update and deletion, by key or by tags. Each entry carries its author, the trace id of the governed call behind it, and its seal in the hash chain. Entries written before the chain show as unsealed. Access is scoped like a read.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -130,7 +130,7 @@ The life of one key, oldest first, read from the markdown workspace (the index o
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET`  | `/healthz` | Liveness probe, returns `{"status":"ok","version":"…"}` (always public, no auth) |
-| `POST` | `/rpc` | JSON-RPC 2.0 — same tool surface as stdio |
+| `POST` | `/rpc` | JSON-RPC 2.0, same tool surface as stdio |
 | `POST` | `/mcp` | MCP Streamable HTTP (for flux7-mesh daemon mode). No session, JSON answers, notifications get `202`; `GET` and `DELETE` return `405` |
 | `GET`  | `/sse` | MCP HTTP+SSE transport, deprecated by the MCP spec (2026-07-28); kept for existing clients, use `/mcp` |
 | `POST` | `/messages` | Message endpoint of the deprecated HTTP+SSE transport |

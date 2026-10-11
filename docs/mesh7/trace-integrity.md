@@ -52,7 +52,7 @@ line must be HMAC. Lines written before the chain existed are counted as
 `.old`), with the store's own key, and returns the report as JSON:
 `persistent`, `files`, `hmac`, `verified_at`, then `lines`, `chained`,
 `unchained`, `first_seq`, `last_seq`, `anchor`, `head`, `alg` and `break`
-when there is one. A broken chain is still a `200`: the report is the answer.
+when there is one. A broken chain still returns `200`, because the report itself is the answer.
 Like every control-plane route it needs the admin token, or loopback. Writes
 wait while the file is read (tens of milliseconds for 10 MB).
 

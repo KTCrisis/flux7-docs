@@ -93,7 +93,7 @@ bench:
 
 ## Rule conditions
 
-Conditions follow the format `<field> <operator> <value>` :
+Conditions follow the format `<field> <operator> <value>`:
 
 | Operator | Example | Meaning |
 |----------|---------|---------|
@@ -139,7 +139,7 @@ evaluator:
   timeout: 30
 ```
 
-Requires Ollama running locally. The model receives a structured prompt with tool name, params, recent traces, and active grants, and must respond in format :
+Requires Ollama running locally. The model receives a structured prompt with tool name, params, recent traces, and active grants, and must respond in this format:
 
 ```
 DECISION: APPROVE | CONFIDENCE: 0.95 | REASONING: routine file read
@@ -177,7 +177,7 @@ evaluator:
     redact_params: [content]           # parameter names never sent to the model
 ```
 
-`api_key_env` and `account_id_env` name environment variables; the secrets themselves stay out of the file. The code defaults above are conservative, for a new installation without measurements; the values used in production were measured, see [Measuring](measuring.md). The questions, their families and how sup7 decides from them: [Jev and question sets](jev.md).
+`api_key_env` and `account_id_env` name environment variables, so the secrets themselves stay out of the file. The code defaults above are conservative and suit a new installation without measurements. The values used in production were measured (see [Measuring](measuring.md)). [Jev and question sets](jev.md) describes the questions, their families and how sup7 decides from them.
 
 **Local model.** Ollama 0.35 and later serve the same System One API. Point the `typesafe` backend at it and leave the key name empty: no variable is required and no `Authorization` header is sent.
 
@@ -228,9 +228,9 @@ evaluator:
         in_scope_min: 0.05
 ```
 
-Each chain entry is a full `evaluator` block; `breaker_failures` and `breaker_cooldown` are read from the top level. A chain entry may set its own `confidence_threshold`, which then applies to that provider's verdicts: confidences are not comparable across models (Jev's is computed, an LLM's is self-reported). Unset, the top-level threshold applies. When `chain` is non-empty it replaces the single `provider`.
+Each chain entry is a full `evaluator` block. However, `breaker_failures` and `breaker_cooldown` are read from the top level. A chain entry may set its own `confidence_threshold`, which then applies to that provider's verdicts: confidences are not comparable across models (Jev's is computed, an LLM's is self-reported). When it is unset, the top-level threshold applies. When `chain` is non-empty it replaces the single `provider`.
 
-Providers are tried in order and the first one that answers gives the verdict; an `escalate` verdict is an answer, not a failure. The next provider is tried only when the previous one fails (network error, HTTP error such as 402, timeout, unreadable answer). After `breaker_failures` consecutive failures a provider is skipped for `breaker_cooldown` seconds. If every provider fails, sup7 escalates to a human. The reasoning is prefixed with the provider that answered and those skipped or failed, e.g. `[ollama, jev skipped] ...`, and `GET /status` on the admin API reports each provider as `ok`, `failing` or `skipped`.
+Providers are tried in order and the first one that answers gives the verdict. An `escalate` verdict counts as an answer, not as a failure. The next provider is tried only when the previous one fails (network error, HTTP error such as 402, timeout, unreadable answer). After `breaker_failures` consecutive failures a provider is skipped for `breaker_cooldown` seconds. If every provider fails, sup7 escalates to a human. The reasoning is prefixed with the provider that answered and those skipped or failed, e.g. `[ollama, jev skipped] ...`, and `GET /status` on the admin API reports each provider as `ok`, `failing` or `skipped`.
 
 ## Admin API
 
@@ -242,4 +242,4 @@ admin:
   token: ""
 ```
 
-Off by default. Routes: `GET /health` (no token), `GET /status`, `GET /config` (never secrets; shows each provider's effective threshold, the poll scope and the question sets), `GET /decisions?limit=50` (1 to 500), `POST /pause`, `POST /resume`, the file routes (`/files`) and the evaluation routes (`/bench/...`). Editing and starting a run need `token`. See [the overview](index.md#admin-api).
+The admin API is off by default. Its routes are `GET /health` (no token), `GET /status`, `GET /config` (never secrets; shows each provider's effective threshold, the poll scope and the question sets), `GET /decisions?limit=50` (1 to 500), `POST /pause`, `POST /resume`, the file routes (`/files`) and the evaluation routes (`/bench/...`). Editing and starting a run need `token`. See [the overview](index.md#admin-api).

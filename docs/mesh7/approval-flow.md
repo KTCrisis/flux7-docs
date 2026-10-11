@@ -1,6 +1,6 @@
 # Approval Flow
 
-When a policy rule has `action: human_approval`, the tool call enters an approval queue. The agent waits. A human (or supervisor) resolves it. The tool call proceeds or is rejected.
+When a policy rule has `action: human_approval`, the tool call enters an approval queue. The agent waits until a human (or a supervisor) resolves it, and the tool call then proceeds or is rejected.
 
 ## How it works
 
@@ -43,9 +43,9 @@ approval:
 
 | Channel | Behavior |
 |---|---|
-| `queue` | Always enqueue. For daemons and supervisor setups — a service has no terminal to prompt on. |
+| `queue` | Always enqueue. For daemons and supervisor setups, since a service has no terminal to prompt on. |
 | `tty` | Require the interactive `/dev/tty` prompt. If no TTY is available, the call is **denied** (fail-closed), never silently queued. |
-| `tty-fallback` | Try the TTY prompt, fall back to the queue. Default — matches the historical behavior. |
+| `tty-fallback` | Try the TTY prompt, fall back to the queue. Default, which matches the historical behavior. |
 
 Without an explicit channel, routing depends on how the process was launched: a daemon started from a terminal keeps a usable `/dev/tty` and will prompt in a window nobody watches. Set `channel: queue` for any unattended deployment (systemd, container, supervisor loop).
 
@@ -172,7 +172,7 @@ Prefix matching: `a1b2c3d4` matches the full ID if the prefix is unique.
 
 ## Temporal grants
 
-Repeated approvals for the same tool pattern get tedious. Grants are like `sudo` — a temporary bypass:
+Repeated approvals for the same tool pattern get tedious. Grants work like `sudo`, as a temporary bypass:
 
 ```
 grant.create {tools: "filesystem.write_*", duration: "30m"}
@@ -246,7 +246,7 @@ curl -X DELETE http://localhost:9090/grants/abc123
 ```
 
 !!! warning "Grants only bypass `human_approval`"
-    Tools marked `deny` remain blocked. A grant cannot override a deny rule — that requires a policy edit.
+    Tools marked `deny` remain blocked. A grant cannot override a deny rule; overriding one requires a policy edit.
 
 ## Timeouts
 
@@ -326,12 +326,12 @@ curl "http://localhost:9090/traces?tool=filesystem.write_file" | python3 -m json
 
 When [flux7-memory](mem7-auto-approve.md) is configured, every approval resolution (approve, deny, timeout) is stored as a queryable fact. This enables:
 
-- **Auto-approve** — reads a human approved before resolve without asking again (writes always ask)
-- **Audit trail** — "who approved what, when, why" is queryable
-- **Cross-session memory** — decisions survive process restarts
+- **Auto-approve**: reads a human approved before resolve without asking again (writes always ask)
+- **Audit trail**: "who approved what, when, why" is queryable
+- **Cross-session memory**: decisions survive process restarts
 
 ## Next steps
 
-- [Memory Integration](mem7-auto-approve.md) — auto-approve from past decisions
-- [CLI Tools](cli-tools.md) — governing git, docker, terraform
-- [Deployment Modes](deployment-modes.md) — solo, team, cloud
+- [Memory Integration](mem7-auto-approve.md): auto-approve from past decisions
+- [CLI Tools](cli-tools.md): governing git, docker, terraform
+- [Deployment Modes](deployment-modes.md): solo, team, cloud

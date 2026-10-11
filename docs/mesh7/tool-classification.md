@@ -1,12 +1,12 @@
 # Tool Classification
 
-Writing a policy means judging every tool an upstream declares, for every agent. mesh7 helps with that judgment: it reads what each tool declares about itself, suggests a starting point, shows what the policy decides for each agent, lets you change one tool's action without touching the rest of the file, and can hold the catalogue to the version you reviewed.
+Writing a policy means judging every tool an upstream declares, for every agent. mesh7 helps with that judgment. It reads what each tool declares about itself and suggests a starting point. It also shows what the policy decides for each agent and lets you change one tool's action without touching the rest of the file. Finally, it can hold the catalogue to the version you reviewed.
 
 The classification is advice for the person writing the policy; it never decides a call. Two opt-in settings act on the catalogue: [pinning](#pinning-the-catalogue) holds back upstream tools that appeared or changed since they were accepted, and [hiding](#hiding-what-can-only-be-denied) keeps tools the policy can only deny out of the model's context.
 
 ## Two families of tools
 
-The question is where the meaning of a call lives.
+The two families differ in where the meaning of a call lives.
 
 | Family | The effect is stated by | Examples | What a rule on the name decides |
 |---|---|---|---|
@@ -32,7 +32,7 @@ Tools that compose several calls behind one intent (`osm.analyze_commute`) canno
 
 Conflicting signals resolve to the restrictive side: one write signal outweighs any number of read signals, because a false *read* opens a hole while a false *write* only costs an approval. A tool with no signal is `unknown`. Every classification lists its reasons.
 
-Annotations are claims. The MCP specification itself says not to trust them from an untrusted server, and some servers send the specification's defaults (`destructiveHint: true`) on every tool, which classifies them all as writes. The classification shows it; the decision stays yours.
+Annotations are claims. The MCP specification itself says not to trust them from an untrusted server, and some servers send the specification's defaults (`destructiveHint: true`) on every tool, which classifies them all as writes. The classification shows these signals, but the decision remains with you.
 
 ## Starting from a draft
 
@@ -86,7 +86,7 @@ Starting strict and relaxing on evidence is cheaper than the reverse. [Memory In
 - the dispatcher floor of a CLI tool is already applied;
 - grants are not reflected: they belong to a session, not to the catalogue.
 
-This is how a broad glob shows itself: a `docker.*: allow` written for read-only tools also allows any tool the upstream adds later.
+The decisions also expose a broad glob: a `docker.*: allow` written for read-only tools also allows any tool the upstream adds later.
 
 ## Changing one tool's action
 
@@ -97,7 +97,7 @@ This is how a broad glob shows itself: a `docker.*: allow` written for read-only
 - the rule is headed by `# set from console, <date> by <by>`;
 - `inherit` removes such a rule and falls back to whatever comes next. It refuses (`409`) a rule written by hand: those are edited in the file.
 
-The file is edited as text, not re-serialized: comments and blank lines stay as written. The previous version is kept as `<file>.bak`, the write is atomic and keeps the file's mode, the whole policy set is re-validated (the file is restored if it fails), then applied at once through the hot-reload path. Each edit is recorded in the trace chain as the tool `mesh.policy_edit`, with the action before and after.
+The file is edited as text, not re-serialized: comments and blank lines stay as written. The previous version is kept as `<file>.bak`. The write is atomic and keeps the file's mode. The whole policy set is then re-validated (the file is restored if it fails) and applied at once through the hot-reload path. Each edit is recorded in the trace chain as the tool `mesh.policy_edit`, with the action before and after.
 
 `by` is recorded as given: the admin token proves the right to edit, not an identity.
 

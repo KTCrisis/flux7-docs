@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block htmltitle %}
-  <title>flux7 — Governance infrastructure for AI agents</title>
+  <title>flux7 · Governance infrastructure for AI agents</title>
 {% endblock %}
 
 {% block styles %}
@@ -25,7 +25,7 @@
       <span class="f7-t1">flux</span><span class="f7-t2">7</span>
     </h1>
     <p class="f7-hero-sub">
-      Four projects, one system. Policy enforcement, governed memory, automated evaluation, human oversight.
+      Four projects that form one system for policy enforcement, governed memory, automated evaluation and human oversight.
     </p>
     <div class="f7-hero-actions">
       <a href="getting-started/" class="f7-btn f7-btn-primary">Get started</a>
@@ -41,8 +41,8 @@
       <div class="f7-section-line"></div>
     </div>
     <div class="f7-prose">
-      <p>AI agents call tools. Tools have consequences. An agent with access to your filesystem, email, database, and cloud APIs is one hallucination away from an irreversible action.</p>
-      <p>The current answer is either <strong>trust everything</strong> (dangerous) or <strong>approve everything manually</strong> (doesn't scale). Between "allow all" and "human in the loop for every call," there's a gap — and no standard infrastructure to fill it.</p>
+      <p>AI agents call tools, and tools have consequences. An agent with access to your filesystem, email, database, and cloud APIs is one hallucination away from an irreversible action.</p>
+      <p>The current answer is either <strong>trust everything</strong> (dangerous) or <strong>approve everything manually</strong> (doesn't scale). Between "allow all" and "human in the loop for every call," there's a gap with no standard infrastructure to fill it.</p>
       <p>flux7 fills that gap with a layered governance system that handles the routine automatically and escalates the ambiguous to humans.</p>
     </div>
   </section>
@@ -92,8 +92,8 @@ L2  Human               Console UI / Claude Code  final decision             min
           <span class="f7-card-name">flux7-mesh</span>
           <span class="f7-card-badge">Go</span>
         </div>
-        <div class="f7-card-role">L0 — Policy engine</div>
-        <p class="f7-card-desc">Enforces what agents can do. YAML policies, first-match-wins, glob patterns, approval queue, rate limiting, JSONL tracing. One binary, one config file. Fail-closed.</p>
+        <div class="f7-card-role">L0 · Policy engine</div>
+        <p class="f7-card-desc">Enforces what agents can do with YAML policies (first match wins, glob patterns), an approval queue, rate limiting and JSONL tracing. It runs as one binary with one config file and fails closed.</p>
         <div class="f7-card-tags">
           <span>MCP proxy</span><span>hot-reload</span><span>per-agent policies</span>
         </div>
@@ -106,7 +106,7 @@ L2  Human               Console UI / Claude Code  final decision             min
           <span class="f7-card-badge">Go</span>
         </div>
         <div class="f7-card-role">Memory substrate</div>
-        <p class="f7-card-desc">Remembers what happened. Persistent, searchable, governed memory. Hybrid search (BM25 + dense cosine + LLM reranking). Decisions stored as queryable facts.</p>
+        <p class="f7-card-desc">Remembers what happened in a persistent, searchable, governed memory, with hybrid search (BM25 + dense cosine + LLM reranking). Decisions are stored as queryable facts.</p>
         <div class="f7-card-tags">
           <span>decisions as facts</span><span>temporal</span><span>multi-agent</span>
         </div>
@@ -118,7 +118,7 @@ L2  Human               Console UI / Claude Code  final decision             min
           <span class="f7-card-name">flux7-supervisor</span>
           <span class="f7-card-badge">Python</span>
         </div>
-        <div class="f7-card-role">L1+ — Automated evaluation</div>
+        <div class="f7-card-role">L1+ · Automated evaluation</div>
         <p class="f7-card-desc">Evaluates what's ambiguous. Polls pending approvals, applies rules, then asks a decision model narrow typed questions (Jev, with the same questions on a local model through Ollama as fallback, behind a circuit breaker) and decides in code from the probabilities. Thresholds are measured on a bench.</p>
         <div class="f7-card-tags">
           <span>rule engine</span><span>provider chain</span><span>confidence threshold</span>
@@ -131,8 +131,8 @@ L2  Human               Console UI / Claude Code  final decision             min
           <span class="f7-card-name">flux7-console</span>
           <span class="f7-card-badge">Next.js</span>
         </div>
-        <div class="f7-card-role">L2 — Human oversight</div>
-        <p class="f7-card-desc">Shows it all and lets humans intervene. Dashboard, approval UI, trace viewer with chain of authority and integrity check, memory browser, OTEL waterfall. The management plane for the entire system.</p>
+        <div class="f7-card-role">L2 · Human oversight</div>
+        <p class="f7-card-desc">Shows it all and lets humans intervene through a dashboard, an approval UI, a trace viewer with chain of authority and integrity check, a memory browser and an OTEL waterfall. It is the management plane for the entire system.</p>
         <div class="f7-card-tags">
           <span>dashboard</span><span>approval UI</span><span>OTEL traces</span>
         </div>
@@ -256,7 +256,7 @@ L2  Human               Console UI / Claude Code  final decision             min
         </tbody>
       </table>
     </div>
-    <p class="f7-timeline-note">Snapshot of September 2026; this field moves every week. Gateways and flux7 compose rather than compete: a gateway checks who calls which tool, flux7 judges the call itself. The <a href="guides/keycloak-kong/">Keycloak and Kong example</a> runs mesh7 behind a Kong node.</p>
+    <p class="f7-timeline-note">Snapshot of September 2026; this field moves every week. Gateways and flux7 compose rather than compete: a gateway checks who calls which tool, and flux7 judges the call itself. The <a href="guides/keycloak-kong/">Keycloak and Kong example</a> runs mesh7 behind a Kong node.</p>
   </section>
 
   <!-- Source -->

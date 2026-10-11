@@ -1,4 +1,4 @@
-# System Design — flux7-mesh + flux7-memory + flux7-console
+# System Design: flux7-mesh + flux7-memory + flux7-console
 
 *September 2026. Living document.*
 
@@ -8,10 +8,10 @@
 
 ## Design principles
 
-1. **Each project works alone.** flux7-mesh without flux7-memory still enforces policies. flux7-memory without flux7-mesh is a standalone memory server. flux7-console without the others is a governance dashboard. Integration is opt-in, not required.
-2. **Open-source runtime, product on top.** flux7-mesh and flux7-memory are Apache 2.0 — free, adoptable, no lock-in. flux7-console is the management plane that makes them manageable at scale. That's where the business model sits.
+1. **Each project works alone.** flux7-mesh without flux7-memory still enforces policies. flux7-memory without flux7-mesh is a standalone memory server. flux7-console without the others is a governance dashboard. Integration is opt-in.
+2. **Open-source runtime, product on top.** flux7-mesh and flux7-memory are Apache 2.0, free to adopt without lock-in. flux7-console is the management plane that makes them manageable at scale, and the business model sits there.
 3. **Decisions are facts.** When a human approves an action or a supervisor auto-resolves a request, that decision is stored as a queryable fact in flux7-memory. It doesn't vanish into a log file.
-4. **Write path matters more than read path.** The system becomes valuable when events automatically flow between components — not when a human manually checks dashboards.
+4. **Write path matters more than read path.** The system becomes valuable when events automatically flow between components, rather than when a human manually checks dashboards.
 
 ---
 
@@ -19,7 +19,7 @@
 
 ### flux7-mesh (runtime / data plane)
 
-Go binary. Sidecar proxy between agents and their tools.
+Go binary acting as a sidecar proxy between agents and their tools.
 
 | What it does | How |
 |---|---|
@@ -36,7 +36,7 @@ Go binary. Sidecar proxy between agents and their tools.
 
 ### flux7-memory (memory substrate)
 
-Go binary. MCP server for persistent, searchable, governed memory.
+Go binary serving persistent, searchable, governed memory over MCP.
 
 | What it does | How |
 |---|---|
@@ -51,7 +51,7 @@ Go binary. MCP server for persistent, searchable, governed memory.
 
 ### flux7-supervisor (L1 supervisor)
 
-Python agent. Standalone evaluation process between policy engine and human.
+Python agent that runs as a standalone evaluation process between the policy engine and the human.
 
 | What it does | How |
 |---|---|
@@ -153,7 +153,7 @@ Developer → Claude Code → flux7-mesh → gmail.send_email
 |---|---|---|
 | Approval source | Always human | Supervisor checks flux7-memory first, escalates if unsure |
 | Decision storage | Lost in terminal history | Stored as fact in flux7-memory, queryable |
-| Learning | None — same prompt every time | Supervisor learns from past decisions |
+| Learning | None (same prompt every time) | Supervisor learns from past decisions |
 | Audit | Grep JSONL logs | flux7-console dashboard, filterable, searchable |
 | Visibility | Only the developer who approved | Any team member via flux7-console |
 
@@ -236,16 +236,16 @@ Level 2: Human
          Decision written back to flux7-memory via flux7-mesh.
 ```
 
-> **Two supervisor layers.** Level 1 is built into flux7-mesh — a `MemoryReader`
-> that queries flux7-memory before the approval queue. It's a pre-filter, not a full
-> resolver. Level 1+ is [flux7-supervisor (sup7)](https://github.com/KTCrisis/flux7-supervisor),
+> **Two supervisor layers.** Level 1 is built into flux7-mesh: a `MemoryReader`
+> that queries flux7-memory before the approval queue. It acts as a pre-filter and does not
+> resolve requests fully. Level 1+ is [flux7-supervisor (sup7)](https://github.com/KTCrisis/flux7-supervisor),
 > a standalone Python agent that implements the
-> [supervisor protocol](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/supervisor-protocol.md)
-> — it polls pending approvals and resolves them with rule evaluation + pluggable LLM
+> [supervisor protocol](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/supervisor-protocol.md).
+> It polls pending approvals and resolves them with rule evaluation + pluggable LLM
 > (Ollama, Anthropic, Jev, or a chain of them; the Claude Code MCP callback is not functional yet).
 > The `supervisor/` package inside flux7-mesh handles content redaction and
 > injection detection on the protocol's outbound payloads (`RedactParams`,
-> `DetectInjection`) — a separate concern from both layers.
+> `DetectInjection`), which is a separate concern from both layers.
 
 ### Supervisor decision logic (pseudocode)
 
@@ -276,9 +276,9 @@ def evaluate(request, mem7_client):
 
 ### Where the approval UI lives
 
-**Claude Code terminal** — the developer gets the prompt inline. This is the current flow, works for solo use.
+**Claude Code terminal**: the developer gets the prompt inline. This current flow works for solo use.
 
-**flux7-console web UI** — for team use, overnight runs, or when multiple agents generate approvals faster than one human can handle. flux7-console polls flux7-mesh's pending queue, displays context, human clicks. flux7-console POSTs back to flux7-mesh `/approvals/{id}/approve` or `/deny`.
+**flux7-console web UI**: for team use, overnight runs, or when multiple agents generate approvals faster than one human can handle. flux7-console polls flux7-mesh's pending queue and displays the context, then a human clicks. flux7-console POSTs back to flux7-mesh `/approvals/{id}/approve` or `/deny`.
 
 Both are **thin clients** of the flux7-mesh approval API. If flux7-console goes down, Claude Code still works. If both go down, requests queue in flux7-mesh until someone resolves them (fail-safe, not fail-open).
 
@@ -298,7 +298,7 @@ laptop
 └── Claude Code / Cursor (agent)
 ```
 
-No flux7-console needed. flux7-mesh + flux7-memory provide full governance + memory. The developer is the human-in-the-loop via terminal prompts.
+No flux7-console is needed, because flux7-mesh + flux7-memory provide full governance + memory. The developer is the human-in-the-loop via terminal prompts.
 
 ### Small team
 
@@ -313,7 +313,7 @@ developer laptops
 └── agents connect to shared flux7-mesh
 ```
 
-flux7-console adds value: team visibility, approval UI for shared agents, audit trail. sup7 handles automated evaluation.
+flux7-console adds team visibility, an approval UI for shared agents and an audit trail. sup7 handles automated evaluation.
 
 flux7-console ships a systemd unit, `deploy/flux7-console.service`, which runs `next start` on `127.0.0.1:8790` after `mesh7.service`; tokens and URLs come from an optional `EnvironmentFile`. sup7 ships its own unit (`contrib/systemd/sup7.service`). Reaching the console from a phone goes through whatever puts that loopback port on your network (reverse proxy, tunnel); the layout is usable at phone width.
 
@@ -370,7 +370,7 @@ When an approval resolves in flux7-mesh, the decision is stored in flux7-memory 
 - On resolve: async POST to flux7-memory `/rpc` with `memory_store`
 - Key format: `decision.<tool>.<approval_id>`
 - Tags: `[decision, approved|denied, <tool>, agent:<id>]`
-- Value: human-readable summary — "approved by X — agent:Y tool:Z reason:..."
+- Value: human-readable summary of the form "approved by X — agent:Y tool:Z reason:..."
 - Metrics: `agent_mesh_mem7_writes_{attempted,succeeded,failed}_total`
 - Graceful degradation: failing flux7-memory never blocks approvals
 
@@ -378,7 +378,7 @@ When an approval resolves in flux7-mesh, the decision is stored in flux7-memory 
 
 *Shipped in flux7-mesh v0.9.1.*
 
-flux7-mesh queries flux7-memory before submitting to the approval queue. This is the built-in Level 1 supervisor — a pre-filter that handles routine patterns.
+flux7-mesh queries flux7-memory before submitting to the approval queue. This lookup is the built-in Level 1 supervisor, a pre-filter that handles routine patterns.
 
 Eligibility, thresholds and settings: [Precedents](../mesh7/mem7-auto-approve.md). Auto-approved decisions are traced as `supervisor:mem7`.
 
@@ -411,10 +411,10 @@ Shipped in the frontend.
 
 2. **Cross-agent memory.** Agent A stores an observation. Agent B searches and finds it. The supervisor checks if a decision was already made. All through the same flux7-memory store, scoped by tags.
 
-3. **Audit without effort.** Every decision is a fact in flux7-memory. Every tool call is a trace in flux7-mesh. flux7-console joins them: "this agent called this tool, it was approved because of this past decision, here's the full chain." Compliance teams query, they don't grep.
+3. **Audit without effort.** Every decision is a fact in flux7-memory. Every tool call is a trace in flux7-mesh. flux7-console joins them: "this agent called this tool, it was approved because of this past decision, here's the full chain." Compliance teams query that record instead of grepping logs.
 
 4. **Progressive adoption.** Day 1: install flux7-mesh, get policies and tracing. Day 30: add flux7-memory, get persistent memory. Day 60: add flux7-console, get visibility and team governance. Each step is independently valuable.
 
 ---
 
-*Three projects, one system. Independent by default, powerful together.*
+*The three projects form one system. Each works independently by default, and together they do more.*

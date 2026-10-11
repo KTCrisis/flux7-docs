@@ -2,7 +2,7 @@
 
 A worked example, built and run end to end with a real agent: [scout7](https://github.com/KTCrisis/scout7), a research agent that searches the web, reads pages, analyses them with a local model, remembers what it found and draws architecture diagrams. Every tool call goes through mesh7.
 
-Three layers, three questions:
+Each layer answers a different question:
 
 | Layer | Answers | Sees |
 |---|---|---|
@@ -10,7 +10,7 @@ Three layers, three questions:
 | **Kong** (Konnect or Gateway Enterprise 3.14+) | May this agent, for this person, reach this *tool*? | The token and its scopes, the MCP method and tool name |
 | **mesh7** | Should this *act*, with these *arguments*, run, wait for a human, or stop? | The tool, its arguments, the agent and the human, the history |
 
-Kong opens the door; mesh7 judges the act. Each layer is useful alone; the example adds them one at a time.
+Kong controls who reaches a tool, and mesh7 judges the act itself. Each layer is useful alone, and the example adds them one at a time.
 
 ```
 human ──sign-in──► Keycloak
@@ -97,7 +97,7 @@ rules:
     action: deny
 ```
 
-An agent that waits for the human retries the same call; mesh7 answers with the same pending approval, then runs the call once approved, or tells the agent once that it was refused. See [Approval Flow](../mesh7/approval-flow.md).
+An agent that waits for the human retries the same call. mesh7 answers with the same pending approval, then runs the call once approved, or tells the agent once that it was refused. See [Approval Flow](../mesh7/approval-flow.md).
 
 ## Part 2: adding Kong
 
@@ -152,7 +152,7 @@ services:
     propagation: { default_format: w3c }
 ```
 
-Tracing is off by default on the node: set `KONG_TRACING_INSTRUMENTATIONS=all` (and a sampling rate). On mesh7, `otel_endpoint: http://localhost:4318`. Kong propagates a `traceparent`; mesh7 joins it, so one call is one trace: Kong's router and MCP plugin spans, then the mesh7 span for the tool, under Kong's balancer span. See [Observability](../mesh7/otel.md).
+Tracing is off by default on the node: set `KONG_TRACING_INSTRUMENTATIONS=all` (and a sampling rate). On mesh7, `otel_endpoint: http://localhost:4318`. Kong propagates a `traceparent` and mesh7 joins it. Hence one call produces a single trace: Kong's router and MCP plugin spans, then the mesh7 span for the tool, under Kong's balancer span. See [Observability](../mesh7/otel.md).
 
 ## Who catches what
 
@@ -168,7 +168,7 @@ Played end to end with the stack above:
 | bob's scout7 draws a diagram | scope present | lets it through | **held for a human**, approved or refused in the console |
 | The upstream server changes a tool's description | | | **held back** ([`pin_tools`](../mesh7/configuration.md)) |
 
-Kong decides on the identity and the tool name; mesh7 decides on the act.
+Kong decides on the identity and the tool name, whereas mesh7 decides on the act.
 
 ## Pitfalls met on the way
 
@@ -183,5 +183,5 @@ Kong decides on the identity and the tool name; mesh7 decides on the act.
 ## Limits, today
 
 - mesh7 **records** the human (`user_claim`) but its policies do not yet **decide** on the human or on the organisation: alice and bob are told apart by Keycloak (roles) and Kong (scopes). Claim-based conditions are on the roadmap.
-- The `fetch` rule compares the start of the URL: it stops `http://` addresses, not an internal service reached over `https://`. It is a text condition, not an SSRF guard; resolving the host and refusing private addresses would belong in the tool or in a dedicated check.
+- The `fetch` rule compares the start of the URL: it stops `http://` addresses, not an internal service reached over `https://`. It is a text condition, not an SSRF guard. Resolving the host and refusing private addresses would belong in the tool or in a dedicated check.
 - The agent must speak MCP Streamable HTTP to go through Kong's MCP plugins; mesh7's REST data plane (`POST /tool/…`) needs a plain route and loses the per-tool ACL.

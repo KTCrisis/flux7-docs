@@ -17,7 +17,7 @@ Jev learns nothing at runtime, but it is pre-trained: it already knows what a de
 
 ## Jev describes, the code decides
 
-The first integration asked Jev one broad question, "approve, escalate or deny?". On real calls it stayed soft (0.61 to 0.79) where narrow questions on the same calls answered 0.99. Deciding means combining facts with a risk tolerance that belongs to the operator, not to the model. So sup7 asks only for facts, and decides in code.
+The first integration asked Jev one broad question, "approve, escalate or deny?". On real calls it stayed soft (0.61 to 0.79) where narrow questions on the same calls answered 0.99. Deciding means combining facts with a risk tolerance that belongs to the operator, not to the model. Therefore sup7 asks Jev only for facts and decides in code.
 
 The base set, the **socle**, shipped with sup7 in `data/socle.yaml`:
 
@@ -40,7 +40,7 @@ The decision, fail-closed:
 3. every counted danger at or below its threshold (`destructive_max` by default) **and** `in_scope` at or above `in_scope_min` → **approve**, with confidence `1 - max(danger, manipulation)`, then checked against the provider's `confidence_threshold`;
 4. anything else → **escalate**.
 
-`overwrites` does not count when `target_zone = project` is probable enough (`project_min`): overwriting a file in the project is the agent's job, not a harm. `in_scope` gates approval and denial but stays out of the confidence: on the bench it separated nothing and mostly produced false alerts.
+`overwrites` does not count when `target_zone = project` is probable enough (`project_min`): overwriting a file in the project is the agent's job. `in_scope` gates approval and denial but stays out of the confidence: on the bench it separated nothing and mostly produced false alerts.
 
 ## What a decision records
 
@@ -72,7 +72,7 @@ questions:
 
 For each pending call, sup7 asks the socle plus every pack that applies to its agent or tool, in the same request. One sup7 serves every domain; several sup7 instances make sense for organisational reasons only (data that must not cross, different owners, jurisdictions, volume), split with `poll.tool_scopes`.
 
-Only `type`, `instructions` and `criteria` are sent to Jev; `group`, `role` (`scope` on the question that gates approval and denial), `threshold` and `ignore_when` stay in sup7. Every set is validated when sup7 starts, and when it is edited through the admin API: types, families, choice options, thresholds, `applies_to` patterns, a question defined twice, an `ignore_when` pointing at a missing option. A set that loads is a set sup7 can decide with.
+Only `type`, `instructions` and `criteria` are sent to Jev; `group`, `role` (`scope` on the question that gates approval and denial), `threshold` and `ignore_when` stay in sup7. Every set is validated when sup7 starts, and when it is edited through the admin API: types, families, choice options, thresholds, `applies_to` patterns, a question defined twice, an `ignore_when` pointing at a missing option. Hence any set that loads is one sup7 can decide with.
 
 ## Known limits of the model
 
@@ -83,4 +83,4 @@ From TypeSafe's own notes on jev-1.13, those that matter here:
 - **large irrelevant state** lowers accuracy: sup7 sends the call, five recent calls and the active grants, nothing more;
 - **no invariant** between question types: a yes/no probability and a choice probability are not on the same scale, thresholds do not transfer between them, nor between model versions.
 
-Open alternatives with the same `/v1/systemone` contract (Laya, Kev) can run locally, which matters when call parameters must not leave the infrastructure: set `backend: typesafe` and point `url` at the local runtime. Their calibration is not provided; measure it.
+Open alternatives with the same `/v1/systemone` contract (Laya, Kev) can run locally, which matters when call parameters must not leave the infrastructure: set `backend: typesafe` and point `url` at the local runtime. Their calibration is not provided, so you have to measure it.

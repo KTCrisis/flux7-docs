@@ -57,13 +57,13 @@ for a human, and an approval nobody answers expires and the call is refused.
    forwarded.
 3. **L1.** If the mesh is connected to flux7-memory, it asks for past decisions on
    this agent and tool. For a tool that reads, three approvals by a human and no
-   refusal: approved. Writes, a refusal in the history, or suspicious arguments:
-   the call stays pending. Exact conditions and settings:
-   [Precedents](mesh7/mem7-auto-approve.md).
+   refusal are enough to approve the call. A write, a refusal in the history or
+   suspicious arguments keep the call pending. The exact conditions and settings
+   are in [Precedents](mesh7/mem7-auto-approve.md).
 4. **L1+.** flux7-supervisor polls the queue. Its rules come first; what no rule
    settles goes to a decision model that answers narrow questions with
-   probabilities (Jev in production; the same questions on a local model, nimble through Ollama, if it is down), a few hundred
-   milliseconds. Below the confidence threshold it escalates: the approval stays
+   probabilities (Jev in production; the same questions on a local model, nimble through Ollama, if it is down), which takes a few
+   hundred milliseconds. Below the confidence threshold it escalates: the approval stays
    pending for a human.
 5. **L2.** A human approves or denies in the console, the `mesh` CLI or a
    terminal prompt. Approving can open a grant, so the same call does not ask

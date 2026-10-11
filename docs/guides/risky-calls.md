@@ -1,6 +1,6 @@
 # Hold risky calls for a human
 
-Most calls are routine; a few deserve a look. This guide sends the few to a
+Most calls are routine, and only a few deserve a look. This guide sends the few to a
 human, lets the rest through, and keeps the human from answering the same
 question twice.
 
@@ -57,8 +57,8 @@ nobody answers expires and is refused.
 
 ## 3. Don't ask twice
 
-Three ways to spare the human a repeated question, from the most explicit to
-the most automatic:
+The table lists the ways to spare the human a repeated question, from the most
+explicit to the most automatic:
 
 | | What it does | When |
 |---|---|---|

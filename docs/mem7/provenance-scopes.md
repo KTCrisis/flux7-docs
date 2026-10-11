@@ -19,7 +19,7 @@ a `_meta` to each `tools/call`:
 mem7 records the trace id on every write and every deletion: in the markdown
 workspace (`trace:` in the entry's envelope), which stays the source of truth,
 and in the index, rebuilt with it by `mem7 rescan`. `memory_recall` and
-`memory_search` print it, `memory_context` returns it as `trace_id`. A memory
+`memory_search` print it, and `memory_context` returns it as `trace_id`. Hence a memory
 points back to the decision that produced it in the mesh's traces.
 
 ## Hash chain (tamper evidence)
@@ -33,7 +33,7 @@ seals: HMAC-SHA256 with MEM7_CHAIN_KEY
 chain holds
 ```
 
-With `MEM7_CHAIN_KEY` the seal is an HMAC-SHA256: editing the workspace without the key leaves a break no one can reseal. Without it, a plain SHA-256 catches accidents and careless edits, not a forger. Keep the key stable: entries sealed with one key do not verify with another. Entries written before the chain existed are counted, not checked; the chain starts at the first sealed entry. The workspace stays plain markdown you can read and edit by hand; an edit now shows.
+With `MEM7_CHAIN_KEY` the seal is an HMAC-SHA256: editing the workspace without the key leaves a break no one can reseal. Without it, a plain SHA-256 catches accidents and careless edits but does not catch a forger. Keep the key stable: entries sealed with one key do not verify with another. Entries written before the chain existed are counted but not checked, because the chain starts at the first sealed entry. The workspace stays plain markdown that you can read and edit by hand. However, such an edit now shows in the chain.
 
 ## Identity
 
@@ -79,7 +79,7 @@ mcp_servers:
 ```
 
 Every direct client then needs the token: the supervisor reads `MEM7_TOKEN`
-from its environment when `memory.token` is empty, the console reads it from
+from its environment when `memory.token` is empty, and the console reads it from
 its environment file. `contrib/systemd/enable-token.sh` in flux7-memory wires
 the token and the scopes into the systemd units of a single machine.
 

@@ -12,7 +12,7 @@ different trust requirements, so they are authorized differently.
 
 The control plane is the governance plane: reading the full trace history,
 resolving approvals, and minting temporal grants. A caller with control-plane
-access can override the policy decisions the data plane enforces — so it must be
+access can override the policy decisions the data plane enforces. Therefore it must be
 authenticated independently of agent identity.
 
 !!! warning "Why this matters"
@@ -37,15 +37,15 @@ auth:
 
 ### Behaviour
 
-- **`admin_token` set** — every control-plane request must send
+- **`admin_token` set**: every control-plane request must send
   `Authorization: Bearer <token>`. Anything else returns `401`, from any
   interface (local or remote).
-- **`admin_token` unset** — the control plane accepts **loopback callers only**
+- **`admin_token` unset**: the control plane accepts **loopback callers only**
   (`127.0.0.1`, `::1`). Remote requests return `401`. This makes the
   localhost-only posture explicit rather than silently exposing the governance
   plane on every interface.
 
-The **data plane is never gated by `admin_token`** — agents keep calling tools
+The **data plane is never gated by `admin_token`**: agents keep calling tools
 with their own identity regardless of this setting.
 
 ```
@@ -79,7 +79,7 @@ explicit. There are two ways to add TLS, in order of preference:
 **1. Terminate at the ingress (recommended).** Put mesh7 behind a reverse proxy
 or service mesh (nginx, Caddy, Traefik, a cloud load balancer, or Istio/Linkerd
 mTLS) and keep mesh7 on loopback or an internal network. The certificate lives
-at the ingress; mesh7 stays simple. This is the idiomatic sidecar posture.
+at the ingress, and mesh7 stays simple. This is the idiomatic sidecar posture.
 
 **2. In-binary TLS (standalone).** For a single-host deployment with no ingress,
 point mesh7 at a certificate and key directly:
@@ -96,12 +96,12 @@ for trusted internal use (clients must then trust it).
 
 !!! note "Loopback needs no TLS"
     With the default loopback-only posture, traffic never leaves the host and
-    TLS adds little. TLS matters once mesh7 is reachable across the network —
+    TLS adds little. TLS matters once mesh7 is reachable across the network,
     which is also when you should set an `admin_token`.
 
 ## Recommendations
 
-- **Local development**: leave `admin_token` unset — loopback-only is enough.
+- **Local development**: leave `admin_token` unset, since loopback-only is enough.
 - **Shared or containerised deployments**: set `admin_token` (or
   `MESH_ADMIN_TOKEN`) so the control plane is reachable only with the secret.
   Combine with TLS at the ingress so the token is not sent in clear.
@@ -110,5 +110,5 @@ for trusted internal use (clients must then trust it).
 
 ## See also
 
-- [JWT Authentication](jwt-auth.md) — data-plane agent identity
-- [Approval Flow](approval-flow.md) — what the control plane operates on
+- [JWT Authentication](jwt-auth.md): data-plane agent identity
+- [Approval Flow](approval-flow.md): what the control plane operates on

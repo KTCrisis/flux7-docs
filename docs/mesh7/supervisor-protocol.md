@@ -2,7 +2,7 @@
 
 Agent Mesh exposes a rich approval API so that external **supervisor agents** can review and resolve approval requests on behalf of humans.
 
-The supervisor is not built into flux7-mesh. It's any external process — Python script, Go service, LangChain agent, Claude API call — that polls for pending approvals and resolves them. Agent-mesh provides the protocol; you bring the logic.
+The supervisor is not built into flux7-mesh. Any external process (a Python script, a Go service, a LangChain agent, a Claude API call) can poll for pending approvals and resolve them. Agent-mesh provides the protocol, and you provide the logic.
 
 ## Why
 
@@ -10,7 +10,7 @@ Human-in-the-loop doesn't scale:
 
 - **Multiple concurrent agents** generate approval requests faster than a human can review them
 - **Overnight runs** stall at approval gates while the human sleeps
-- **80% of approvals are routine** ("yes, you can write to the project directory") — only 20% need real judgment
+- **80% of approvals are routine** ("yes, you can write to the project directory"), and only 20% need real judgment
 
 A supervisor agent handles the routine and escalates the rest.
 
@@ -28,7 +28,7 @@ Level 2: Human                 — full judgment, slow, expensive attention
 | **Supervisor (L1)** | Gray area, routine | write to project dir, draft email to known contact |
 | **Human (L2)** | High-stakes, ambiguous | send to external recipient, write outside project scope |
 
-The goal is not to remove the human. It's to **protect human attention** for decisions that actually need it.
+The goal is to keep the human in the loop and to **protect human attention** for the decisions that need it.
 
 ## Architecture
 
@@ -120,7 +120,7 @@ When `supervisor.expose_content: false` is configured, large or content-like par
 GET /approvals/{id}
 ```
 
-Returns the approval plus the agent's recent activity and active grants — context for evaluation:
+Returns the approval plus the agent's recent activity and active grants, as context for the evaluation:
 
 ```json
 {
@@ -233,7 +233,7 @@ supervisor:
 
 ### Content isolation
 
-When `expose_content` is `false`, the approval API replaces raw content values with structural metadata. This reduces the prompt injection attack surface — the supervisor evaluates structure, not content.
+When `expose_content` is `false`, the approval API replaces raw content values with structural metadata. This reduces the prompt injection attack surface, because the supervisor then evaluates structure rather than content.
 
 ```yaml
 supervisor:
@@ -324,7 +324,7 @@ The supervisor should evaluate **structural properties**, not interpret content 
 | "agent has been writing to this area recently" | "the comment says this is a fix" |
 | "request rate is normal" | "the agent seems trustworthy" |
 
-Structural evaluation is resistant to prompt injection. Semantic evaluation is vulnerable.
+Structural evaluation resists prompt injection, whereas semantic evaluation is vulnerable to it.
 
 ### Context signals available
 
@@ -393,10 +393,10 @@ deny <──── human_approval <──── supervisor <──── allow
 
 Example progression for `gmail.send`:
 
-1. **Day 1**: `deny` — not ready
-2. **Day 30**: `human_approval` — human reviews every send
-3. **Day 90**: supervisor — agent reviews, escalates external recipients
-4. **Day 180**: `allow` for internal recipients — trusted pattern
+1. **Day 1**: `deny` (not ready)
+2. **Day 30**: `human_approval` (a human reviews every send)
+3. **Day 90**: supervisor (an agent reviews and escalates external recipients)
+4. **Day 180**: `allow` for internal recipients (trusted pattern)
 
 The policies evolve as trust is established through trace data.
 
@@ -429,11 +429,11 @@ The reference implementation is [flux7-supervisor (sup7)](../sup7/index.md). It 
 
 ### Features
 
-- **Rule engine** — first-match-wins rules with a simple DSL (`starts_with`, `equals`, `contains`, `in`). Fast path for known patterns (0ms).
-- **Decision model** — when no rule matches, asks narrow typed questions to a chain of providers (Jev, then the same questions on a local Ollama model if it is down) and decides in code from the probabilities (a few hundred milliseconds). Thresholds are measured on a bench.
-- **Memory integration** — stores each decision in flux7-memory through the mem7 SDK, and reads past decisions as precedents.
-- **JSONL audit trail** — every decision logged with reasoning, confidence, rule matched, provider provenance and evaluation time.
-- **Admin API** — status, pause and resume, edits of rules and question sets, `POST /evaluate` for enforcement points outside the mesh.
+- **Rule engine**: first-match-wins rules with a simple DSL (`starts_with`, `equals`, `contains`, `in`). Fast path for known patterns (0ms).
+- **Decision model**: when no rule matches, it asks narrow typed questions to a chain of providers (Jev, then the same questions on a local Ollama model if it is down) and decides in code from the probabilities (a few hundred milliseconds). Thresholds are measured on a bench.
+- **Memory integration**: stores each decision in flux7-memory through the mem7 SDK, and reads past decisions as precedents.
+- **JSONL audit trail**: every decision logged with reasoning, confidence, rule matched, provider provenance and evaluation time.
+- **Admin API**: status, pause and resume, edits of rules and question sets, `POST /evaluate` for enforcement points outside the mesh.
 
 ### Quick start
 

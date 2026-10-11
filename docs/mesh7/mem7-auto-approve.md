@@ -31,7 +31,7 @@ Every decision is written to flux7-memory as a fact tagged with who settled it: 
 
 ## Why these limits
 
-Three flaws were found in production on 2026-09-29, each confirmed on real data:
+The flaws below were found in production on 2026-09-29, and each was confirmed on real data:
 
 | Flaw | Consequence | Now |
 |---|---|---|

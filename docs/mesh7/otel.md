@@ -1,6 +1,6 @@
 # OpenTelemetry Export
 
-Agent Mesh exports every tool call as an OTLP span. Zero new dependencies — raw OTLP JSON, no SDK required.
+Agent Mesh exports every tool call as an OTLP span. The export adds no dependency: it writes raw OTLP JSON and requires no SDK.
 
 ## Configuration
 
@@ -76,12 +76,12 @@ approved call (human_approval)
     └── the next one
 ```
 
-This is the one causal edge a proxy can observe rather than be told. The agent's
-reasoning stays invisible — mesh7 never claims to know *why the model chose* a
-tool — but the chain of authority is mechanical and complete.
+A proxy can observe this causal edge rather than be told about it, and it is the
+only one. The agent's reasoning stays invisible (mesh7 never claims to know *why
+the model chose* a tool). However, the chain of authority is mechanical and complete.
 
 A root span with no `parentSpanId` means the call needed no grant, or the grant
-covering it was issued without an origin. Both are honest answers, not gaps.
+covering it was issued without an origin. In both cases the missing parent is an honest answer rather than a gap.
 
 Origin is recorded at grant creation, and is always optional:
 
@@ -97,7 +97,7 @@ first, without an OTLP backend.
 
 ## JSONL file mode
 
-The simplest mode — each line is a complete OTLP JSON export:
+In the simplest mode, each line is a complete OTLP JSON export:
 
 ```yaml
 otel_endpoint: /home/user/flux7-mesh/traces-otel.jsonl
@@ -158,7 +158,7 @@ otel_insecure_skip_verify: false                   # true only for a self-signed
 ```
 
 Header values are expanded from the environment and never logged (only header
-names are). An unreadable CA file is logged, not fatal.
+names are). An unreadable CA file is logged and does not stop mesh7.
 
 ### Jaeger quick start
 

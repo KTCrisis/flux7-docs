@@ -5,9 +5,9 @@ against a policy before it reaches the tool, recorded in a verifiable trail,
 and, when the policy asks for it, held until someone or something with the
 authority to decide has decided.
 
-No code change in the agent: it sees the same tools, through a proxy.
+The agent needs no code change: it sees the same tools through a proxy.
 
-## Four products, one core
+## The four products
 
 flux7 is a family of four products. flux7-mesh is the core; the other three
 are separate products you add when you need them, and two of them are useful
@@ -15,7 +15,7 @@ without the mesh at all.
 
 | Product | What it is | On its own |
 |---|---|---|
-| [**flux7-mesh**](../mesh7/index.md) · `mesh7` | the policy proxy: rules, approvals, traces | yes, it is the core; one Go binary, one YAML file |
+| [**flux7-mesh**](../mesh7/index.md) · `mesh7` | the policy proxy: rules, approvals, traces | yes, it is the core: one Go binary and one YAML file |
 | [**flux7-memory**](../mem7/index.md) · `mem7` | persistent, searchable memory for agents | yes, as a memory server for any MCP client; with the mesh, it also keeps human decisions as precedents |
 | [**flux7-supervisor**](../sup7/index.md) · `sup7` | automated evaluation of tool calls | yes, as a decision service (`POST /evaluate`) for any hook or gateway; with the mesh, it settles the approval queue |
 | [**flux7-console**](../console/index.md) | dashboard and approval UI | no, it is a window onto the mesh, and onto memory and supervisor when present |
@@ -31,8 +31,8 @@ something irreversible. Today there are two answers, and neither holds:
 - **Allow everything**, and read the logs afterwards.
 - **Ask a human every time**, until the human approves without reading.
 
-flux7 fills the space between them. Rules settle what is clear-cut. What a
-human has already approved, repeatedly, stops being asked. What remains goes
+flux7 fills the space between them. Rules settle the clear-cut cases. A call that a
+human has already approved repeatedly is no longer asked. The remaining calls go
 to an automated evaluator, then to a human if the evaluator is not confident.
 
 ## What is governed
@@ -75,11 +75,11 @@ SDK, LangChain, a plain script over HTTP.
 - **It does not replace an identity provider or an API gateway.** It reads
   identity from JWTs issued by yours (Keycloak, Auth0, Cloudflare Access), and
   it runs behind a gateway such as Kong: the gateway checks who calls which
-  tool, flux7 judges the call itself.
+  tool, and flux7 judges the call itself.
 - **Policy conditions match text.** Denying `rm -rf` does not stop `RM -RF`
   or a base64 payload. The automated evaluator exists for what text matching
-  cannot see, and it is measured, not proven.
-- **It is young.** One maintainer, versions below 1.0. The
+  cannot see, and its accuracy is measured rather than proven.
+- **It is young.** It has one maintainer, and its versions are below 1.0. The
   [features page](features.md) states the maturity of each part.
 
 ## How it is deployed

@@ -1,7 +1,7 @@
 # CLI Tool Sources
 
 Govern CLI tools (terraform, kubectl, docker, gh, aws, gcloud…) through flux7-mesh.
-Agents call them via MCP or HTTP. Agent-mesh enforces policy, traces every call, and requires approval when configured — just like HTTP and MCP tools.
+Agents call them via MCP or HTTP. Agent-mesh enforces policy, traces every call, and requires approval when configured, as it does for HTTP and MCP tools.
 
 No competitor covers CLI tool governance today.
 
@@ -19,7 +19,7 @@ Agent calls terraform.plan
   → Return structured result
 ```
 
-CLI tools reuse the same policy engine, approval flow, grants, rate limiting, and tracing as HTTP and MCP tools. No special treatment needed in policy rules.
+CLI tools reuse the same policy engine, approval flow, grants, rate limiting, and tracing as HTTP and MCP tools. Policy rules need no special treatment for them.
 
 ## Configuration
 
@@ -40,9 +40,9 @@ cli_tools:
 
 ### Four modes
 
-#### Simple — just the binary
+#### Simple: just the binary
 
-Wraps all subcommands through the dispatcher. Minimal config.
+This mode wraps all subcommands through the dispatcher with a minimal config.
 
 ```yaml
 cli_tools:
@@ -55,7 +55,7 @@ The agent can call `gh.pr.list`, `gh.issue.create`, etc. All go through policy
 and tracing, and the policy still has to allow them. `default_action: allow` only
 declines to add a floor of its own; it grants nothing on its own.
 
-#### Fine-tuned — binary + command overrides
+#### Fine-tuned: binary + command overrides
 
 Declare specific commands for custom rules (timeout, allowed_args). Unlisted commands fall through to the dispatcher, where `default_action` is the floor.
 
@@ -79,9 +79,9 @@ cli_tools:
       # init, validate, fmt, etc. → dispatcher, floored at human_approval
 ```
 
-#### Strict — only declared commands allowed
+#### Strict: only declared commands allowed
 
-With `strict: true`, any command not explicitly listed is denied. For high-risk tools.
+With `strict: true`, any command not explicitly listed is denied. This mode suits high-risk tools.
 
 ```yaml
 cli_tools:
@@ -100,7 +100,7 @@ cli_tools:
 
 #### Bare (binary without subcommands)
 
-For CLIs that take only flags and positional arguments (`jq`, `ffmpeg`, custom tools). Registers a single `<name>.run` tool: no subcommand is ever injected, no catch-all dispatch.
+For CLIs that take only flags and positional arguments (`jq`, `ffmpeg`, custom tools). This mode registers a single `<name>.run` tool. No subcommand is ever injected, and there is no catch-all dispatch.
 
 ```yaml
 cli_tools:
@@ -118,12 +118,12 @@ The agent calls `play7.run` with `args` (and optionally `stdin`). `bare` is mutu
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `name` | string | yes | Tool name prefix (e.g. `terraform`) — must be unique |
+| `name` | string | yes | Tool name prefix (e.g. `terraform`); must be unique |
 | `bin` | string | yes | Path or name of the binary (resolved via PATH) |
 | `default_action` | string | no | Floor for the dynamic dispatcher only: `allow`, `deny`, or `human_approval` (default: `deny`). It can only restrict, never widen. See [Dispatcher floor](#dispatcher-floor). |
 | `strict` | bool | no | Only declared commands allowed (default: `false`) |
 | `working_dir` | string | no | Working directory for all commands |
-| `env` | map | no | Environment variables (isolated — only PATH, HOME, LANG + these) |
+| `env` | map | no | Environment variables (isolated: only PATH, HOME, LANG + these) |
 | `commands` | map | no | Per-command overrides (see below) |
 | `bare` | object | no | Bare-binary mode: same fields as a command entry. Exclusive with `commands`/`strict`. |
 
@@ -181,7 +181,7 @@ execution would fall through to the dispatcher.
 
 ### Dispatcher floor
 
-`default_action` governs the dynamic dispatcher, and nothing else. Declared
+`default_action` governs only the dynamic dispatcher. Declared
 commands answer to the policy alone: declaring a command is already the
 operator's grant, so a floor over it would make the declaration pointless.
 
@@ -227,7 +227,7 @@ Each declared command gets a named tool: `terraform.plan`, `kubectl.get`, etc.
 
 Non-strict tools also register a `<name>.__dispatch` catch-all tool. When an agent calls a tool that doesn't have an exact match (e.g. `terraform.init`), flux7-mesh falls back to `terraform.__dispatch` and extracts the subcommand from the tool name.
 
-This means agents can call `terraform.init` directly — they don't need to know about `__dispatch`.
+Agents can therefore call `terraform.init` directly, without knowing about `__dispatch`.
 
 The dispatcher carries no `allowed_args`, so argument filtering does not apply
 to it: only the shell-metacharacter check runs, which every argument gets
@@ -295,7 +295,7 @@ Any CLI tool accepts an optional `stdin` param:
 }
 ```
 
-stdin is **data, not shell syntax**: it is piped directly to the process and is deliberately exempt from metacharacter validation (a JSON or text payload may legitimately contain `|`, `$`, etc.). It never touches a shell. Note that stdin content is recorded in traces like any other param, by design, but worth knowing for large payloads.
+stdin is **data, not shell syntax**: it is piped directly to the process and is deliberately exempt from metacharacter validation (a JSON or text payload may legitimately contain `|`, `$`, etc.). It never touches a shell. By design, stdin content is recorded in traces like any other param, which matters for large payloads.
 
 ## Security
 
@@ -303,7 +303,7 @@ CLI execution is the highest-risk surface in agent governance. Every layer has a
 
 | Threat | Protection |
 |--------|------------|
-| Shell injection (`; rm -rf /`) | `exec.Command()` directly — never `sh -c` |
+| Shell injection (`; rm -rf /`) | `exec.Command()` directly, never `sh -c` |
 | Argument injection (`--kubeconfig=/etc/shadow`) | `allowed_args` allowlist enforcement |
 | Metacharacter injection (`` ` ``, `$(`, `&&`, `\|`) | Rejected before execution |
 | Command timeout/hang | `context.WithTimeout` + process kill |

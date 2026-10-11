@@ -26,7 +26,7 @@ mesh7 --version                         # print version
 
 `serve` flags: `--config <path>`, `--port <port>`. Runs as a persistent HTTP daemon. MCP clients auto-proxy to it via `--mcp`.
 
-`discover` flags: `--openapi <url>`, `--config <path>`, `--generate-policy`, `--backend <url>`. The draft allows named reads and asks for everything else, each tool commented with its classification: see [Tool Classification](tool-classification.md).
+`discover` flags: `--openapi <url>`, `--config <path>`, `--generate-policy`, `--backend <url>`. The draft allows named reads and asks for everything else. Each tool carries a comment with its classification (see [Tool Classification](tool-classification.md)).
 
 `trace verify` flags: `--json` (machine-readable report), `--key-env <VAR>` (default `MESH_TRACE_KEY`). Exit 0 when the chain holds, 1 at the first break, 2 on usage or I/O error. See [Trace Integrity](trace-integrity.md).
 
@@ -61,7 +61,7 @@ mesh resume <id>                # lift a stop, restore the grants it revoked
 | `MESH_GRANT_DURATION` | `1h` | Grant length used by `[g]` in `watch` |
 | `MESH_ADMIN_TOKEN` | | Sent by `halt`, `halts` and `resume` as `Authorization: Bearer` |
 
-The approval commands (`pending`, `show`, `approve`, `deny`, `watch`) send no `Authorization` header, so they reach the control plane only on loopback with no `admin_token` set; `halt`, `halts` and `resume` send `MESH_ADMIN_TOKEN` when it is set. Against a token-protected mesh, use the HTTP API with `Authorization: Bearer $MESH_ADMIN_TOKEN`.
+The approval commands (`pending`, `show`, `approve`, `deny`, `watch`) send no `Authorization` header, so they reach the control plane only on loopback with no `admin_token` set. However, `halt`, `halts` and `resume` send `MESH_ADMIN_TOKEN` when it is set. Against a token-protected mesh, use the HTTP API with `Authorization: Bearer $MESH_ADMIN_TOKEN`.
 
 ---
 

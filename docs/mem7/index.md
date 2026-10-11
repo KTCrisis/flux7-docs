@@ -1,17 +1,17 @@
 # flux7-memory
 
-Persistent, searchable, governed memory for AI agents. Single Go binary, zero dependencies.
+Persistent, searchable, governed memory for AI agents. It ships as a single Go binary with zero dependencies.
 
 ## The problem
 
-Agents work for one session, then forget everything. You add memory — a vector store, maybe Mem0 or Zep — and single-agent workflows improve. Then you scale to multiple agents, and new problems appear :
+Agents work for one session, then forget everything. You add memory (a vector store, maybe Mem0 or Zep), and single-agent workflows improve. Then you scale to multiple agents, and new problems appear :
 
 - **Agent A approved something last week. Agent B doesn't know.** Human decisions aren't stored as queryable facts.
 - **Three agents write to the same memory. Who wrote what ?** No provenance, no access control at the fact level.
 - **Your agent uses a memory from 6 months ago.** No staleness signal, no lifecycle management.
 - **A client asks for an audit trail.** You have logs somewhere. They're not queryable.
 
-These aren't retrieval problems. They're governance problems.
+These are governance problems rather than retrieval problems.
 
 ## Quick start
 
@@ -38,13 +38,13 @@ for mem in m.context("deployment approval", limit=5):
 
 ## Features
 
-- **7 MCP tools** — `store`, `recall`, `search`, `context`, `get`, `list`, `forget`
-- **Hybrid search** — BM25 + dense cosine + LLM reranking (71% LoCoMo benchmark)
-- **Markdown source of truth** — SQLite index is rebuildable via `mem7 rescan`
-- **Three transports** — MCP stdio, HTTP JSON-RPC, MCP SSE (daemon mode)
-- **Auto-proxy** — stdio mode detects a running daemon and proxies transparently
-- **Provider-agnostic** — works with Ollama, OpenAI, or any compatible embedding API
-- **Python SDK** — `pip install flux7-memory` — structured `Memory` objects, not raw text
+- **8 MCP tools**: `store`, `recall`, `search`, `context`, `get`, `list`, `forget`, `history`
+- **Hybrid search**: BM25 + dense cosine + LLM reranking (71% LoCoMo benchmark)
+- **Markdown source of truth**: SQLite index is rebuildable via `mem7 rescan`
+- **Three transports**: MCP stdio, HTTP JSON-RPC, MCP SSE (daemon mode)
+- **Auto-proxy**: stdio mode detects a running daemon and proxies transparently
+- **Provider-agnostic**: works with Ollama, OpenAI, or any compatible embedding API
+- **Python SDK**: `pip install flux7-memory`, structured `Memory` objects rather than raw text
 
 ## How it fits
 
@@ -64,11 +64,11 @@ for mem in m.context("deployment approval", limit=5):
            └──────────────┘
 ```
 
-**Agent memory** — each agent reads and writes observations, scoped by tags.
+**Agent memory**: each agent reads and writes observations, scoped by tags.
 
-**Supervisor memory** — cross-agent view. Policies and human approvals stored as first-class facts.
+**Supervisor memory**: a cross-agent view, where policies and human approvals are stored as first-class facts.
 
-**Audit** — every fact carries who wrote it, when, with which tags. Queryable.
+**Audit**: every fact carries who wrote it, when and with which tags, and all of it is queryable.
 
 ## Comparison
 
@@ -85,8 +85,8 @@ for mem in m.context("deployment approval", limit=5):
 
 ## Current state (October 2026)
 
-**v0.8.0** — 8 MCP tools, Python SDK, hybrid search + LLM reranking, Streamable HTTP daemon mode with a systemd unit, auto-proxy (stdio detects running daemon), build version in `/healthz`, a Dockerfile for stdio mode. Since 03/10/2026: [provenance, hash chain and agent scopes](provenance-scopes.md) (0.6, 0.7) and [bi-temporal memories](time.md) (0.8).
+**v0.8.0**: 8 MCP tools, Python SDK, hybrid search + LLM reranking, Streamable HTTP daemon mode with a systemd unit, auto-proxy (stdio detects running daemon), build version in `/healthz`, a Dockerfile for stdio mode. Since 03/10/2026: [provenance, hash chain and agent scopes](provenance-scopes.md) (0.6, 0.7) and [bi-temporal memories](time.md) (0.8).
 
-71% LoCoMo benchmark — competitive with VC-backed solutions without gaming the eval.
+On the LoCoMo benchmark, mem7 scores 71%, which is competitive with VC-backed solutions, without gaming the eval.
 
 Apache 2.0 licensed. [github.com/KTCrisis/flux7-memory](https://github.com/KTCrisis/flux7-memory)

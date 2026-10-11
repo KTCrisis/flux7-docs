@@ -32,7 +32,7 @@ The last line is a correction of the past: what mem7 believed on 04-11
 (Cloudflare until today) is no longer believed, but is still readable `as_of`
 that day.
 
-`memory_forget` stops believing a key; it does not erase the past: a read
+`memory_forget` stops believing a key but does not erase the past, so a read
 `as_of` an earlier moment still sees it.
 
 ## Reading
@@ -42,7 +42,7 @@ that day.
 - `valid_at`: what held at that moment ("where was event7 on March 1st?")
 - `as_of`: what mem7 believed at that moment ("what did we know on April 11th?")
 
-Both together: what mem7 believed on one day about another. A version with an
+Used together, they give what mem7 believed on one day about another. A version with an
 explicit validity shows a `Valid: from → to` line (recall, search) or
 `valid_from` / `valid_to` / `tx_from` / `tx_to` fields (context);
 `memory_history` lists each write with the validity it declared.
@@ -51,7 +51,7 @@ explicit validity shows a `Valid: from → to` line (recall, search) or
 
 The markdown workspace stays the source of truth: a store entry carries
 `valid_from` / `valid_to` when the caller gave them, under the hash chain. The
-index keeps every version; an index built before versions (one row per key) is
+index keeps every version. An index built before versions (one row per key) is
 rebuilt from the markdown when mem7 starts, keeping embeddings.
 
 Out of scope for now: detecting that two different keys contradict each other.

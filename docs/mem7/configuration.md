@@ -34,7 +34,7 @@ A systemd unit for daemon mode ships in `contrib/systemd/mem7.service`.
 
 ## Hybrid search
 
-Entirely opt-in. Without `MEM7_EMBED_URL`, mem7 uses pure BM25.
+Hybrid search is entirely opt-in. Without `MEM7_EMBED_URL`, mem7 uses pure BM25.
 
 When enabled, `memory_store` computes and persists an embedding alongside each entry. `memory_search` retrieves BM25 top-2N and cosine top-2N candidates, then merges them via Reciprocal Rank Fusion (RRF, k=60) into the final top-N. Embeddings are stored as BLOBs in SQLite and cached in memory for sub-ms cosine search.
 
@@ -69,7 +69,7 @@ MEM7_EMBED_PROVIDER=openai \
 
 ## LLM reranking
 
-Opt-in, with or without embeddings. Over-fetches 3x candidates (merged via RRF when hybrid search is on, BM25 alone otherwise), then uses an LLM to score relevance before returning the final top-N. Falls back to non-reranked results if the LLM is unavailable.
+Reranking is opt-in, with or without embeddings. It over-fetches 3x candidates (merged via RRF when hybrid search is on, BM25 alone otherwise), then uses an LLM to score relevance before returning the final top-N. It falls back to non-reranked results if the LLM is unavailable.
 
 ```bash
 MEM7_EMBED_URL=http://localhost:11434 \

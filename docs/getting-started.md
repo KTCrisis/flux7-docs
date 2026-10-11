@@ -1,9 +1,10 @@
 # Getting Started
 
-Install flux7-mesh, put it in front of Claude Code, and watch one call go
-through, one call wait for you, and the trail they leave. About five minutes.
+This page installs flux7-mesh in front of Claude Code, then shows one call
+that goes through, one call that waits for you, and the trail both leave. It
+takes about five minutes.
 
-The other products come after, each on its own. None is needed to start.
+The other products come later, each with its own install, and none is needed to start.
 
 ## 1. Install
 
@@ -95,7 +96,7 @@ mesh7 trace verify traces.jsonl        # the lines are hash-chained: an edit bre
 ```
 
 The held write's line records the approval: its id, its outcome and who gave
-it. The trail says not only what happened, but who allowed it.
+it. The trail therefore records who allowed the call as well as what happened.
 
 ## Without Claude Code
 

@@ -1,10 +1,10 @@
 # Agent Security
 
-Giving an AI agent tools is giving it hands. The moment an agent can write a
-file, send an email, call an API, or run a command, the question stops being
-"is the model good?" and becomes "what can this thing actually *do*, and who
-said it could?". flux7-mesh exists to answer that question at the tool-call
-layer — and, just as importantly, to keep the answer honest under attack.
+Tools give an AI agent the ability to act. Once an agent can write a file,
+send an email, call an API, or run a command, the relevant question is no
+longer "is the model good?" but "what can this agent *do*, and who said it
+could?". flux7-mesh answers that question at the tool-call layer, and it also
+keeps the answer honest under attack.
 
 This page maps the agent-security threat model to the mechanisms mesh7 provides,
 and records how those mechanisms were hardened by auditing the mesh against
@@ -13,8 +13,8 @@ itself.
 ## The threat model
 
 An agent runtime is an attacker-influenced system. The model's input includes
-web pages, file contents, tool results, and other agents' output — any of which
-can carry instructions. So the threats are not hypothetical:
+web pages, file contents, tool results, and other agents' output, and any of these
+can carry instructions. Therefore the following threats are real:
 
 | Threat | What it looks like | OWASP |
 |---|---|---|
@@ -31,7 +31,7 @@ manipulated and constrains what its tool calls can achieve.
 
 ## The mechanisms
 
-Every tool call — over MCP stdio, MCP Streamable HTTP, or the REST API —
+Every tool call, whether over MCP stdio, MCP Streamable HTTP, or the REST API,
 travels the same pipeline: **identity → rate limit → policy → (grant) →
 (auto-approve) → (human approval) → forward → trace**. Each stage answers one
 question.
@@ -55,16 +55,16 @@ Two principles run through all of them:
 - **Fail closed.** No matching policy means deny. Missing credentials mean
   anonymous, and anonymous has no rights unless you grant them. The default is
   always the safe one.
-- **The mesh governs the mesh.** Actions that *modify* governance — minting a
-  grant, resolving an approval, reading the trace history — are themselves
+- **The mesh governs the mesh.** Actions that *modify* governance (minting a
+  grant, resolving an approval, reading the trace history) are themselves
   privileged operations, not free side-doors.
 
 ## Hardening: auditing the mesh against itself
 
 A governance tool that can be bypassed is theatre. To check that mesh7 is not
-theatre, we pointed [audit7](https://github.com/KTCrisis/audit7) — a
+theatre, we pointed [audit7](https://github.com/KTCrisis/audit7) (a
 RAG-powered audit agent that runs *through the mesh* and stores findings in
-[flux7-memory](https://github.com/KTCrisis/flux7-memory) — at flux7-mesh's own
+[flux7-memory](https://github.com/KTCrisis/flux7-memory)) at flux7-mesh's own
 source, with the OWASP LLM and Agentic corpora as its knowledge base.
 
 It found real issues. The interesting ones were structural:
@@ -75,19 +75,19 @@ bypass its own `human_approval` rules. A grant is sudo; minting one had no
 guard. Fixed: grant mutation is now reserved to declared supervisor agents.
 
 **Its twin: self-approval.** A second audit pass found the sibling we had
-missed — `approval.resolve` was callable by any agent in the default mode, so an
-agent could approve *its own* pending request. Same class of bug, the other door
-to the same room. The lesson: when you guard one privileged primitive, look for
+missed: `approval.resolve` was callable by any agent in the default mode, so an
+agent could approve *its own* pending request. It was the same class of bug, through
+another door to the same room. The lesson: when you guard one privileged primitive, look for
 its twin. Both are now gated identically.
 
 **Identity spoofing past JWT.** The legacy `Bearer agent:<name>` form was checked
-*before* JWT validation, so it worked even with JWT configured — making the
-cryptographic check decorative. Fixed: with JWT on, plaintext identity claims
+*before* JWT validation, so it worked even with JWT configured. Hence the
+cryptographic check was decorative. Fixed: with JWT on, plaintext identity claims
 are rejected (strict by default).
 
 **Injection slipping through one transport.** The injection check that gates
-auto-approval lived only on the HTTP path; the MCP path — the busiest one, used
-by Claude Code and Cursor — had none. A poisoned tool call could be silently
+auto-approval lived only on the HTTP path; the MCP path (the busiest one, used
+by Claude Code and Cursor) had none. A poisoned tool call could be silently
 auto-approved. Fixed: the guard now lives in one shared function both paths call.
 
 **SSRF via callbacks and spec URLs.** Agent-supplied callback URLs and OpenAPI
@@ -113,8 +113,8 @@ agent security work:
 > Data plane → anonymous-allowed (policy-governed) by default,
 > `require_authentication` to lock it.
 
-The default never silently exposes anything; the capability is there when the
-deployment genuinely needs it.
+The default never silently exposes anything; the capability remains available when
+the deployment needs it.
 
 ## Production hardening checklist
 
@@ -122,7 +122,7 @@ For any deployment where the mesh is reachable beyond loopback:
 
 - [ ] **Identity**: configure `auth.jwt` and leave `allow_legacy` off, so agent
       identity is cryptographically proven.
-- [ ] **Control plane**: set `auth.admin_token` (or `MESH_ADMIN_TOKEN`) — never
+- [ ] **Control plane**: set `auth.admin_token` (or `MESH_ADMIN_TOKEN`), and never
       rely on loopback when the port is exposed.
 - [ ] **Transport**: terminate TLS at your ingress, or set `tls.cert_file` /
       `tls.key_file` for standalone hosts. Don't expose the port in plaintext.
@@ -130,7 +130,7 @@ For any deployment where the mesh is reachable beyond loopback:
       anonymous callers with `401` on `POST /tool/*`, `POST /decide`,
       `POST`/`DELETE /mcp`, and to stop registry enumeration (`/tools`,
       `/mcp-servers`).
-- [ ] **Supervisors**: declare `supervisor.supervisor_agents` explicitly — only
+- [ ] **Supervisors**: declare `supervisor.supervisor_agents` explicitly. Only
       those agents can mint grants or resolve approvals over MCP.
 - [ ] **Policies**: prefer `strict: true` for CLI tools, write glob policies
       (`terraform.*`) so undeclared commands are covered, and keep a final

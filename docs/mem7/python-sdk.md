@@ -52,7 +52,7 @@ Moments (`valid_from`, `valid_to`, `valid_at`, `as_of`) accept a `date` (midnigh
 
 ### `store(key, value, *, tags=None, agent="", ttl=0, valid_from=None, valid_to=None)`
 
-Record a new version of a memory. `valid_from` / `valid_to` say when it holds in the world: by default from now, open-ended; a past `valid_from` corrects history without erasing what was believed.
+Record a new version of a memory. `valid_from` / `valid_to` say when it holds in the world. By default it holds from now, open-ended. A past `valid_from` corrects history without erasing what was believed.
 
 ```python
 m.store("user.prefs", "prefers dark mode", tags=["user", "ui"])
@@ -61,7 +61,7 @@ m.store("event7.host", "Cloudflare", valid_from="2026-03-20")
 
 ### `search(query, *, mode="natural", tags=None, agent="", limit=10, include_neighbors=False, neighbor_radius=1, since="", until="", valid_at=None, as_of=None)`
 
-Full-text search (BM25), returns formatted markdown text. The SDK defaults to `mode="natural"` (stop words stripped, OR-joined: suited to agent questions); `mode="raw"` keeps FTS5 operators (`foo*`, `AND`, `OR`, `NOT`), and is the default of the MCP tool itself. `include_neighbors` expands hits on sequential keys (`conv.session.t005` brings `t004` and `t006`, `neighbor_radius` on each side). `since` / `until` bound `updated_at` (RFC 3339).
+Full-text search (BM25), returns formatted markdown text. The SDK defaults to `mode="natural"` (stop words stripped, OR-joined), which suits agent questions. `mode="raw"` keeps FTS5 operators (`foo*`, `AND`, `OR`, `NOT`) and is the default of the MCP tool itself. `include_neighbors` expands hits on sequential keys (`conv.session.t005` brings `t004` and `t006`, `neighbor_radius` on each side). `since` / `until` bound `updated_at` (RFC 3339).
 
 ```python
 results = m.search("dark mode", limit=5)

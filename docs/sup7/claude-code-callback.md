@@ -9,8 +9,8 @@ The intended evaluation mode: Claude Code acts as the supervisor's brain, with f
 
 When `evaluator.provider` is `claude-code`, sup7 doubles as an MCP server exposing two tools :
 
-- **`sup7_pending`** — returns evaluations waiting for review
-- **`sup7_verdict`** — accepts a decision (action, confidence, reasoning)
+- **`sup7_pending`**: returns evaluations waiting for review
+- **`sup7_verdict`**: accepts a decision (action, confidence, reasoning)
 
 ```
 Claude Code ──MCP──► flux7-mesh ──MCP──► sup7
@@ -28,7 +28,7 @@ Claude Code ──MCP──► flux7-mesh ──MCP──► sup7
 3. Rules don't match → needs LLM evaluation
 4. Provider is `claude-code` → sup7 queues the evaluation
 5. Claude Code calls `sup7_pending` through flux7-mesh, sees the request with full context
-6. Claude Code evaluates — it can read files, check git history, review the agent's recent activity
+6. Claude Code evaluates (it can read files, check git history and review the agent's recent activity)
 7. Claude Code calls `sup7_verdict` with its decision
 8. sup7 receives the verdict, resolves the original approval in flux7-mesh
 9. If timeout expires (default 120s) → escalate to human
@@ -39,7 +39,7 @@ Claude Code ──MCP──► flux7-mesh ──MCP──► sup7
 |---|---|---|
 | **Context** | Tool name + params only | Full codebase, git history, conversations |
 | **Judgment** | Pattern matching | Semantic understanding |
-| **Blocking** | Synchronous | Async — doesn't block other evaluations |
+| **Blocking** | Synchronous | Async (doesn't block other evaluations) |
 | **Coupling** | Tied to specific API | Any MCP-capable agent can evaluate |
 
 Claude Code has context that no API call can replicate. It knows what the user is working on, what files were recently changed, what the project structure looks like. A file write to `src/main.py` means something different during a refactor than during a security audit.

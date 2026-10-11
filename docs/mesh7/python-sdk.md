@@ -1,6 +1,6 @@
 # Python SDK
 
-`pip install flux7-mesh` — govern tool calls from any Python code: Claude API, the Anthropic Agent SDK, LangChain, or plain HTTP. Source and full examples: [sdk/python](https://github.com/KTCrisis/flux7-mesh/blob/main/sdk/python/).
+Install with `pip install flux7-mesh` to govern tool calls from any Python code (Claude API, the Anthropic Agent SDK, LangChain, or plain HTTP). Source and full examples: [sdk/python](https://github.com/KTCrisis/flux7-mesh/blob/main/sdk/python/).
 
 ## Python SDK
 
@@ -9,7 +9,7 @@ pip install flux7-mesh              # core client
 pip install flux7-mesh[anthropic]   # with Claude API support
 ```
 
-Govern tool calls from any Python code — Claude API, LangChain, or plain HTTP:
+Govern tool calls from any Python code (Claude API, LangChain, or plain HTTP):
 
 ```python
 from mesh7 import GovernedToolkit
@@ -82,7 +82,7 @@ See [sdk/python/](https://github.com/KTCrisis/flux7-mesh/blob/main/sdk/python/) 
 ## Harness hook
 
 The proxy governs what an agent routes through mesh7. It cannot govern the tools
-the harness runs itself — `Bash`, `Read`, `Write`, `Edit`. The SDK ships a
+the harness runs itself (`Bash`, `Read`, `Write`, `Edit`). The SDK ships a
 `PreToolUse` hook that closes that side, so one policy file covers both:
 
 ```json
@@ -95,7 +95,7 @@ the harness runs itself — `Bash`, `Read`, `Write`, `Edit`. The SDK ships a
 }
 ```
 
-It starts in observe mode — it traces without refusing anything — so you can
+It starts in observe mode, where it traces without refusing anything, so you can
 write the rules from what you actually see before switching to enforce. See
 [docs/harness-hook.md](https://github.com/KTCrisis/flux7-mesh/blob/main/docs/harness-hook.md).
 
@@ -122,7 +122,7 @@ Pass the token your identity provider issued instead:
 mesh = AgentMesh("https://mesh.example.com", agent="my-agent", token=jwt)
 ```
 
-The mesh then resolves the agent from the token's claims — and, if the token
+The mesh then resolves the agent from the token's claims and, if the token
 carries one, the human the agent acts for ([`user_claim`](jwt-auth.md)), which
 lands on every trace as `user_id`. The same `token=` exists on
 `GovernedToolkit` and `MeshHooks`; the CLI hook reads it from `MESH7_TOKEN`.

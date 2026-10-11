@@ -1,20 +1,20 @@
-# flux7-supervisor — L1 Evaluation Agent
+# flux7-supervisor: L1 Evaluation Agent
 
 ## The problem
 
-Your AI agents make hundreds of tool calls per session. [flux7-mesh](../mesh7/index.md) enforces policy on every call — but some actions land in a grey zone. The policy says `human_approval`, and a human stares at a terminal prompt:
+Your AI agents make hundreds of tool calls per session. [flux7-mesh](../mesh7/index.md) enforces policy on every call. However, some actions land in a grey zone. The policy says `human_approval`, and a human stares at a terminal prompt:
 
 > *Allow filesystem.write_file to /home/user/project/src/main.py? [y/n]*
 
-For the 47th time today. Same agent, same directory, same pattern. The human approves mechanically, attention already elsewhere.
+It is the 47th time today, with the same agent, the same directory and the same pattern, so the human approves mechanically while their attention is already elsewhere.
 
 Meanwhile, an agent sends an email to an external address. Same `human_approval` policy. The human, deep in approval fatigue, hits `y` without reading.
 
-The problem isn't the policy. The problem is that routine and risky look the same to a queue.
+The policy itself is correct. However, a queue presents routine and risky calls in the same way.
 
 ## What flux7-supervisor is
 
-A standalone agent that sits between policy (L0) and human (L2). It evaluates pending approvals using rules and an LLM, auto-resolving the routine ones so humans only see what actually needs judgment.
+A standalone agent that sits between policy (L0) and human (L2). It evaluates pending approvals using rules and an LLM, and auto-resolves the routine ones, so that humans only see what needs judgment.
 
 ```
 flux7-mesh (L0)              sup7 (L1)                    Human (L2)
@@ -44,8 +44,8 @@ It polls flux7-mesh for pending approvals, evaluates each one, and resolves. Dec
 
 | Level | Component | Speed | Judgment | Example |
 |-------|-----------|-------|----------|---------|
-| **L0** | flux7-mesh policy | instant | none — static rules | `allow` reads, `deny` deletes |
-| **L1** | flux7-supervisor | 0 ms (rules) to ~500 ms (decision model) | bounded — rules, then typed questions | project writes → approve, unknown tool → escalate |
+| **L0** | flux7-mesh policy | instant | none (static rules) | `allow` reads, `deny` deletes |
+| **L1** | flux7-supervisor | 0 ms (rules) to ~500 ms (decision model) | bounded (rules, then typed questions) | project writes → approve, unknown tool → escalate |
 | **L2** | Human (terminal or UI) | minutes | full | external email, ambiguous intent |
 
 The supervisor reduces L2 load by handling the predictable cases. Over time, as decisions accumulate in flux7-memory, patterns emerge and the supervisor gets more confident.
@@ -106,7 +106,7 @@ curl -s -X POST localhost:9096/evaluate -H "Authorization: Bearer $TOKEN" -H "Co
 
 The same rules, provider chain, questions and thresholds as a polled approval; `recent_traces` (up to 5), `active_grants`, `injection_risk` and `policy_rule` are optional context. Measured in production: a test run in the project approved, `rm -rf ~/.ssh` and a credentials upload denied, in about 330 ms; a read settled by a rule without calling the model.
 
-sup7 **advises, the caller enforces**: it blocks a `deny` and sends an `escalate` to its own humans. Nothing is resolved in any mesh; the decision is logged with `"via": "evaluate"`, and a paused sup7 answers `escalate`. Used alone, sup7 brings the judgment; [flux7-mesh](../mesh7/index.md) brings what surrounds it: enforcement, signed traces, the human queue, grants, precedents and the approval wait.
+sup7 **advises** and the caller **enforces**: the caller blocks a `deny` and sends an `escalate` to its own humans. Nothing is resolved in any mesh; the decision is logged with `"via": "evaluate"`, and a paused sup7 answers `escalate`. Used alone, sup7 provides only the judgment. The surrounding pieces (enforcement, signed traces, the human queue, grants, precedents and the approval wait) come from [flux7-mesh](../mesh7/index.md).
 
 ### Editing from the console
 
@@ -138,13 +138,13 @@ Adapt `User=` and the paths in `ExecStart=` first. sup7 waits for the mesh on it
                       └────────────┘
 ```
 
-1. **Poll** — `GET /approvals?status=pending` via mesh7 SDK, deduplicated across tool scopes
-2. **Fetch context** — `GET /approvals/{id}` returns params, recent traces, active grants, injection risk
-3. **Evaluate rules** — YAML conditions, first-match-wins, with confidence scores
-4. **Evaluator** — if no rule matches, the provider (or chain) evaluates; `provider: none` keeps sup7 to its rules
-5. **Confidence gate** — below the threshold of the provider that answered (a chain entry may set its own), escalate to human
-6. **Resolve** — `POST /approvals/{id}/approve` or `/deny` with reasoning and confidence
-7. **Log** — JSONL file with the evaluator's provenance (model, question fingerprint, thresholds), plus a flux7-memory store (tagged `supervisor`, `decision`) when memory is enabled
+1. **Poll**: `GET /approvals?status=pending` via mesh7 SDK, deduplicated across tool scopes
+2. **Fetch context**: `GET /approvals/{id}` returns params, recent traces, active grants, injection risk
+3. **Evaluate rules**: YAML conditions, first-match-wins, with confidence scores
+4. **Evaluator**: if no rule matches, the provider (or chain) evaluates; `provider: none` keeps sup7 to its rules
+5. **Confidence gate**: below the threshold of the provider that answered (a chain entry may set its own), escalate to human
+6. **Resolve**: `POST /approvals/{id}/approve` or `/deny` with reasoning and confidence
+7. **Log**: JSONL file with the evaluator's provenance (model, question fingerprint, thresholds), plus a flux7-memory store (tagged `supervisor`, `decision`) when memory is enabled
 
 Paired with mesh7's [`approval.wait_seconds`](../mesh7/approval-flow.md#waiting-for-an-automatic-decision-approvalwait_seconds) and a fast `poll.interval` (500 ms), a call sup7 decides runs in the same request: the agent never retries.
 
@@ -152,11 +152,11 @@ While paused through the admin API, the loop does not poll: approvals stay pendi
 
 ## Current state (September 2026)
 
-- **v0.1.0** — 4 providers (Ollama, Anthropic, Jev, Claude Code) and a provider chain with circuit breaker, rule engine, HTTP admin API with file editing and evaluation runs, question sets in YAML, `sup7 bench replay`, systemd unit, 176 tests
-- **Jev in production** since 2026-09-29, first in the chain; since 2026-09-30 the fallback asks the same questions to `nimble` on a local Ollama (System One API) instead of free text, so a Jev outage loses the provider, not the method
+- **v0.1.0**: 4 providers (Ollama, Anthropic, Jev, Claude Code) and a provider chain with circuit breaker, rule engine, HTTP admin API with file editing and evaluation runs, question sets in YAML, `sup7 bench replay`, systemd unit, 176 tests
+- **Jev in production** since 2026-09-29, first in the chain; since 2026-09-30 the fallback asks the same questions to `nimble` on a local Ollama (System One API) instead of free text, so that a Jev outage loses the provider but keeps the method
 - **Claude Code callback**: MCP tools defined but the MCP server is not started yet
 - **Install**: from the GitHub repository, not on PyPI
-- **SDKs** — consumes `mesh7` (AgentMesh) and `mem7` (Mem7) Python SDKs
+- **SDKs**: consumes `mesh7` (AgentMesh) and `mem7` (Mem7) Python SDKs
 - **Extracted** from flux7-console backend, now standalone
 
 Apache 2.0 licensed. [github.com/KTCrisis/flux7-supervisor](https://github.com/KTCrisis/flux7-supervisor)

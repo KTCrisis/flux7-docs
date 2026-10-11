@@ -1,6 +1,6 @@
 # Writing Policies
 
-Policies are YAML rules that decide what each agent can do. First match wins. Fail-closed — if no rule matches, the tool call is denied.
+Policies are YAML rules that decide what each agent can do. The first matching rule wins. Evaluation fails closed: if no rule matches, the tool call is denied.
 
 ## Basic structure
 
@@ -102,7 +102,7 @@ Files are loaded alphabetically after any inline `policies:`. Duplicate names pr
 
 ## Hot-reload
 
-Policies are reloaded automatically when files change — no daemon restart required. The daemon watches both `config.yaml` and the `policy_dir/` directory using filesystem notifications.
+Policies are reloaded automatically when files change, without a daemon restart. The daemon watches both `config.yaml` and the `policy_dir/` directory using filesystem notifications.
 
 **What gets reloaded:**
 
@@ -118,7 +118,7 @@ Policies are reloaded automatically when files change — no daemon restart requ
 **Safety guarantees:**
 
 - Changes are debounced (200ms) to handle editors that write multiple events per save
-- New policies are fully parsed and validated before swapping — invalid YAML is logged and rejected
+- New policies are fully parsed and validated before swapping. Invalid YAML is logged and rejected
 - The mesh never crashes on a bad reload; current policies stay active
 
 **Example: add a policy at runtime**
@@ -152,7 +152,7 @@ When multiple policies match an agent, more specific agent globs are evaluated f
 "*"           → catch-all, lowest priority
 ```
 
-This means `agent: "claude"` rules are checked before `agent: "*"` rules, regardless of file order.
+Hence `agent: "claude"` rules are checked before `agent: "*"` rules, regardless of file order.
 
 ## Inspecting the active policies
 
@@ -164,7 +164,7 @@ curl -s localhost:9090/policies | jq '.[] | {name, agent, source_file}'
 # → {"name": "default", "agent": "*", "source_file": "default.yaml"}
 ```
 
-`source_file` is the file the policy was read from, relative to `policy_dir`, and is absent for policies declared inline in `config.yaml`. The loader sets it; YAML cannot. It exists because a policy's `name` and its file name need not match (`claude.local.yaml` can declare `name: claude`), so a tool that wants to edit a rule can find its file without guessing.
+`source_file` is the file the policy was read from, relative to `policy_dir`, and is absent for policies declared inline in `config.yaml`. The loader sets this field, which cannot be set from YAML. The field exists because a policy's `name` and its file name need not match (`claude.local.yaml` can declare `name: claude`), so a tool that wants to edit a rule can find its file without guessing.
 
 ## Conditions
 
@@ -183,7 +183,7 @@ rules:
     action: human_approval
 ```
 
-This allows transfers under 100 automatically, requires approval for larger amounts.
+These rules allow transfers under 100 automatically and require approval for larger amounts.
 
 ### The field path
 
@@ -236,19 +236,20 @@ Order matters: first match wins, so the guard goes **above** the permissive rule
 
 ### What string matching does not do
 
-It matches text, not meaning. Three consequences worth stating plainly:
+String matching compares text, not meaning, with the following consequences:
 
 - **Case-sensitive.** A rule denying `rm -rf` does not stop `RM -RF`.
 - **No shell parsing.** A needle written `curl | sh` does not catch
   `curl https://x | sh`, because nothing here understands a pipeline. Write the
   fragment that will actually appear, such as `| sh`.
-- **Evadable by anyone trying.** `rm -r -f`, `$(echo rm) -rf`, a script file —
-  all pass. This raises the floor against accidents and careless commands. It is
-  not a sandbox, and treating it as one is the mistake it invites.
+- **Evadable by anyone trying.** `rm -r -f`, `$(echo rm) -rf` and a script file
+  all pass. String matching raises the floor against accidents and careless
+  commands. However, it is not a sandbox, and the likely mistake is to treat it
+  as one.
 
 Values that are not strings are matched on their rendered form, so a tool taking
-`{"args": ["push", "--force"]}` is searched as `[push --force]`. That is
-deliberate: the alternative would be to silently ignore every tool that takes an
+`{"args": ["push", "--force"]}` is searched as `[push --force]`. This behaviour is
+deliberate, because the alternative would be to silently ignore every tool that takes an
 argument list.
 
 ## Rate limiting
@@ -328,6 +329,6 @@ policies:
 ## Next steps
 
 - [Tool Classification](tool-classification.md): a draft policy from `discover`, per-agent decisions, changing one tool's action
-- [Approval Flow](approval-flow.md) — what happens when a tool call hits `human_approval`
-- [CLI Tools](cli-tools.md) — governing git, docker, terraform as tools
-- [Memory Integration](mem7-auto-approve.md) — auto-approve from past decisions
+- [Approval Flow](approval-flow.md): what happens when a tool call hits `human_approval`
+- [CLI Tools](cli-tools.md): governing git, docker, terraform as tools
+- [Memory Integration](mem7-auto-approve.md): auto-approve from past decisions

@@ -44,7 +44,7 @@ pip install flux7-mesh
 ```
 
 The hook starts in **observe** mode: every built-in call is evaluated and
-traced, nothing is refused, your usual permission prompts are unchanged.
+traced, but nothing is refused and your usual permission prompts are unchanged.
 Work normally for a day.
 
 ## 3. Write the rules from what you saw
@@ -88,7 +88,7 @@ rules:
 export MESH7_HOOK_MODE=enforce
 ```
 
-`allow` runs without a prompt, `deny` never runs, `human_approval` becomes
+`allow` runs without a prompt, `deny` never runs, and `human_approval` becomes
 Claude Code's own permission prompt. If the mesh is unreachable, the hook
 refuses: it fails closed.
 
@@ -102,8 +102,8 @@ refuses: it fails closed.
 - Another harness without a `PreToolUse` hook: there, the same policy is only
   advisory.
 - A determined evasion of a text condition (`rm -r -f`, a script file). The
-  conditions catch accidents, not an adversary; see
-  [what string matching does not do](../mesh7/writing-policies.md#what-string-matching-does-not-do).
+  conditions catch accidents, but they do not stop an adversary (see
+  [what string matching does not do](../mesh7/writing-policies.md#what-string-matching-does-not-do)).
 
 **Reference:** [Python SDK and hook variables](../mesh7/python-sdk.md#harness-hook) ·
 [Writing policies](../mesh7/writing-policies.md)
