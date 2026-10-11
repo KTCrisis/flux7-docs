@@ -11,7 +11,7 @@ pip install flux7-memory
 !!! warning "PyPI package name"
     The package is `flux7-memory`, not `mem7`. `pip install mem7` installs a different, unrelated package.
 
-Or from source :
+Or from source:
 
 ```bash
 pip install ./sdk/python
@@ -70,7 +70,7 @@ results = m.search("deploy*", mode="raw", since="2026-09-01T00:00:00Z")
 
 ### `context(query, *, mode="natural", tags=None, agent="", limit=10, ...)`
 
-Same as `search` but returns a list of `Memory` objects with structured fields :
+Same as `search` but returns a list of `Memory` objects with structured fields:
 
 ```python
 for mem in m.context("deploy*", limit=10):
@@ -92,7 +92,7 @@ m.context("event7 host", as_of="2026-04-11", valid_at="2026-04-08")  # as believ
 
 ### `context_block(query, limit=10, **kwargs)`
 
-Returns a pre-formatted text block for LLM prompt injection :
+Returns a pre-formatted text block for LLM prompt injection:
 
 ```python
 block = m.context_block("user preferences", limit=10)

@@ -25,7 +25,7 @@ policy: human_approval  ──►  rules + LLM evaluate    ──►  only ambig
                               └─ escalate (unsure)  ───────┘
 ```
 
-Install and run :
+Install and run:
 
 ```bash
 pip install "git+https://github.com/KTCrisis/flux7-supervisor"
@@ -52,7 +52,7 @@ The supervisor reduces L2 load by handling the predictable cases. Over time, as 
 
 ## Pluggable LLM providers
 
-The evaluation brain is configurable. Choose based on your constraints :
+The evaluation brain is configurable. Choose based on your constraints:
 
 | Provider | Transport | Latency | Cost | Context |
 |----------|-----------|---------|------|---------|

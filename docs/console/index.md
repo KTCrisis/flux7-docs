@@ -2,7 +2,7 @@
 
 ## The problem
 
-You deployed agents. flux7-mesh governs them. flux7-memory stores their decisions. Now you need answers :
+You deployed agents. flux7-mesh governs them. flux7-memory stores their decisions. Now you need answers:
 
 - **Which agents are running ? What are they doing ?** You have JSONL traces and terminal logs across machines, with no single view.
 - **Who approved what, when, and why ?** Decisions are in flux7-memory, but querying them requires knowing the key format and tag conventions.
@@ -26,7 +26,7 @@ flux7-console (management plane — L2 visibility + human control)
 └── (planned) Governance Engine, Agent Catalog, Dependency Graph
 ```
 
-**Stack :** Next.js 16 + TanStack Query. Backend API and PostgreSQL are scaffolded for future phases. Currently a direct HTTP client of flux7-mesh and flux7-memory.
+**Stack:** Next.js 16 + TanStack Query. Backend API and PostgreSQL are scaffolded for future phases. Currently a direct HTTP client of flux7-mesh and flux7-memory.
 
 ## How it fits
 
@@ -59,11 +59,11 @@ flux7-console is agent-agnostic: it doesn't know or care which SDK produced the 
 
 ## What it enables
 
-**For the solo dev :** trace viewer shows what your agents did today. Memory viewer shows what decisions were made. You don't need flux7-console on day 1, because flux7-mesh + flux7-memory are enough. Add flux7-console when you want a dashboard instead of `curl`.
+**For the solo dev:** trace viewer shows what your agents did today. Memory viewer shows what decisions were made. You don't need flux7-console on day 1, because flux7-mesh + flux7-memory are enough. Add flux7-console when you want a dashboard instead of `curl`.
 
-**For the team :** approval UI lets any team member resolve pending approvals from a browser. Governance scoring flags risky agents before they hit production. Audit trail answers "who approved that email send at 3am."
+**For the team:** approval UI lets any team member resolve pending approvals from a browser. Governance scoring flags risky agents before they hit production. Audit trail answers "who approved that email send at 3am."
 
-**For compliance :** every decision is a fact in flux7-memory. Every tool call is a trace. flux7-console joins them : "this agent called this tool, it was auto-approved because a human approved this read 3 times before, here's the full chain." You query this chain instead of grepping logs.
+**For compliance:** every decision is a fact in flux7-memory. Every tool call is a trace. flux7-console joins them: "this agent called this tool, it was auto-approved because a human approved this read 3 times before, here's the full chain." You query this chain instead of grepping logs.
 
 ## What makes it different
 

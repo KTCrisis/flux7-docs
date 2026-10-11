@@ -4,7 +4,7 @@ Persistent, searchable, governed memory for AI agents. It ships as a single Go b
 
 ## The problem
 
-Agents work for one session, then forget everything. You add memory (a vector store, maybe Mem0 or Zep), and single-agent workflows improve. Then you scale to multiple agents, and new problems appear :
+Agents work for one session, then forget everything. You add memory (a vector store, maybe Mem0 or Zep), and single-agent workflows improve. Then you scale to multiple agents, and new problems appear:
 
 - **Agent A approved something last week. Agent B doesn't know.** Human decisions aren't stored as queryable facts.
 - **Three agents write to the same memory. Who wrote what ?** No provenance, no access control at the fact level.

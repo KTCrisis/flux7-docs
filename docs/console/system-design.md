@@ -83,7 +83,7 @@ Next.js 16 + TanStack Query. Dashboard and human governance UI (L2). The whole p
 | Supervisor | L1 statistics derived from mesh traces; live status, config, recent decisions and pause/resume through the sup7 admin API (`SUP7_URL`, default `http://localhost:9096`) |
 | Memory browser | Search, store, edit, forget via flux7-memory JSON-RPC `/rpc` |
 
-Planned (not implemented; `governance-engine/` and `backend/` hold only empty `__init__.py` files) :
+Planned (not implemented; `governance-engine/` and `backend/` hold only empty `__init__.py` files):
 
 | What it will do | How |
 |---|---|

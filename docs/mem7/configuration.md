@@ -17,7 +17,7 @@
 | `MEM7_RERANK_URL` | *(empty)* | Reranking LLM base URL. Enables LLM reranking after RRF merge |
 | `MEM7_RERANK_MODEL` | `gemma4:e4b` | Model name for the Ollama generate API |
 
-Flags on `mem7 serve` mirror `MEM7_LISTEN` and `MEM7_TOKEN` :
+Flags on `mem7 serve` mirror `MEM7_LISTEN` and `MEM7_TOKEN`:
 
 ```bash
 mem7 serve --listen :9070 --token mem7_secret123
@@ -58,7 +58,7 @@ MEM7_EMBED_KEY=sk-... \
 
 ### With any OpenAI-compatible endpoint
 
-vLLM, LiteLLM, Azure OpenAI, etc. :
+vLLM, LiteLLM, Azure OpenAI, etc.:
 
 ```bash
 MEM7_EMBED_URL=http://localhost:8000 \
@@ -92,7 +92,7 @@ MEM7_RERANK_MODEL=gemma4:e4b \
 
 The markdown files are the source of truth. `index.db` is a derived cache that can be dropped and rebuilt at any time via `mem7 rescan`.
 
-Each entry is written as a level-2 heading followed by a fenced `mem7` envelope and a free-form body :
+Each entry is written as a level-2 heading followed by a fenced `mem7` envelope and a free-form body:
 
 ````markdown
 ## example_key
@@ -112,7 +112,7 @@ Free-form markdown content lives here.
 
 ## Usage with flux7-mesh
 
-In your mesh `config.yaml` :
+In your mesh `config.yaml`:
 
 ```yaml
 mcp_servers:

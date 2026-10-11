@@ -165,7 +165,7 @@ an API gateway (Kong, ...) validates before handing the call to mesh7.
 
 ## Local development
 
-For testing without a real IdP, use the `generate-token.py` script in `examples/jwt-auth/` :
+For testing without a real IdP, use the `generate-token.py` script in `examples/jwt-auth/`:
 
 ```bash
 pip install cryptography PyJWT

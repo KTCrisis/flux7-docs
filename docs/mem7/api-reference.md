@@ -6,7 +6,7 @@ flux7-memory exposes 7 MCP tools, available over stdio, HTTP JSON-RPC, and MCP S
 
 ### memory_store
 
-Upsert a memory entry by key. The markdown workspace receives an append-only section ; the SQLite index is updated in place.
+Upsert a memory entry by key. The markdown workspace receives an append-only section; the SQLite index is updated in place.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -35,7 +35,7 @@ Recall memories by key, tags, or agent. Most recently updated first. Bumps `acce
 
 Full-text search using SQLite FTS5 with field-weighted BM25. When hybrid search is enabled, results are merged with dense cosine similarity via RRF.
 
-Supports FTS5 operators in raw mode : `foo*` prefix, `AND` / `OR` / `NOT`, quoted phrases.
+Supports FTS5 operators in raw mode: `foo*` prefix, `AND` / `OR` / `NOT`, quoted phrases.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -69,7 +69,7 @@ Same search as `memory_search` but returns a JSON array of structured objects in
 | `include_neighbors` | boolean | no | Fetch sequential neighbors (default false) |
 | `neighbor_radius` | number | no | Neighbors on each side (default 1) |
 
-Returns :
+Returns:
 
 ```json
 [
@@ -125,7 +125,7 @@ Returns the life of one key, oldest first, read from the markdown workspace (the
 
 ## HTTP endpoints
 
-`mem7 serve` exposes these routes :
+`mem7 serve` exposes these routes:
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -139,7 +139,7 @@ Returns the life of one key, oldest first, read from the markdown workspace (the
 
 Bearer auth is applied to every route except `/healthz` (`/rpc`, `/mcp`, `/sse`, `/messages`, `/memory/*`) when `MEM7_TOKEN` is set.
 
-### Example : JSON-RPC call
+### Example: JSON-RPC call
 
 ```bash
 curl -s -X POST http://localhost:9070/rpc \

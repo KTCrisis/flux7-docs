@@ -7,7 +7,7 @@ The intended evaluation mode: Claude Code acts as the supervisor's brain, with f
 
 ## Architecture
 
-When `evaluator.provider` is `claude-code`, sup7 doubles as an MCP server exposing two tools :
+When `evaluator.provider` is `claude-code`, sup7 doubles as an MCP server exposing two tools:
 
 - **`sup7_pending`**: returns evaluations waiting for review
 - **`sup7_verdict`**: accepts a decision (action, confidence, reasoning)
@@ -60,7 +60,7 @@ mcp_server:
 
 ### flux7-mesh config
 
-Register sup7 as an MCP source so Claude Code can see its tools :
+Register sup7 as an MCP source so Claude Code can see its tools:
 
 ```yaml
 mcp_servers:
@@ -72,7 +72,7 @@ mcp_servers:
 
 ### Policy
 
-Supervisor mode in flux7-mesh hides the approval tools from ordinary agents, so that only the listed supervisor agents can see and resolve them :
+Supervisor mode in flux7-mesh hides the approval tools from ordinary agents, so that only the listed supervisor agents can see and resolve them:
 
 ```yaml
 supervisor:
@@ -86,9 +86,9 @@ supervisor:
 
 Returns a list of evaluations waiting for review.
 
-**Parameters** : none
+**Parameters**: none
 
-**Response** :
+**Response**:
 
 ```json
 [
@@ -109,7 +109,7 @@ Returns a list of evaluations waiting for review.
 
 Submit a decision for a pending evaluation.
 
-**Parameters** :
+**Parameters**:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -118,4 +118,4 @@ Submit a decision for a pending evaluation.
 | `confidence` | float | 0.0–1.0 confidence score |
 | `reasoning` | string | One sentence explanation |
 
-**Response** : `"accepted"` or error message.
+**Response**: `"accepted"` or error message.
