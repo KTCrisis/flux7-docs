@@ -33,7 +33,17 @@ seals: HMAC-SHA256 with MEM7_CHAIN_KEY
 chain holds
 ```
 
-With `MEM7_CHAIN_KEY` the seal is an HMAC-SHA256: editing the workspace without the key leaves a break no one can reseal. Without it, a plain SHA-256 catches accidents and careless edits but does not catch a forger. Keep the key stable: entries sealed with one key do not verify with another. Entries written before the chain existed are counted but not checked, because the chain starts at the first sealed entry. The workspace stays plain markdown that you can read and edit by hand. However, such an edit now shows in the chain.
+With `MEM7_CHAIN_KEY` the seal is an HMAC-SHA256: editing the workspace without the key leaves a break no one can reseal. Without it, a plain SHA-256 catches accidents and careless edits but does not catch a forger. The key changes only through `mem7 rekey` (below). Changed in the environment alone, it breaks the chain at the next entry. Entries written before the chain existed are counted but not checked, because the chain starts at the first sealed entry. The workspace stays plain markdown that you can read and edit by hand. However, such an edit now shows in the chain.
+
+### Rotating the key
+
+```
+$ systemctl stop mem7
+$ MEM7_CHAIN_KEY=<current> MEM7_NEW_CHAIN_KEY=<new> mem7 rekey --agent <who>
+chain handed to key 2f40cf03a69776de (427 entries sealed, 1 rotation(s))
+```
+
+`rekey` checks that the chain holds, then appends a rekey entry sealed with the new key over the last seal of the old one. Set `MEM7_CHAIN_KEY` to the new key, add the old one to `MEM7_CHAIN_KEYS_RETIRED`, and start the daemon. A holder of the retired key can then neither reseal the entries before the rotation (the rekey entry would no longer follow them) nor append after it, and `verify` requires the chain to end under the current key. Keys are named by an id derived from them and are never written. Stop the daemon first, because it keeps the chain head in memory. `rekey` also moves a keyless (SHA-256) chain to a key. Available since v0.9.0.
 
 ## Identity
 

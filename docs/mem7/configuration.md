@@ -9,6 +9,7 @@
 | `MEM7_TOKEN` | *(empty)* | Bearer token for `/rpc`, `/mcp`, `/sse` and `/memory/*`; also what lets a request speak for an agent |
 | `MEM7_SCOPES` | *(empty)* | JSON file of read scopes per agent; empty = reads not scoped |
 | `MEM7_CHAIN_KEY` | *(empty)* | Key of the workspace's hash chain (HMAC-SHA256); empty = SHA-256 |
+| `MEM7_CHAIN_KEYS_RETIRED` | *(empty)* | Earlier chain keys, comma-separated: they verify the stretches before a `mem7 rekey`, never seal |
 | `MEM7_MAX_ENTRIES` | `10000` | Soft ceiling on live entries |
 | `MEM7_EMBED_URL` | *(empty)* | Embedding provider base URL. Enables hybrid search |
 | `MEM7_EMBED_MODEL` | `nomic-embed-text` | Model name for the embedding API |

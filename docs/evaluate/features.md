@@ -1,11 +1,11 @@
 # Features
 
-State as of September 2026. **Stable**: used daily, tested, documented.
+State as of October 2026. **Stable**: used daily, tested, documented.
 **Early**: works, recent, may change. **Planned**: not there yet.
 
 ## flux7-mesh: policy, approvals, traces
 
-v0.17.2 · Go · [overview](../mesh7/index.md)
+v0.20.0 · Go · [overview](../mesh7/index.md)
 
 | Capability | State | Details |
 |---|---|---|
@@ -36,15 +36,19 @@ v0.17.2 · Go · [overview](../mesh7/index.md)
 
 ## flux7-memory: precedents and agent memory
 
-v0.5.1 · Go · [overview](../mem7/index.md)
+v0.9.0 · Go · [overview](../mem7/index.md)
 
 | Capability | State | Details |
 |---|---|---|
 | Store and search memories over MCP, HTTP and Python | Stable | [API reference](../mem7/api-reference.md) |
 | Hybrid search: keyword, vector, LLM reranking | Stable | 71 % on the LoCoMo benchmark |
 | Markdown files as source of truth, index rebuildable | Stable | |
-| Human approvals kept as facts, used as precedents by the mesh | Stable | [Memory integration](../mesh7/mem7-auto-approve.md) |
-| Access control per fact | Not planned | one token per instance; who may read or write what is a mesh policy on the `memory.*` tools |
+| Human approvals kept as facts, used as precedents by the mesh | Stable | only human approvals count; [Memory integration](../mesh7/mem7-auto-approve.md) |
+| Provenance: the trace id of the governed call on every write and deletion | Early | [Provenance and scopes](../mem7/provenance-scopes.md) |
+| Read scopes per agent, from the identity the mesh vouches for | Early | `MEM7_SCOPES`; [Provenance and scopes](../mem7/provenance-scopes.md) |
+| Hash chain over the workspace (`mem7 verify`), key rotation (`mem7 rekey`) | Early | rotation since v0.9.0; [Provenance and scopes](../mem7/provenance-scopes.md#hash-chain-tamper-evidence) |
+| Bi-temporal facts: valid time and transaction time, `as_of` | Early | [Time](../mem7/time.md) |
+| Access control per fact | Not planned | beyond read scopes, who may write what is a mesh policy on the `memory.*` tools |
 
 ## flux7-supervisor: automated evaluation
 

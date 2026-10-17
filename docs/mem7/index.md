@@ -85,7 +85,7 @@ for mem in m.context("deployment approval", limit=5):
 
 ## Current state (October 2026)
 
-**v0.8.0**: 8 MCP tools, Python SDK, hybrid search + LLM reranking, Streamable HTTP daemon mode with a systemd unit, auto-proxy (stdio detects running daemon), build version in `/healthz`, a Dockerfile for stdio mode. Since 03/10/2026: [provenance, hash chain and agent scopes](provenance-scopes.md) (0.6, 0.7) and [bi-temporal memories](time.md) (0.8).
+**v0.9.0**: 8 MCP tools, Python SDK, hybrid search + LLM reranking, Streamable HTTP daemon mode with a systemd unit, auto-proxy (stdio detects running daemon), build version in `/healthz`, a Dockerfile for stdio mode. Since 03/10/2026: [provenance, hash chain and agent scopes](provenance-scopes.md) (0.6, 0.7), [bi-temporal memories](time.md) (0.8) and chain key rotation with `mem7 rekey` (0.9, 17/10/2026).
 
 On the LoCoMo benchmark, mem7 scores 71%, which is competitive with VC-backed solutions, without gaming the eval.
 
