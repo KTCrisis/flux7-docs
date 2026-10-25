@@ -106,7 +106,7 @@ curl -s -X POST localhost:9096/evaluate -H "Authorization: Bearer $TOKEN" -H "Co
 
 The same rules, provider chain, questions and thresholds as a polled approval; `recent_traces` (up to 5), `active_grants`, `injection_risk` and `policy_rule` are optional context. Measured in production: a test run in the project approved, `rm -rf ~/.ssh` and a credentials upload denied, in about 330 ms; a read settled by a rule without calling the model.
 
-sup7 **advises** and the caller **enforces**: the caller blocks a `deny` and sends an `escalate` to its own humans. Nothing is resolved in any mesh; the decision is logged with `"via": "evaluate"`, and a paused sup7 answers `escalate`. Used alone, sup7 provides only the judgment. The surrounding pieces (enforcement, signed traces, the human queue, grants, precedents and the approval wait) come from [flux7-mesh](../mesh7/index.md).
+sup7 **advises** and the caller **enforces**: the caller blocks a `deny` and sends an `escalate` to its own humans. Nothing is resolved in any mesh; the decision is logged with `"via": "evaluate"`, and a paused sup7 answers `escalate`. Used alone, sup7 provides only the judgment. The surrounding pieces (enforcement, hash-chained traces, the human queue, grants, precedents and the approval wait) come from [flux7-mesh](../mesh7/index.md).
 
 ### Editing from the console
 
